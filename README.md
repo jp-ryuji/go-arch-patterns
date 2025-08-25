@@ -59,12 +59,12 @@ Structure:
 │   │   ├── http          # HTTP adapter implementation
 │   │   ├── redis         # Redis adapter implementation
 │   │   └── s3            # S3 adapter implementation
+│   ├── pkg               # library
 │   └── usecase           # application service
 ├── schema
 │   ├── openapi
 │   └── proto
-├── seed-data
-└── tools
+└── seed-datatools
 ```
 
 ### Go `internal` Directory
