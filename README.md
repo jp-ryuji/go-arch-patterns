@@ -53,3 +53,29 @@ The `internal` directory is a special directory in Go that restricts access to i
 In this project, all core business logic, domain models, use cases, and infrastructure implementations are placed under the `internal` directory to enforce this encapsulation and prevent accidental exposure of internal details as part of the public API.
 
 Note: For most web applications, especially those with clear architectural boundaries like this one, the root `internal` directory is optional. The separation of concerns is already evident through the domain, usecase, and infrastructure packages. The `internal` directory provides an additional layer of enforcement but isn't strictly necessary when the boundaries are well-defined through naming conventions and architecture.
+
+## Development Tools
+
+This project uses Go 1.24's new tool dependency management feature. Tool dependencies are declared in the `go.mod` file using `tool` directives and can be managed using the `-tool` flag with `go get`.
+
+For example, to add a new tool dependency:
+
+```bash
+go get -tool github.com/some/tool/cmd/tool-name
+```
+
+To upgrade all tools:
+
+```bash
+go get tool
+```
+
+To install all tools:
+
+```bash
+go install tool
+```
+
+For more detailed information about Go tooling and linting in this project, see [docs/golang.md](docs/golang.md).
+
+More information about Go 1.24's tool dependency management can be found in the [Go 1.24 release notes](https://go.dev/doc/go1.24#go-command).
