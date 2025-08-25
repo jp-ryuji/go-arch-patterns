@@ -5,6 +5,11 @@ go 1.25.0
 tool github.com/golangci/golangci-lint/cmd/golangci-lint
 
 require (
+	github.com/aarondl/null/v9 v9.0.1
+	github.com/lucsky/cuid v1.2.1
+)
+
+require (
 	4d63.com/gocheckcompilerdirectives v1.3.0 // indirect
 	4d63.com/gochecknoglobals v0.2.2 // indirect
 	github.com/4meepo/tagalign v1.4.2 // indirect
