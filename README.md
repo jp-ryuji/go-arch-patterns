@@ -1,5 +1,26 @@
 # go-sample
 
+## Installation & Setup
+
+1. **Clone the repository:**
+
+```bash
+git clone https://github.com/jp-ryuji/go-sample.git
+cd go-sample
+```
+
+2. **Set up git hooks:**
+
+This project includes a pre-commit hook that automatically runs the Go linter before each commit. If the linter finds any issues, the commit will be aborted, and you'll need to fix the issues before committing again.
+
+To install the pre-commit hook, run:
+
+```bash
+./scripts/install-hooks.sh
+```
+
+Note: Git hooks are local to your repository and are not shared through the repository. Each developer needs to run this script to install the hooks in their local environment.
+
 ## Software Architecture
 
 This project follows the Ports and Adapters Architecture (also known as Hexagonal Architecture). This pattern, along with Onion Architecture and Clean Architecture, share common principles of separation of concerns and dependency inversion, though each has its own emphasis:
@@ -54,28 +75,3 @@ In this project, all core business logic, domain models, use cases, and infrastr
 
 Note: For most web applications, especially those with clear architectural boundaries like this one, the root `internal` directory is optional. The separation of concerns is already evident through the domain, usecase, and infrastructure packages. The `internal` directory provides an additional layer of enforcement but isn't strictly necessary when the boundaries are well-defined through naming conventions and architecture.
 
-## Development Tools
-
-This project uses Go 1.24's new tool dependency management feature. Tool dependencies are declared in the `go.mod` file using `tool` directives and can be managed using the `-tool` flag with `go get`.
-
-For example, to add a new tool dependency:
-
-```bash
-go get -tool github.com/some/tool/cmd/tool-name
-```
-
-To upgrade all tools:
-
-```bash
-go get tool
-```
-
-To install all tools:
-
-```bash
-go install tool
-```
-
-For more detailed information about Go tooling and linting in this project, see [docs/golang.md](docs/golang.md).
-
-More information about Go 1.24's tool dependency management can be found in the [Go 1.24 release notes](https://go.dev/doc/go1.24#go-command).
