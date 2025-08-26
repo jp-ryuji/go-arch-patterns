@@ -42,4 +42,4 @@ make lint.go
 make lint.go.fix
 ```
 
-For information about the Git pre-commit hook, see the main README file.
+For information about the Git pre-commit hook, see [Installation Guide](installation_guide.md).
