@@ -20,3 +20,19 @@ To install the pre-commit hook, run:
 Note: Git hooks are local to your repository and are not shared through the repository. Each developer needs to run this script to install the hooks in their local environment.
 
 For more information about Go development, see [Go Development Guide](golang.md).
+
+3. **Necessary tools installation:**
+
+This project uses two categories of development tools:
+
+**Linting tools (golangci-lint):**
+We use golangci-lint as our primary linter. The golangci-lint project strongly recommends binary installation over installing from sources for performance and compatibility reasons. Follow [their binary installation instructions](https://golangci-lint.run/docs/welcome/install/#binaries) for your platform.
+
+**Other development tools:**
+Additional tools like `goimports` and `gofumpt` are managed using [Go 1.24's tool dependency management feature](https://tip.golang.org/doc/go1.24#tools). These tools are already declared in the `go.mod` file:
+
+- `github.com/golangci/golangci-lint/cmd/golangci-lint` (used via `go tool`)
+- `golang.org/x/tools/cmd/goimports`
+- `mvdan.cc/gofumpt`
+
+For more information about tool management, see [Go Development Guide](golang.md).
