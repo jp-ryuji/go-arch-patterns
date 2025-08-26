@@ -7,3 +7,7 @@ lint.go:
 lint.go.fix:
 	@go tool golangci-lint run --fix
 	$(call format)
+
+.PHONY: test
+test:
+	@go test ./internal/...

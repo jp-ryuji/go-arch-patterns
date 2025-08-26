@@ -21,6 +21,8 @@ To install the pre-commit hook, run:
 
 Note: Git hooks are local to your repository and are not shared through the repository. Each developer needs to run this script to install the hooks in their local environment.
 
+For more information about Go development, see [Go Development Guide](docs/golang.md).
+
 ## Software Architecture
 
 This project follows the Ports and Adapters Architecture (also known as Hexagonal Architecture). This pattern, along with Onion Architecture and Clean Architecture, share common principles of separation of concerns and dependency inversion, though each has its own emphasis:
@@ -75,3 +77,9 @@ The `internal` directory is a special directory in Go that restricts access to i
 In this project, all core business logic, domain models, use cases, and infrastructure implementations are placed under the `internal` directory to enforce this encapsulation and prevent accidental exposure of internal details as part of the public API.
 
 Note: For most web applications, especially those with clear architectural boundaries like this one, the root `internal` directory is optional. The separation of concerns is already evident through the domain, usecase, and infrastructure packages. The `internal` directory provides an additional layer of enforcement but isn't strictly necessary when the boundaries are well-defined through naming conventions and architecture.
+
+## Documentation
+
+Find specific documentation in the [docs/](docs/) folder:
+
+- [Go Development Guide](docs/golang.md)
