@@ -22,6 +22,14 @@ To install all tools:
 go install tool
 ```
 
+## Testing
+
+To run all tests in the project:
+
+```bash
+make test
+```
+
 ## lint
 
 There are two linting targets available:
