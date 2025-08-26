@@ -48,6 +48,7 @@ Structure:
 ├── internal
 │   ├── domain
 │   │   ├── model         # domain model
+│   │   │   ├── value     # value object
 │   │   │   └── factory
 │   │   ├── repository    # repository interface (port)
 │   │   └── service       # domain service
@@ -64,7 +65,7 @@ Structure:
 ├── schema
 │   ├── openapi
 │   └── proto
-└── seed-datatools
+└── seed-data
 ```
 
 ### Go `internal` Directory
@@ -74,4 +75,3 @@ The `internal` directory is a special directory in Go that restricts access to i
 In this project, all core business logic, domain models, use cases, and infrastructure implementations are placed under the `internal` directory to enforce this encapsulation and prevent accidental exposure of internal details as part of the public API.
 
 Note: For most web applications, especially those with clear architectural boundaries like this one, the root `internal` directory is optional. The separation of concerns is already evident through the domain, usecase, and infrastructure packages. The `internal` directory provides an additional layer of enforcement but isn't strictly necessary when the boundaries are well-defined through naming conventions and architecture.
-
