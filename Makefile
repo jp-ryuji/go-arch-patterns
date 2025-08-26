@@ -1,3 +1,7 @@
+.PHONY: build
+build:
+	go build -v ./...
+
 .PHONY: lint.go
 lint.go:
 	@golangci-lint run
