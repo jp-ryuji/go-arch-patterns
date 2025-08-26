@@ -3,13 +3,14 @@ package model
 import (
 	"time"
 
+	"github.com/jp-ryuji/go-sample/internal/domain/model/value"
 	"github.com/jp-ryuji/go-sample/internal/pkg/id"
 )
 
 type Student struct {
 	ID               string
 	AuthUID          string
-	Email            string
+	Email            *value.Email
 	DisplayName      string
 	FirstName        string
 	LastName         string
@@ -32,11 +33,16 @@ func NewStudent(
 	lastNameKana string,
 	profileImagePath string,
 	t time.Time,
-) *Student {
+) (*Student, error) {
+	emailVO, err := value.NewEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Student{
 		ID:               id.New(),
 		AuthUID:          authUID,
-		Email:            email,
+		Email:            emailVO,
 		DisplayName:      displayName,
 		FirstName:        firstName,
 		LastName:         lastName,
@@ -45,5 +51,5 @@ func NewStudent(
 		ProfileImagePath: profileImagePath,
 		CreatedAt:        t,
 		UpdatedAt:        t,
-	}
+	}, nil
 }
