@@ -1,13 +1,13 @@
 # Installation & Setup
 
-1. **Clone the repository:**
+## Clone the repository
 
 ```bash
 git clone https://github.com/jp-ryuji/go-sample.git
 cd go-sample
 ```
 
-2. **Set up git hooks:**
+## Set up git hooks
 
 This project includes a pre-commit hook that automatically runs the Go linter before each commit. If the linter finds any issues, the commit will be aborted, and you'll need to fix the issues before committing again.
 
@@ -21,7 +21,7 @@ Note: Git hooks are local to your repository and are not shared through the repo
 
 For more information about Go development, see [Go Development Guide](golang.md).
 
-3. **Necessary tools installation:**
+## Install necessary tools
 
 This project uses two categories of development tools:
 
@@ -29,10 +29,6 @@ This project uses two categories of development tools:
 We use golangci-lint as our primary linter. The golangci-lint project strongly recommends binary installation over installing from sources for performance and compatibility reasons. Follow [their binary installation instructions](https://golangci-lint.run/docs/welcome/install/#binaries) for your platform.
 
 **Other development tools:**
-Additional tools like `goimports` and `gofumpt` are managed using [Go 1.24's tool dependency management feature](https://tip.golang.org/doc/go1.24#tools). These tools are already declared in the `go.mod` file:
-
-- `github.com/golangci/golangci-lint/cmd/golangci-lint` (used via `go tool`)
-- `golang.org/x/tools/cmd/goimports`
-- `mvdan.cc/gofumpt`
+Additional tools like `goimports` and `gofumpt` are managed using [Go 1.24's tool dependency management feature](https://tip.golang.org/doc/go1.24#tools). These tools are already declared in the `go.mod`.
 
 For more information about tool management, see [Go Development Guide](golang.md).
