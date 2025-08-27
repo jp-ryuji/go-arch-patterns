@@ -2,15 +2,15 @@ services:
   postgres:
     image: postgres:17
     ports:
-      - '${POSTGRES_PORT_EXTERNAL:-5433}:${POSTGRES_PORT:-5432}'
+      - '${DB_PORT_EXTERNAL:-5433}:${DB_PORT:-5432}'
     environment:
-      - POSTGRES_USER=${POSTGRES_USERNAME}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DBNAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USERNAME} -d ${POSTGRES_DBNAME}']
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
       interval: 1s
       timeout: 3s
       retries: 5
