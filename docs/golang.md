@@ -43,3 +43,7 @@ make lint.go.fix
 ```
 
 For information about the Git pre-commit hook, see [Installation Guide](installation_guide.md).
+
+## Database Schema Updates
+
+For information about database schema updates, including GORM AutoMigrate and GORM Gen, see [Database Schema Updates](database_schema_updates.md).

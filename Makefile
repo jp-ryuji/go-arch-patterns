@@ -16,6 +16,14 @@ lint.go.fix:
 test:
 	@go test ./internal/...
 
+.PHONY: gen.gorm
+gen.gorm:
+	@go run internal/infrastructure/postgres/gen/generator.go
+
+.PHONY: migrate
+migrate:
+	@go run internal/infrastructure/postgres/migrate/main.go
+
 .PHONY: format
 format:
 	$(call format)

@@ -4,11 +4,20 @@ This is a sample repository showcasing the Ports and Adapters architectural patt
 
 The system represents a SaaS platform for car rental companies. For more details about the system, see [Entity Relationship Diagram](docs/er-diagram.md).
 
+## Disclaimer
+
+This repository is intended for educational and demonstration purposes. It is not recommended for production use without significant modifications.
+
+1. **Database Schema Management**: The project uses GORM's AutoMigrate feature to manage database schema changes for convenience. Proper migration strategies should be implemented for production environments. For more details on how database schema updates are handled, see [Database Schema Updates](docs/database_schema_updates.md).
+
+2. **Database Security**: SSL mode is disabled for database access (see [internal/infrastructure/postgres/client.go](internal/infrastructure/postgres/client.go)). This configuration is insecure and should be enabled in production environments.
+
 ## Documentation
 
 Find specific documentation in the [docs/](docs/) folder:
 
 - [Software Architecture](docs/software_architecture.md)
+- [Entity Relationship Diagram](docs/er-diagram.md)
 - [Installation Guide](docs/installation_guide.md)
 - [Go Development Guide](docs/golang.md)
-- [Entity Relationship Diagram](docs/er-diagram.md)
+- [Database Schema Updates](docs/database_schema_updates.md)

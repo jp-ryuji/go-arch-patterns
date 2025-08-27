@@ -33,8 +33,8 @@ Structure:
 │   │   ├── cmd
 │   │   │   ├── internal
 │   │   │   └── root.go
-│   │   ├── database      # database adapter implementation
 │   │   ├── http          # HTTP adapter implementation
+│   │   ├── postgres      # PostgreSQL adapter implementation
 │   │   ├── redis         # Redis adapter implementation
 │   │   └── s3            # S3 adapter implementation
 │   ├── pkg               # library
@@ -52,3 +52,7 @@ The `internal` directory is a special directory in Go that restricts access to i
 In this project, all core business logic, domain models, use cases, and infrastructure implementations are placed under the `internal` directory to enforce this encapsulation and prevent accidental exposure of internal details as part of the public API.
 
 Note: For most web applications, especially those with clear architectural boundaries like this one, the root `internal` directory is optional. The separation of concerns is already evident through the domain, usecase, and infrastructure packages. The `internal` directory provides an additional layer of enforcement but isn't strictly necessary when the boundaries are well-defined through naming conventions and architecture.
+
+## Libraries Used
+
+- [GORM Gen](https://gorm.io/gen/index.html) for type-safe database queries.
