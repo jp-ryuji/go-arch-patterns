@@ -10,6 +10,8 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/query"
 )
 
 const (
@@ -68,6 +70,12 @@ func NewClient(
 	if err != nil {
 		panic(err)
 	}
+
+	// Initialize the query package with the database connection
+	// This makes the type-safe generated code globally accessible through
+	// query.Car, query.Company, etc. This is a convenience pattern that
+	// allows direct access to type-safe queries from anywhere in the application.
+	query.SetDefault(gormDB)
 
 	return &Client{
 		DB: gormDB,
