@@ -7,7 +7,7 @@ import (
 	"github.com/jp-ryuji/go-sample/internal/domain/model/factory"
 )
 
-// TestRenterInterface ensures that both Company and Individual implement the Renter interface
+// TestRenterInterface ensures that both Company and Individual implement the ConcreteRenter interface
 func TestRenterInterface(t *testing.T) {
 	t.Parallel()
 
@@ -20,9 +20,9 @@ func TestRenterInterface(t *testing.T) {
 		t.Fatalf("Failed to create individual: %v", err)
 	}
 
-	// Verify that both implement the Renter interface
-	var companyRenter model.Renter = company
-	var individualRenter model.Renter = individual
+	// Verify that both implement the ConcreteRenter interface
+	var companyRenter model.ConcreteRenter = company
+	var individualRenter model.ConcreteRenter = individual
 
 	// Test company
 	if companyRenter.GetID() != company.ID {
