@@ -56,3 +56,4 @@ Note: For most web applications, especially those with clear architectural bound
 ## Libraries Used
 
 - [GORM Gen](https://gorm.io/gen/index.html) for type-safe database queries.
+- [Dockertest](https://github.com/ory/dockertest) for booting up ephermal docker images for integration tests using Postgres or such.

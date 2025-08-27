@@ -30,6 +30,36 @@ To run all tests in the project:
 make test
 ```
 
+### Running Tests in Short Mode
+
+Some tests, particularly integration tests that require external dependencies like Docker, can be skipped when running in short mode. This is useful for quick local testing or CI pipelines where you want to avoid lengthy setup processes.
+
+The project's Makefile target for testing (`make test`) runs all tests by default. To take advantage of the short mode skipping feature, you can modify the Makefile or run the Go command directly with the `-short` flag:
+
+```bash
+go test -short ./internal/...
+```
+
+Integration tests that use Docker (such as repository tests) will automatically be skipped when running in short mode thanks to the `SkipIfShort` utility function in the test utilities package.
+
+To run integration tests specifically:
+
+```bash
+go test -tags=integration ./internal/...
+```
+
+To run integration tests in verbose mode:
+
+```bash
+go test -tags=integration ./internal/... -v
+```
+
+### Integration Testing with Docker
+
+This project uses [Dockertest](https://github.com/ory/dockertest) for integration testing with a PostgreSQL database. The integration tests are tagged with `//go:build integration` and are only run when the `-tags=integration` flag is provided.
+
+When adding new database models, they must be registered in the `allModels` slice in `internal/infrastructure/postgres/repository/testutil/testutil.go` to ensure they are migrated during test setup.
+
 ## lint
 
 There are two linting targets available:
