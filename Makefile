@@ -16,6 +16,10 @@ lint.go.fix:
 test:
 	@go test ./internal/...
 
+.PHONY: gen.gorm
+gen.gorm:
+	@go run internal/infrastructure/postgres/gen/generator.go
+
 .PHONY: format
 format:
 	$(call format)
