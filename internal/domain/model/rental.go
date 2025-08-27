@@ -31,6 +31,7 @@ type Rentals []*Rental
 func NewRental(
 	tenantID string,
 	rentalPartyID string,
+	carID string,
 	startsAt time.Time,
 	endsAt time.Time,
 	t time.Time,
@@ -39,6 +40,7 @@ func NewRental(
 		ID:            id.New(),
 		TenantID:      tenantID,
 		RentalPartyID: rentalPartyID,
+		CarID:         carID,
 		StartsAt:      startsAt,
 		EndsAt:        endsAt,
 		CreatedAt:     t,

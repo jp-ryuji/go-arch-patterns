@@ -72,6 +72,7 @@ erDiagram
     Rental {
         string ID
         string TenantID
+        string CarID
         string RentalPartyID
         time StartsAt
         time EndsAt
