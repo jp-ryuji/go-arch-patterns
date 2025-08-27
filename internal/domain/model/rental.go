@@ -8,20 +8,20 @@ import (
 
 // RentalRefs holds references to related entities for Rental
 type RentalRefs struct {
-	Tenant     *Tenant
-	Car        *Car
-	Renterable *Renterable
+	Tenant      *Tenant
+	Car         *Car
+	RentalParty *RentalParty
 }
 
 type Rental struct {
-	ID           string
-	TenantID     string
-	CarID        string
-	RenterableID string
-	StartsAt     time.Time
-	EndsAt       time.Time
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID            string
+	TenantID      string
+	CarID         string
+	RentalPartyID string
+	StartsAt      time.Time
+	EndsAt        time.Time
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 
 	Refs *RentalRefs
 }
@@ -30,19 +30,19 @@ type Rentals []*Rental
 
 func NewRental(
 	tenantID string,
-	rentalableID string,
+	rentalPartyID string,
 	startsAt time.Time,
 	endsAt time.Time,
 	t time.Time,
 ) *Rental {
 	return &Rental{
-		ID:           id.New(),
-		TenantID:     tenantID,
-		RenterableID: rentalableID,
-		StartsAt:     startsAt,
-		EndsAt:       endsAt,
-		CreatedAt:    t,
-		UpdatedAt:    t,
+		ID:            id.New(),
+		TenantID:      tenantID,
+		RentalPartyID: rentalPartyID,
+		StartsAt:      startsAt,
+		EndsAt:        endsAt,
+		CreatedAt:     t,
+		UpdatedAt:     t,
 
 		Refs: nil,
 	}
