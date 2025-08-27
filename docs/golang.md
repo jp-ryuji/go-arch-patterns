@@ -43,3 +43,11 @@ make lint.go.fix
 ```
 
 For information about the Git pre-commit hook, see [Installation Guide](installation_guide.md).
+
+## ORM
+
+To generate type-safe queries with GORM Gen:
+
+```bash
+make gen.gorm
+```
