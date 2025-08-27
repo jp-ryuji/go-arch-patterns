@@ -9,13 +9,15 @@ import (
 // RentalRefs holds references to related entities for Rental
 type RentalRefs struct {
 	Tenant     *Tenant
-	Rentalable *Rentalable
+	Car        *Car
+	Renterable *Renterable
 }
 
 type Rental struct {
 	ID           string
 	TenantID     string
-	RentalableID string
+	CarID        string
+	RenterableID string
 	StartsAt     time.Time
 	EndsAt       time.Time
 	CreatedAt    time.Time
@@ -36,7 +38,7 @@ func NewRental(
 	return &Rental{
 		ID:           id.New(),
 		TenantID:     tenantID,
-		RentalableID: rentalableID,
+		RenterableID: rentalableID,
 		StartsAt:     startsAt,
 		EndsAt:       endsAt,
 		CreatedAt:    t,

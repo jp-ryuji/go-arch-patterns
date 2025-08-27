@@ -6,14 +6,14 @@ import (
 	"github.com/jp-ryuji/go-sample/internal/pkg/id"
 )
 
-// RentalableRefs holds references to related entities for Rentalable
-type RentalableRefs struct {
+// RenterableRefs holds references to related entities for Renterable
+type RenterableRefs struct {
 	Tenant *Tenant
 	// Renter could be either a Company or an Individual
 	Renter Renter
 }
 
-type Rentalable struct {
+type Renterable struct {
 	ID          string
 	TenantID    string
 	RenterID    string
@@ -21,18 +21,18 @@ type Rentalable struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 
-	Refs *RentalableRefs
+	Refs *RenterableRefs
 }
 
-type Rentalables []*Rentalable
+type Renterables []*Renterable
 
-func NewRentalable(
+func NewRenterable(
 	tenantID string,
 	renterID string,
 	renterModel RenterModel,
 	t time.Time,
-) *Rentalable {
-	return &Rentalable{
+) *Renterable {
+	return &Renterable{
 		ID:          id.New(),
 		TenantID:    tenantID,
 		RenterID:    renterID,
