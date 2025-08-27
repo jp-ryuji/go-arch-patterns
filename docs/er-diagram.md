@@ -8,18 +8,10 @@ Key characteristics of this system:
 - **Polymorphic Association**: Renter can be either a Company or an Individual (demonstrated through the Renter entity)
 - **Many-to-Many Association**: Rental and Option entities are connected through the RentalOption entity, with composite indexing applied for data consistency
 
-> **Note**: For simplicity, common columns such as `ID`, `CreatedAt`, and `UpdatedAt` have been omitted from the diagram below.
+> **Note**: For simplicity, common columns such as `ID`, `CreatedAt`, and `UpdatedAt` have been omitted from the diagram below. Additionally, the explicit associations with the Tenant entity have been removed, though in the actual implementation all entities are associated with a Tenant in a multi-tenant architecture.
 
 ```mermaid
 erDiagram
-    Tenant ||--o{ Car : has
-    Tenant ||--o{ Company : has
-    Tenant ||--o{ Individual : has
-    Tenant ||--o{ Renter : has
-    Tenant ||--o{ Rental : has
-    Tenant ||--o{ Option : has
-    Tenant ||--o{ RentalOption : has
-
     Company ||--o{ Renter : "can be"
     Individual ||--o{ Renter : "can be"
     Car ||--o{ Rental : has
@@ -33,31 +25,26 @@ erDiagram
     }
 
     Car {
-        string TenantID
         string Model
     }
 
     Company {
-        string TenantID
         string Name
         string CompanySize
     }
 
     Individual {
-        string TenantID
         string Email
         string FirstName
         string LastName
     }
 
     Renter {
-        string TenantID
         string ConcreteRenterID
         string ConcreteRenterModel
     }
 
     Rental {
-        string TenantID
         string CarID
         string RenterID
         time StartsAt
@@ -65,12 +52,10 @@ erDiagram
     }
 
     Option {
-        string TenantID
         string Name
     }
 
     RentalOption {
-        string TenantID
         string RentalID
         string OptionID
         int Count
