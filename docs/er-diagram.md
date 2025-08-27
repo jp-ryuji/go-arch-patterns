@@ -5,7 +5,7 @@ This system represents a SaaS platform for car rental companies.
 Key characteristics of this system:
 
 - **SaaS Platform**: Multi-tenant architecture where each tenant is a separate car rental company
-- **Polymorphic Association**: Renter can be either a Company or an Individual (demonstrated through the Rentalable entity)
+- **Polymorphic Association**: Renter can be either a Company or an Individual (demonstrated through the RentalParty entity)
 - **Many-to-Many Association**: Rental and Option entities are connected through the RentalOption entity, with composite indexing applied
 
 ```mermaid
@@ -13,15 +13,16 @@ erDiagram
     Tenant ||--o{ Car : has
     Tenant ||--o{ Company : has
     Tenant ||--o{ Individual : has
-    Tenant ||--o{ Rentalable : has
+    Tenant ||--o{ RentalParty : has
     Tenant ||--o{ Rental : has
     Tenant ||--o{ Option : has
     Tenant ||--o{ RentalOption : has
 
-    Company ||--o{ Rentalable : "can be"
-    Individual ||--o{ Rentalable : "can be"
+    Company ||--o{ RentalParty : "can be"
+    Individual ||--o{ RentalParty : "can be"
+    Car ||--o{ Rental : has
 
-    Rentalable ||--o{ Rental : has
+    RentalParty ||--o{ Rental : has
     Option ||--o{ RentalOption : has
     Rental ||--o{ RentalOption : has
 
@@ -59,7 +60,7 @@ erDiagram
         time UpdatedAt
     }
 
-    Rentalable {
+    RentalParty {
         string ID
         string TenantID
         string RenterID
@@ -71,7 +72,7 @@ erDiagram
     Rental {
         string ID
         string TenantID
-        string RentalableID
+        string RentalPartyID
         time StartsAt
         time EndsAt
         time CreatedAt
