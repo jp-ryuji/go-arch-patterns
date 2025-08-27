@@ -10,10 +10,7 @@ import (
 type RentalableRefs struct {
 	Tenant *Tenant
 	// Renter could be either a Company or an Individual
-	// This is a common pattern in DDD for polymorphic associations
-	// The actual type would need to be determined based on RenterModel
-	// Consider using interfaces or a sum type pattern if Go allows for cleaner implementation
-	Renter interface{} // This is a placeholder, consider a better approach
+	Renter Renter
 }
 
 type Rentalable struct {

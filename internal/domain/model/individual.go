@@ -25,6 +25,21 @@ type Individual struct {
 	Refs *IndividualRefs
 }
 
+// Renter interface implementation for Individual
+func (i *Individual) GetID() string {
+	return i.ID
+}
+
+func (i *Individual) GetTenantID() string {
+	return i.TenantID
+}
+
+func (i *Individual) GetType() RenterModel {
+	return RenterModelIndividual
+}
+
+// End of Renter interface implementation
+
 type Individuals []*Individual
 
 func NewIndividual(

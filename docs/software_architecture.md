@@ -26,7 +26,7 @@ Structure:
 │   ├── domain
 │   │   ├── model         # domain model
 │   │   │   ├── value     # value object
-│   │   │   └── factory
+│   │   │   └── factory   # factory methods used in test
 │   │   ├── repository    # repository interface (port)
 │   │   └── service       # domain service
 │   ├── infrastructure
