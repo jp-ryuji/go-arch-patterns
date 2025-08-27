@@ -30,12 +30,8 @@ func (i *Individual) GetID() string {
 	return i.ID
 }
 
-func (i *Individual) GetTenantID() string {
-	return i.TenantID
-}
-
-func (i *Individual) GetType() RenterModel {
-	return RenterModelIndividual
+func (i *Individual) GetEntityType() RenterEntity {
+	return RenterEntityIndividual
 }
 
 // End of Renter interface implementation

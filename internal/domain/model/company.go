@@ -27,12 +27,8 @@ func (c *Company) GetID() string {
 	return c.ID
 }
 
-func (c *Company) GetTenantID() string {
-	return c.TenantID
-}
-
-func (c *Company) GetType() RenterModel {
-	return RenterModelCompany
+func (c *Company) GetEntityType() RenterEntity {
+	return RenterEntityCompany
 }
 
 // End of Renter interface implementation

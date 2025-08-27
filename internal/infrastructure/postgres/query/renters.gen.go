@@ -28,8 +28,8 @@ func newRenter(db *gorm.DB, opts ...gen.DOOption) renter {
 	_renter.ALL = field.NewAsterisk(tableName)
 	_renter.ID = field.NewString(tableName, "id")
 	_renter.TenantID = field.NewString(tableName, "tenant_id")
-	_renter.ConcreteRenterID = field.NewString(tableName, "concrete_renter_id")
-	_renter.ConcreteRenterModel = field.NewString(tableName, "concrete_renter_model")
+	_renter.RenterEntityID = field.NewString(tableName, "renter_entity_id")
+	_renter.RenterEntityType = field.NewString(tableName, "renter_entity_type")
 	_renter.CreatedAt = field.NewTime(tableName, "created_at")
 	_renter.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_renter.DeletedAt = field.NewField(tableName, "deleted_at")
@@ -42,14 +42,14 @@ func newRenter(db *gorm.DB, opts ...gen.DOOption) renter {
 type renter struct {
 	renterDo renterDo
 
-	ALL                 field.Asterisk
-	ID                  field.String
-	TenantID            field.String
-	ConcreteRenterID    field.String
-	ConcreteRenterModel field.String
-	CreatedAt           field.Time
-	UpdatedAt           field.Time
-	DeletedAt           field.Field
+	ALL              field.Asterisk
+	ID               field.String
+	TenantID         field.String
+	RenterEntityID   field.String
+	RenterEntityType field.String
+	CreatedAt        field.Time
+	UpdatedAt        field.Time
+	DeletedAt        field.Field
 
 	fieldMap map[string]field.Expr
 }
@@ -68,8 +68,8 @@ func (r *renter) updateTableName(table string) *renter {
 	r.ALL = field.NewAsterisk(table)
 	r.ID = field.NewString(table, "id")
 	r.TenantID = field.NewString(table, "tenant_id")
-	r.ConcreteRenterID = field.NewString(table, "concrete_renter_id")
-	r.ConcreteRenterModel = field.NewString(table, "concrete_renter_model")
+	r.RenterEntityID = field.NewString(table, "renter_entity_id")
+	r.RenterEntityType = field.NewString(table, "renter_entity_type")
 	r.CreatedAt = field.NewTime(table, "created_at")
 	r.UpdatedAt = field.NewTime(table, "updated_at")
 	r.DeletedAt = field.NewField(table, "deleted_at")
@@ -100,8 +100,8 @@ func (r *renter) fillFieldMap() {
 	r.fieldMap = make(map[string]field.Expr, 7)
 	r.fieldMap["id"] = r.ID
 	r.fieldMap["tenant_id"] = r.TenantID
-	r.fieldMap["concrete_renter_id"] = r.ConcreteRenterID
-	r.fieldMap["concrete_renter_model"] = r.ConcreteRenterModel
+	r.fieldMap["renter_entity_id"] = r.RenterEntityID
+	r.fieldMap["renter_entity_type"] = r.RenterEntityType
 	r.fieldMap["created_at"] = r.CreatedAt
 	r.fieldMap["updated_at"] = r.UpdatedAt
 	r.fieldMap["deleted_at"] = r.DeletedAt
