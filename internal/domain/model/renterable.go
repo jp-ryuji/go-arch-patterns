@@ -11,6 +11,8 @@ type RenterableRefs struct {
 	Tenant *Tenant
 	// Renter could be either a Company or an Individual
 	Renter Renter
+	// Rentals associated with this Renterable
+	Rentals Rentals
 }
 
 type Renterable struct {
