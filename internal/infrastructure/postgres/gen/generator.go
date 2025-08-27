@@ -2,23 +2,28 @@ package main
 
 import (
 	"gorm.io/gen"
+
+	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/dbmodel"
 )
 
 func main() {
 	// Initialize the generator with configuration
 	g := gen.NewGenerator(gen.Config{
-		OutPath: "./query",
+		OutPath: "./internal/infrastructure/postgres/query",
 		Mode:    gen.WithDefaultQuery,
 	})
 
-	// TODO: Configure database connection for GORM Gen
-	// g.UseDB(getDB())
-
 	// Apply basic CRUD interfaces to all generated models
-	// g.ApplyBasic(
-	// Generate queries for all models
-	// g.GenerateAllTable()...,
-	// )
+	g.ApplyBasic(
+		&dbmodel.Car{},
+		&dbmodel.Company{},
+		&dbmodel.Individual{},
+		&dbmodel.Option{},
+		&dbmodel.Rental{},
+		&dbmodel.RentalOption{},
+		&dbmodel.Renter{},
+		&dbmodel.Tenant{},
+	)
 
 	// Execute the generator
 	g.Execute()

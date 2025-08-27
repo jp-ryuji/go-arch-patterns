@@ -9,6 +9,7 @@ The system represents a SaaS platform for car rental companies. For more details
 Find specific documentation in the [docs/](docs/) folder:
 
 - [Software Architecture](docs/software_architecture.md)
+- [Entity Relationship Diagram](docs/er-diagram.md)
 - [Installation Guide](docs/installation_guide.md)
 - [Go Development Guide](docs/golang.md)
-- [Entity Relationship Diagram](docs/er-diagram.md)
+- [Database Schema Updates](docs/database_schema_updates.md)

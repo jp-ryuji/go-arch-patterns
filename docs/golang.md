@@ -44,10 +44,6 @@ make lint.go.fix
 
 For information about the Git pre-commit hook, see [Installation Guide](installation_guide.md).
 
-## ORM
+## Database Schema Updates
 
-To generate type-safe queries with GORM Gen:
-
-```bash
-make gen.gorm
-```
+For information about database schema updates, including GORM AutoMigrate and GORM Gen, see [Database Schema Updates](database_schema_updates.md).
