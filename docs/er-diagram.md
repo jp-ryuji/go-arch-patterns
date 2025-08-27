@@ -40,8 +40,8 @@ erDiagram
     }
 
     Renter {
-        string ConcreteRenterID
-        string ConcreteRenterModel
+        string RenterEntityID
+        string RenterEntityType
     }
 
     Rental {
