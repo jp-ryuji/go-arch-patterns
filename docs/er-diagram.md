@@ -1,4 +1,4 @@
-# Entity Relationship Diagram
+# ER Diagram
 
 This system represents a SaaS platform for car rental companies.
 

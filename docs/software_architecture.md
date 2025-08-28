@@ -36,7 +36,7 @@ Structure:
 │   │   ├── http           # HTTP adapter implementation
 │   │   ├── postgres       # PostgreSQL adapter implementation
 │   │   │   ├── dbmodel    # (ORM specific models with database annotations and relationships)
-│   │   │   ├── repository # (Implement the repository interfaces using ORM)d
+│   │   │   ├── repository # (Implement the repository interfaces using ORM)
 │   │   │   └── query      # (Generated type-safe query code using GORM Gen)
 │   │   ├── redis          # Redis adapter implementation
 │   │   └── s3             # S3 adapter implementation
