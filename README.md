@@ -11,10 +11,7 @@ This repository demonstrates the following software engineering concepts:
 - **Value Object**:
   - *Definition*: See [Email value object](internal/domain/model/value/email.go) with [tests](internal/domain/model/value/email_test.go)
   - *Usage*: See [Individual entity](internal/domain/model/individual.go) using the Email value object
-- **Factory Method**: See [Company factory](internal/domain/model/factory/company.go) for creating test instances
 - **Polymorphic Association**: See [Renter model](internal/domain/model/renter.go) representing either Individual or Company entities
-- **Continuous Integration**: See [CI workflow](.github/workflows/go.yml)
-- **Infrastructure**: See [Docker Compose file](compose.yml)
 
 ## Disclaimer
 
