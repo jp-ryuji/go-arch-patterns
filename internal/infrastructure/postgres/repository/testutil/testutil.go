@@ -26,6 +26,11 @@ var (
 var allModels = []interface{}{
 	&dbmodel.Car{},
 	&dbmodel.Company{},
+	&dbmodel.Individual{},
+	&dbmodel.Option{},
+	&dbmodel.Rental{},
+	&dbmodel.RentalOption{},
+	&dbmodel.Renter{},
 	&dbmodel.Tenant{},
 }
 
@@ -47,7 +52,7 @@ func SetupTestEnvironment() error {
 	// Start a PostgreSQL container
 	Resource, err = Pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "postgres",
-		Tag:        "13",
+		Tag:        "17",
 		Env: []string{
 			"POSTGRES_PASSWORD=secret",
 			"POSTGRES_USER=user",
