@@ -155,6 +155,73 @@ func TestCarUsecase_GetByID_NotFound(t *testing.T) {
 	assert.Nil(t, retrievedCar)
 }
 
+// TestCarUsecase_GetByIDWithTenant_Success tests successful retrieval of a car with tenant by ID
+func TestCarUsecase_GetByIDWithTenant_Success(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	ctrl, mockCarRepo, carUsecase := setupTest(t)
+	defer ctrl.Finish()
+
+	// Test data
+	ctx := context.Background()
+	carID := "car-123"
+	getInput := input.GetCarByIDInput{
+		ID: carID,
+	}
+
+	// Create expected car with tenant using the factory method
+	now := time.Now()
+	expectedCar := model.NewCar("tenant-123", "Toyota Prius", now)
+	expectedTenant := model.NewTenant("tenant-code", now)
+	expectedCar.Refs = &model.CarRefs{
+		Tenant: expectedTenant,
+	}
+
+	// Set up expectations for retrieving the car with tenant
+	mockCarRepo.EXPECT().GetByIDWithTenant(ctx, carID).Return(expectedCar, nil)
+
+	// Execute - Retrieve the car with tenant using the usecase
+	retrievedCar, err := carUsecase.GetByIDWithTenant(ctx, getInput)
+	assert.NoError(t, err)
+	assert.NotNil(t, retrievedCar)
+
+	// Verify the returned car
+	assert.Equal(t, expectedCar.ID, retrievedCar.ID)
+	assert.Equal(t, expectedCar.TenantID, retrievedCar.TenantID)
+	assert.Equal(t, expectedCar.Model, retrievedCar.Model)
+	assert.NotNil(t, retrievedCar.Refs)
+	assert.NotNil(t, retrievedCar.Refs.Tenant)
+	assert.Equal(t, expectedTenant.ID, retrievedCar.Refs.Tenant.ID)
+	assert.Equal(t, expectedTenant.Code, retrievedCar.Refs.Tenant.Code)
+}
+
+// TestCarUsecase_GetByIDWithTenant_NotFound tests retrieval when car with tenant doesn't exist
+func TestCarUsecase_GetByIDWithTenant_NotFound(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	ctrl, mockCarRepo, carUsecase := setupTest(t)
+	defer ctrl.Finish()
+
+	// Test data
+	ctx := context.Background()
+	carID := "non-existent-car"
+	getInput := input.GetCarByIDInput{
+		ID: carID,
+	}
+
+	// Set up expectations for not found error
+	expectedError := assert.AnError
+	mockCarRepo.EXPECT().GetByIDWithTenant(ctx, carID).Return(nil, expectedError)
+
+	// Execute - Try to retrieve a non-existent car with tenant
+	retrievedCar, err := carUsecase.GetByIDWithTenant(ctx, getInput)
+	assert.Error(t, err)
+	assert.Equal(t, expectedError, err)
+	assert.Nil(t, retrievedCar)
+}
+
 // TestCarUsecase_Register_Validation tests validation failures for Register
 func TestCarUsecase_Register_Validation(t *testing.T) {
 	t.Parallel()

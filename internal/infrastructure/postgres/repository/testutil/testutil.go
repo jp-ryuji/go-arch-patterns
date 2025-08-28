@@ -98,6 +98,26 @@ func SetupTestEnvironment() error {
 		return fmt.Errorf("could not migrate: %w", err)
 	}
 
+	// Drop foreign key constraints on renters table that were automatically created by GORM
+	// These constraints are problematic for polymorphic relationships
+	if err := DBClient.DB.Exec("ALTER TABLE renters DROP CONSTRAINT IF EXISTS fk_companies_renters").Error; err != nil {
+		log.Printf("Warning: failed to drop fk_companies_renters: %v", err)
+	}
+	if err := DBClient.DB.Exec("ALTER TABLE renters DROP CONSTRAINT IF EXISTS fk_individuals_renters").Error; err != nil {
+		log.Printf("Warning: failed to drop fk_individuals_renters: %v", err)
+	}
+
+	// Drop duplicate foreign key constraints
+	if err := DBClient.DB.Exec("ALTER TABLE rentals DROP CONSTRAINT IF EXISTS fk_renters_rentals").Error; err != nil {
+		log.Printf("Warning: failed to drop fk_renters_rentals: %v", err)
+	}
+	if err := DBClient.DB.Exec("ALTER TABLE cars DROP CONSTRAINT IF EXISTS fk_tenants_cars").Error; err != nil {
+		log.Printf("Warning: failed to drop fk_tenants_cars: %v", err)
+	}
+	if err := DBClient.DB.Exec("ALTER TABLE rentals DROP CONSTRAINT IF EXISTS fk_rentals_car").Error; err != nil {
+		log.Printf("Warning: failed to drop fk_rentals_car: %v", err)
+	}
+
 	return nil
 }
 

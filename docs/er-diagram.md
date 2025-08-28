@@ -61,3 +61,105 @@ erDiagram
         int Count
     }
 ```
+
+# ER Diagram (Full Version)
+
+```mermaid
+erDiagram
+    tenants ||--o{ cars : owns
+    tenants ||--o{ companies : owns
+    tenants ||--o{ individuals : owns
+    tenants ||--o{ renters : owns
+    tenants ||--o{ rentals : owns
+    tenants ||--o{ options : owns
+    tenants ||--o{ rental_options : owns
+
+    companies ||--o{ renters : "polymorphic (type=company)"
+    individuals ||--o{ renters : "polymorphic (type=individual)"
+
+    cars ||--o{ rentals : has
+    renters ||--o{ rentals : places
+
+    rentals ||--o{ rental_options : includes
+    options ||--o{ rental_options : included_in
+
+    tenants {
+        string id PK
+        string code UK
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    cars {
+        string id PK
+        string tenant_id FK
+        string model
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    companies {
+        string id PK
+        string tenant_id FK
+        string name
+        string company_size
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    individuals {
+        string id PK
+        string tenant_id FK
+        string email
+        string first_name
+        string last_name
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    renters {
+        string id PK
+        string tenant_id FK
+        string renter_entity_id
+        string renter_entity_type
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    rentals {
+        string id PK
+        string tenant_id FK
+        string car_id FK
+        string renter_id FK
+        timestamp starts_at
+        timestamp ends_at
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    options {
+        string id PK
+        string tenant_id FK
+        string name
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    rental_options {
+        string id PK
+        string tenant_id FK
+        string rental_id FK
+        string option_id FK
+        integer count
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+```

@@ -19,6 +19,8 @@ type Individual struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
+
+	Renters []Renter `gorm:"foreignKey:RenterEntityID"`
 }
 
 // TableName specifies the table name for GORM
@@ -26,8 +28,13 @@ func (Individual) TableName() string {
 	return "individuals"
 }
 
-// ToDomain converts Individual to domain model
-func (i *Individual) ToDomain() (*model.Individual, error) {
+// IndividualLoadOptions specifies which associations to load
+type IndividualLoadOptions struct {
+	WithRenters bool
+}
+
+// ToDomain converts Individual to domain model with specified associations
+func (i *Individual) ToDomain(opts ...IndividualLoadOptions) (*model.Individual, error) {
 	emailVO, err := value.NewEmail(i.Email)
 	if err != nil {
 		return nil, err
@@ -41,16 +48,37 @@ func (i *Individual) ToDomain() (*model.Individual, error) {
 		lastName = null.StringFrom(i.LastName)
 	}
 
-	return &model.Individual{
+	individual := &model.Individual{
 		ID:        i.ID,
 		TenantID:  i.TenantID,
-		Email:     emailVO,
+		Email:     *emailVO,
 		FirstName: firstName,
 		LastName:  lastName,
 		CreatedAt: i.CreatedAt,
 		UpdatedAt: i.UpdatedAt,
-		Refs:      nil, // References would be loaded separately if needed
-	}, nil
+		Refs:      nil,
+	}
+
+	// If no options provided, return basic individual
+	if len(opts) == 0 {
+		return individual, nil
+	}
+
+	option := opts[0]
+
+	// Only create Refs if renters need to be loaded
+	if option.WithRenters && len(i.Renters) > 0 {
+		renters := make(model.Renters, len(i.Renters))
+		for j, renter := range i.Renters {
+			renters[j] = renter.ToDomain()
+		}
+
+		individual.Refs = &model.IndividualRefs{
+			Renters: renters,
+		}
+	}
+
+	return individual, nil
 }
 
 // FromDomain converts domain model to Individual

@@ -3,16 +3,13 @@ package model
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-sample/internal/pkg/id"
+	"github.com/google/uuid"
 )
 
-// RentalOptionRefs holds references to related entities for RentalOption
-type RentalOptionRefs struct {
-	Tenant *Tenant
-	Rental *Rental
-	Option *Option
-}
+// RentalOptions is a slice of RentalOption
+type RentalOptions []*RentalOption
 
+// RentalOption represents a rental option entity
 type RentalOption struct {
 	ID        string
 	TenantID  string
@@ -22,27 +19,32 @@ type RentalOption struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
+	// References to related entities
 	Refs *RentalOptionRefs
 }
 
-type RentalOptions []*RentalOption
+// RentalOptionRefs holds references to related entities
+type RentalOptionRefs struct {
+	Rental *Rental
+	Option *Option
+}
 
-func NewRentalOption(
-	tenantID string,
-	rentalID string,
-	optionID string,
-	count int,
-	t time.Time,
-) *RentalOption {
+// NewRentalOption creates a new RentalOption
+func NewRentalOption(tenantID, rentalID, optionID string, count int) *RentalOption {
+	now := time.Now()
 	return &RentalOption{
-		ID:        id.New(),
+		ID:        uuid.New().String(),
 		TenantID:  tenantID,
 		RentalID:  rentalID,
 		OptionID:  optionID,
 		Count:     count,
-		CreatedAt: t,
-		UpdatedAt: t,
-
-		Refs: nil,
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
+}
+
+// WithID creates a RentalOption with a specific ID (for testing)
+func (ro *RentalOption) WithID(id string) *RentalOption {
+	ro.ID = id
+	return ro
 }

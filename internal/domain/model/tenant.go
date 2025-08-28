@@ -3,26 +3,40 @@ package model
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-sample/internal/pkg/id"
+	"github.com/google/uuid"
 )
 
+// Tenants is a slice of Tenant
+type Tenants []*Tenant
+
+// Tenant represents a tenant entity
 type Tenant struct {
 	ID        string
 	Code      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
+
+	// References to related entities
+	Refs *TenantRefs
 }
 
-type Tenants []*Tenant
+// TenantRefs holds references to related entities
+type TenantRefs struct {
+	Cars Cars
+}
 
-func NewTenant(
-	code string,
-	t time.Time,
-) *Tenant {
+// NewTenant creates a new Tenant
+func NewTenant(code string, createdAt time.Time) *Tenant {
 	return &Tenant{
-		ID:        id.New(),
+		ID:        uuid.New().String(),
 		Code:      code,
-		CreatedAt: t,
-		UpdatedAt: t,
+		CreatedAt: createdAt,
+		UpdatedAt: createdAt,
 	}
+}
+
+// WithID creates a Tenant with a specific ID (for testing)
+func (t *Tenant) WithID(id string) *Tenant {
+	t.ID = id
+	return t
 }

@@ -32,6 +32,102 @@ func newCar(db *gorm.DB, opts ...gen.DOOption) car {
 	_car.CreatedAt = field.NewTime(tableName, "created_at")
 	_car.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_car.DeletedAt = field.NewField(tableName, "deleted_at")
+	_car.Rentals = carHasManyRentals{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Rentals", "dbmodel.Rental"),
+		Tenant: struct {
+			field.RelationField
+			Cars struct {
+				field.RelationField
+				Tenant struct {
+					field.RelationField
+				}
+				Rentals struct {
+					field.RelationField
+				}
+			}
+		}{
+			RelationField: field.NewRelation("Rentals.Tenant", "dbmodel.Tenant"),
+			Cars: struct {
+				field.RelationField
+				Tenant struct {
+					field.RelationField
+				}
+				Rentals struct {
+					field.RelationField
+				}
+			}{
+				RelationField: field.NewRelation("Rentals.Tenant.Cars", "dbmodel.Car"),
+				Tenant: struct {
+					field.RelationField
+				}{
+					RelationField: field.NewRelation("Rentals.Tenant.Cars.Tenant", "dbmodel.Tenant"),
+				},
+				Rentals: struct {
+					field.RelationField
+				}{
+					RelationField: field.NewRelation("Rentals.Tenant.Cars.Rentals", "dbmodel.Rental"),
+				},
+			},
+		},
+		Car: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("Rentals.Car", "dbmodel.Car"),
+		},
+		Renter: struct {
+			field.RelationField
+			Rentals struct {
+				field.RelationField
+			}
+		}{
+			RelationField: field.NewRelation("Rentals.Renter", "dbmodel.Renter"),
+			Rentals: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Rentals.Renter.Rentals", "dbmodel.Rental"),
+			},
+		},
+		RentalOptions: struct {
+			field.RelationField
+			Rental struct {
+				field.RelationField
+			}
+			Option struct {
+				field.RelationField
+				RentalOptions struct {
+					field.RelationField
+				}
+			}
+		}{
+			RelationField: field.NewRelation("Rentals.RentalOptions", "dbmodel.RentalOption"),
+			Rental: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Rentals.RentalOptions.Rental", "dbmodel.Rental"),
+			},
+			Option: struct {
+				field.RelationField
+				RentalOptions struct {
+					field.RelationField
+				}
+			}{
+				RelationField: field.NewRelation("Rentals.RentalOptions.Option", "dbmodel.Option"),
+				RentalOptions: struct {
+					field.RelationField
+				}{
+					RelationField: field.NewRelation("Rentals.RentalOptions.Option.RentalOptions", "dbmodel.RentalOption"),
+				},
+			},
+		},
+	}
+
+	_car.Tenant = carBelongsToTenant{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Tenant", "dbmodel.Tenant"),
+	}
 
 	_car.fillFieldMap()
 
@@ -48,6 +144,9 @@ type car struct {
 	CreatedAt field.Time
 	UpdatedAt field.Time
 	DeletedAt field.Field
+	Rentals   carHasManyRentals
+
+	Tenant carBelongsToTenant
 
 	fieldMap map[string]field.Expr
 }
@@ -94,23 +193,226 @@ func (c *car) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (c *car) fillFieldMap() {
-	c.fieldMap = make(map[string]field.Expr, 6)
+	c.fieldMap = make(map[string]field.Expr, 8)
 	c.fieldMap["id"] = c.ID
 	c.fieldMap["tenant_id"] = c.TenantID
 	c.fieldMap["model"] = c.Model
 	c.fieldMap["created_at"] = c.CreatedAt
 	c.fieldMap["updated_at"] = c.UpdatedAt
 	c.fieldMap["deleted_at"] = c.DeletedAt
+
 }
 
 func (c car) clone(db *gorm.DB) car {
 	c.carDo.ReplaceConnPool(db.Statement.ConnPool)
+	c.Rentals.db = db.Session(&gorm.Session{Initialized: true})
+	c.Rentals.db.Statement.ConnPool = db.Statement.ConnPool
+	c.Tenant.db = db.Session(&gorm.Session{Initialized: true})
+	c.Tenant.db.Statement.ConnPool = db.Statement.ConnPool
 	return c
 }
 
 func (c car) replaceDB(db *gorm.DB) car {
 	c.carDo.ReplaceDB(db)
+	c.Rentals.db = db.Session(&gorm.Session{})
+	c.Tenant.db = db.Session(&gorm.Session{})
 	return c
+}
+
+type carHasManyRentals struct {
+	db *gorm.DB
+
+	field.RelationField
+
+	Tenant struct {
+		field.RelationField
+		Cars struct {
+			field.RelationField
+			Tenant struct {
+				field.RelationField
+			}
+			Rentals struct {
+				field.RelationField
+			}
+		}
+	}
+	Car struct {
+		field.RelationField
+	}
+	Renter struct {
+		field.RelationField
+		Rentals struct {
+			field.RelationField
+		}
+	}
+	RentalOptions struct {
+		field.RelationField
+		Rental struct {
+			field.RelationField
+		}
+		Option struct {
+			field.RelationField
+			RentalOptions struct {
+				field.RelationField
+			}
+		}
+	}
+}
+
+func (a carHasManyRentals) Where(conds ...field.Expr) *carHasManyRentals {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a carHasManyRentals) WithContext(ctx context.Context) *carHasManyRentals {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a carHasManyRentals) Session(session *gorm.Session) *carHasManyRentals {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a carHasManyRentals) Model(m *dbmodel.Car) *carHasManyRentalsTx {
+	return &carHasManyRentalsTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a carHasManyRentals) Unscoped() *carHasManyRentals {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type carHasManyRentalsTx struct{ tx *gorm.Association }
+
+func (a carHasManyRentalsTx) Find() (result []*dbmodel.Rental, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a carHasManyRentalsTx) Append(values ...*dbmodel.Rental) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a carHasManyRentalsTx) Replace(values ...*dbmodel.Rental) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a carHasManyRentalsTx) Delete(values ...*dbmodel.Rental) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a carHasManyRentalsTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a carHasManyRentalsTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a carHasManyRentalsTx) Unscoped() *carHasManyRentalsTx {
+	a.tx = a.tx.Unscoped()
+	return &a
+}
+
+type carBelongsToTenant struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a carBelongsToTenant) Where(conds ...field.Expr) *carBelongsToTenant {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a carBelongsToTenant) WithContext(ctx context.Context) *carBelongsToTenant {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a carBelongsToTenant) Session(session *gorm.Session) *carBelongsToTenant {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a carBelongsToTenant) Model(m *dbmodel.Car) *carBelongsToTenantTx {
+	return &carBelongsToTenantTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a carBelongsToTenant) Unscoped() *carBelongsToTenant {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type carBelongsToTenantTx struct{ tx *gorm.Association }
+
+func (a carBelongsToTenantTx) Find() (result *dbmodel.Tenant, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a carBelongsToTenantTx) Append(values ...*dbmodel.Tenant) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a carBelongsToTenantTx) Replace(values ...*dbmodel.Tenant) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a carBelongsToTenantTx) Delete(values ...*dbmodel.Tenant) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a carBelongsToTenantTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a carBelongsToTenantTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a carBelongsToTenantTx) Unscoped() *carBelongsToTenantTx {
+	a.tx = a.tx.Unscoped()
+	return &a
 }
 
 type carDo struct{ gen.DO }

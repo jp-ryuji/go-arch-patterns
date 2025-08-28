@@ -3,16 +3,13 @@ package model
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-sample/internal/pkg/id"
+	"github.com/google/uuid"
 )
 
-// RentalRefs holds references to related entities for Rental
-type RentalRefs struct {
-	Tenant *Tenant
-	Car    *Car
-	Renter *Renter
-}
+// Rentals is a slice of Rental
+type Rentals []*Rental
 
+// Rental represents a rental entity
 type Rental struct {
 	ID        string
 	TenantID  string
@@ -23,29 +20,35 @@ type Rental struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
+	// References to related entities
 	Refs *RentalRefs
 }
 
-type Rentals []*Rental
+// RentalRefs holds references to related entities
+type RentalRefs struct {
+	Tenant        *Tenant
+	Car           *Car
+	Renter        *Renter
+	RentalOptions RentalOptions
+}
 
-func NewRental(
-	tenantID string,
-	renterID string,
-	carID string,
-	startsAt time.Time,
-	endsAt time.Time,
-	t time.Time,
-) *Rental {
+// NewRental creates a new Rental
+func NewRental(tenantID, carID, renterID string, startsAt, endsAt time.Time) *Rental {
+	now := time.Now()
 	return &Rental{
-		ID:        id.New(),
+		ID:        uuid.New().String(),
 		TenantID:  tenantID,
-		RenterID:  renterID,
 		CarID:     carID,
+		RenterID:  renterID,
 		StartsAt:  startsAt,
 		EndsAt:    endsAt,
-		CreatedAt: t,
-		UpdatedAt: t,
-
-		Refs: nil,
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
+}
+
+// WithID creates a Rental with a specific ID (for testing)
+func (r *Rental) WithID(id string) *Rental {
+	r.ID = id
+	return r
 }

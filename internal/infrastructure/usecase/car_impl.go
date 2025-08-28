@@ -47,3 +47,13 @@ func (uc *carUsecase) GetByID(ctx context.Context, input input.GetCarByIDInput) 
 
 	return uc.carRepo.GetByID(ctx, input.ID)
 }
+
+// GetByIDWithTenant retrieves a car by its ID along with its tenant information
+func (uc *carUsecase) GetByIDWithTenant(ctx context.Context, input input.GetCarByIDInput) (*model.Car, error) {
+	// Validate input
+	if err := Validate(input); err != nil {
+		return nil, err
+	}
+
+	return uc.carRepo.GetByIDWithTenant(ctx, input.ID)
+}

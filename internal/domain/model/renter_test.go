@@ -7,8 +7,8 @@ import (
 	"github.com/jp-ryuji/go-sample/internal/domain/model/factory"
 )
 
-// TestRenterInterface ensures that both Company and Individual implement the RenterEntityInstance interface
-func TestRenterInterface(t *testing.T) {
+// TestRenterCreation ensures that we can create renters with different entity types
+func TestRenterCreation(t *testing.T) {
 	t.Parallel()
 
 	// Create a company using the factory
@@ -20,23 +20,21 @@ func TestRenterInterface(t *testing.T) {
 		t.Fatalf("Failed to create individual: %v", err)
 	}
 
-	// Verify that both implement the RenterEntityInstance interface
-	var companyRenter model.RenterEntityInstance = company
-	var individualRenter model.RenterEntityInstance = individual
-
-	// Test company
-	if companyRenter.GetID() != company.ID {
-		t.Error("Company GetID() mismatch")
+	// Test company renter
+	companyRenter := model.NewRenter("tenant-123", company.ID, model.CompanyRenter, company.CreatedAt)
+	if companyRenter.RenterEntityID != company.ID {
+		t.Error("Company RenterEntityID mismatch")
 	}
-	if companyRenter.GetEntityType() != model.RenterEntityCompany {
-		t.Error("Company GetEntityType() mismatch")
+	if companyRenter.RenterEntityType != model.CompanyRenter {
+		t.Error("Company RenterEntityType mismatch")
 	}
 
-	// Test individual
-	if individualRenter.GetID() != individual.ID {
-		t.Error("Individual GetID() mismatch")
+	// Test individual renter
+	individualRenter := model.NewRenter("tenant-123", individual.ID, model.IndividualRenter, individual.CreatedAt)
+	if individualRenter.RenterEntityID != individual.ID {
+		t.Error("Individual RenterEntityID mismatch")
 	}
-	if individualRenter.GetEntityType() != model.RenterEntityIndividual {
-		t.Error("Individual GetEntityType() mismatch")
+	if individualRenter.RenterEntityType != model.IndividualRenter {
+		t.Error("Individual RenterEntityType mismatch")
 	}
 }

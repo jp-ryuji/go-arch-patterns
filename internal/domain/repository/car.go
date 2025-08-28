@@ -10,6 +10,7 @@ import (
 type CarRepository interface {
 	Create(ctx context.Context, car *model.Car) error
 	GetByID(ctx context.Context, id string) (*model.Car, error)
+	GetByIDWithTenant(ctx context.Context, id string) (*model.Car, error)
 	Update(ctx context.Context, car *model.Car) error
 	Delete(ctx context.Context, id string) error
 }

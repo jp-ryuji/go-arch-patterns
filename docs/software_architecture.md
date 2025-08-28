@@ -24,21 +24,24 @@ Structure:
 ├── docs
 ├── internal
 │   ├── domain
-│   │   ├── model         # domain model
-│   │   │   ├── value     # value object
-│   │   │   └── factory   # factory methods used in test
-│   │   ├── repository    # repository interface (port)
-│   │   └── service       # domain service
+│   │   ├── model          # domain model
+│   │   │   ├── value      # value object
+│   │   │   └── factory    # factory methods used in test
+│   │   ├── repository     # repository interface (port)
+│   │   └── service        # domain service
 │   ├── infrastructure
 │   │   ├── cmd
 │   │   │   ├── internal
 │   │   │   └── root.go
-│   │   ├── http          # HTTP adapter implementation
-│   │   ├── postgres      # PostgreSQL adapter implementation
-│   │   ├── redis         # Redis adapter implementation
-│   │   └── s3            # S3 adapter implementation
-│   ├── pkg               # library
-│   └── usecase           # application service
+│   │   ├── http           # HTTP adapter implementation
+│   │   ├── postgres       # PostgreSQL adapter implementation
+│   │   │   ├── dbmodel    # (ORM specific models with database annotations and relationships)
+│   │   │   ├── repository # (Implement the repository interfaces using ORM)d
+│   │   │   └── query      # (Generated type-safe query code using GORM Gen)
+│   │   ├── redis          # Redis adapter implementation
+│   │   └── s3             # S3 adapter implementation
+│   ├── pkg                # library
+│   └── usecase            # application service
 ├── schema
 │   ├── openapi
 │   └── proto
@@ -55,6 +58,7 @@ Note: For most web applications, especially those with clear architectural bound
 
 ## Libraries Used
 
-- [GORM Gen](https://gorm.io/gen/index.html) for type-safe database queries.
-- [Dockertest](https://github.com/ory/dockertest) for booting up ephermal docker images for integration tests using Postgres or such.
-- [gomock](https://github.com/uber-go/mock) for mocking dependencies in tests.
+- [GORM](https://gorm.io/) for ORM and database operations
+- [GORM Gen](https://gorm.io/gen/index.html) for type-safe database queries
+- [Dockertest](https://github.com/ory/dockertest) for booting up ephermal docker images for integration tests using Postgres or such
+- [gomock](https://github.com/uber-go/mock) for mocking dependencies in tests

@@ -3,14 +3,13 @@ package model
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-sample/internal/pkg/id"
+	"github.com/google/uuid"
 )
 
-// CompanyRefs holds references to related entities for Company
-type CompanyRefs struct {
-	Tenant *Tenant
-}
+// Companies is a slice of Company
+type Companies []*Company
 
+// Company represents a company entity
 type Company struct {
 	ID          string
 	TenantID    string
@@ -19,38 +18,31 @@ type Company struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 
+	// References to related entities
 	Refs *CompanyRefs
 }
 
-// Renter interface implementation
-func (c *Company) GetID() string {
-	return c.ID
+// CompanyRefs holds references to related entities
+type CompanyRefs struct {
+	Renters Renters
 }
 
-func (c *Company) GetEntityType() RenterEntity {
-	return RenterEntityCompany
-}
-
-// End of Renter interface implementation
-
-type Companys []*Company
-
-func NewCompany(
-	tenantID string,
-	name string,
-	companySize CompanySize,
-	t time.Time,
-) *Company {
+// NewCompany creates a new Company
+func NewCompany(tenantID, name string, companySize CompanySize, createdAt time.Time) *Company {
 	return &Company{
-		ID:          id.New(),
+		ID:          uuid.New().String(),
 		TenantID:    tenantID,
 		Name:        name,
 		CompanySize: companySize,
-		CreatedAt:   t,
-		UpdatedAt:   t,
-
-		Refs: nil,
+		CreatedAt:   createdAt,
+		UpdatedAt:   createdAt,
 	}
+}
+
+// WithID creates a Company with a specific ID (for testing)
+func (c *Company) WithID(id string) *Company {
+	c.ID = id
+	return c
 }
 
 type CompanySize string

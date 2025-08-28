@@ -3,14 +3,13 @@ package model
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-sample/internal/pkg/id"
+	"github.com/google/uuid"
 )
 
-// OptionRefs holds references to related entities for Option
-type OptionRefs struct {
-	Tenant *Tenant
-}
+// Options is a slice of Option
+type Options []*Option
 
+// Option represents an option entity
 type Option struct {
 	ID        string
 	TenantID  string
@@ -18,23 +17,29 @@ type Option struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
+	// References to related entities
 	Refs *OptionRefs
 }
 
-type Options []*Option
+// OptionRefs holds references to related entities
+type OptionRefs struct {
+	RentalOptions RentalOptions
+}
 
-func NewOption(
-	tenantID string,
-	name string,
-	t time.Time,
-) *Option {
+// NewOption creates a new Option
+func NewOption(tenantID, name string) *Option {
+	now := time.Now()
 	return &Option{
-		ID:        id.New(),
+		ID:        uuid.New().String(),
 		TenantID:  tenantID,
 		Name:      name,
-		CreatedAt: t,
-		UpdatedAt: t,
-
-		Refs: nil,
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
+}
+
+// WithID creates an Option with a specific ID (for testing)
+func (o *Option) WithID(id string) *Option {
+	o.ID = id
+	return o
 }
