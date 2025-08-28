@@ -60,6 +60,16 @@ This project uses [Dockertest](https://github.com/ory/dockertest) for integratio
 
 When adding new database models, they must be registered in the `allModels` slice in `internal/infrastructure/postgres/repository/testutil/testutil.go` to ensure they are migrated during test setup.
 
+### Mocking
+
+This project uses [gomock](https://github.com/uber-go/mock) for mocking dependencies in tests.
+
+Mocks are generated using `go:generate` directives placed directly before interface definitions. To generate mocks, use:
+
+```bash
+make gen.mocks
+```
+
 ## lint
 
 There are two linting targets available:

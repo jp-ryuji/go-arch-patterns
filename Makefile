@@ -24,6 +24,11 @@ gen.gorm:
 migrate:
 	@go run internal/infrastructure/postgres/migrate/main.go
 
+.PHONY: gen.mocks
+gen.mocks:
+	@go generate ./...
+	$(call format)
+
 .PHONY: format
 format:
 	$(call format)
