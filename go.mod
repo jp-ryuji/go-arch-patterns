@@ -14,6 +14,7 @@ require (
 	github.com/lucsky/cuid v1.2.1
 	github.com/ory/dockertest/v3 v3.12.0
 	github.com/stretchr/testify v1.10.0
+	go.uber.org/mock v0.6.0
 	gorm.io/driver/postgres v1.5.0
 	gorm.io/gen v0.3.27
 	gorm.io/gorm v1.30.1
