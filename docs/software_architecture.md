@@ -57,3 +57,4 @@ Note: For most web applications, especially those with clear architectural bound
 
 - [GORM Gen](https://gorm.io/gen/index.html) for type-safe database queries.
 - [Dockertest](https://github.com/ory/dockertest) for booting up ephermal docker images for integration tests using Postgres or such.
+- [gomock](https://github.com/uber-go/mock) for mocking dependencies in tests.
