@@ -13,4 +13,5 @@ import (
 type CarUsecase interface {
 	Register(ctx context.Context, input input.RegisterCarInput) (*model.Car, error)
 	GetByID(ctx context.Context, input input.GetCarByIDInput) (*model.Car, error)
+	GetByIDWithTenant(ctx context.Context, input input.GetCarByIDInput) (*model.Car, error)
 }
