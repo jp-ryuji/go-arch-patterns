@@ -84,6 +84,21 @@ func (mr *MockCarRepositoryMockRecorder) GetByID(ctx, id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockCarRepository)(nil).GetByID), ctx, id)
 }
 
+// GetByIDWithTenant mocks base method.
+func (m *MockCarRepository) GetByIDWithTenant(ctx context.Context, id string) (*model.Car, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByIDWithTenant", ctx, id)
+	ret0, _ := ret[0].(*model.Car)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByIDWithTenant indicates an expected call of GetByIDWithTenant.
+func (mr *MockCarRepositoryMockRecorder) GetByIDWithTenant(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByIDWithTenant", reflect.TypeOf((*MockCarRepository)(nil).GetByIDWithTenant), ctx, id)
+}
+
 // Update mocks base method.
 func (m *MockCarRepository) Update(ctx context.Context, car *model.Car) error {
 	m.ctrl.T.Helper()

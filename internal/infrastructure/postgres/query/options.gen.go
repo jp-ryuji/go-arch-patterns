@@ -32,6 +32,111 @@ func newOption(db *gorm.DB, opts ...gen.DOOption) option {
 	_option.CreatedAt = field.NewTime(tableName, "created_at")
 	_option.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_option.DeletedAt = field.NewField(tableName, "deleted_at")
+	_option.RentalOptions = optionHasManyRentalOptions{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("RentalOptions", "dbmodel.RentalOption"),
+		Rental: struct {
+			field.RelationField
+			Tenant struct {
+				field.RelationField
+				Cars struct {
+					field.RelationField
+					Tenant struct {
+						field.RelationField
+					}
+					Rentals struct {
+						field.RelationField
+					}
+				}
+			}
+			Car struct {
+				field.RelationField
+			}
+			Renter struct {
+				field.RelationField
+				Rentals struct {
+					field.RelationField
+				}
+			}
+			RentalOptions struct {
+				field.RelationField
+			}
+		}{
+			RelationField: field.NewRelation("RentalOptions.Rental", "dbmodel.Rental"),
+			Tenant: struct {
+				field.RelationField
+				Cars struct {
+					field.RelationField
+					Tenant struct {
+						field.RelationField
+					}
+					Rentals struct {
+						field.RelationField
+					}
+				}
+			}{
+				RelationField: field.NewRelation("RentalOptions.Rental.Tenant", "dbmodel.Tenant"),
+				Cars: struct {
+					field.RelationField
+					Tenant struct {
+						field.RelationField
+					}
+					Rentals struct {
+						field.RelationField
+					}
+				}{
+					RelationField: field.NewRelation("RentalOptions.Rental.Tenant.Cars", "dbmodel.Car"),
+					Tenant: struct {
+						field.RelationField
+					}{
+						RelationField: field.NewRelation("RentalOptions.Rental.Tenant.Cars.Tenant", "dbmodel.Tenant"),
+					},
+					Rentals: struct {
+						field.RelationField
+					}{
+						RelationField: field.NewRelation("RentalOptions.Rental.Tenant.Cars.Rentals", "dbmodel.Rental"),
+					},
+				},
+			},
+			Car: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("RentalOptions.Rental.Car", "dbmodel.Car"),
+			},
+			Renter: struct {
+				field.RelationField
+				Rentals struct {
+					field.RelationField
+				}
+			}{
+				RelationField: field.NewRelation("RentalOptions.Rental.Renter", "dbmodel.Renter"),
+				Rentals: struct {
+					field.RelationField
+				}{
+					RelationField: field.NewRelation("RentalOptions.Rental.Renter.Rentals", "dbmodel.Rental"),
+				},
+			},
+			RentalOptions: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("RentalOptions.Rental.RentalOptions", "dbmodel.RentalOption"),
+			},
+		},
+		Option: struct {
+			field.RelationField
+			RentalOptions struct {
+				field.RelationField
+			}
+		}{
+			RelationField: field.NewRelation("RentalOptions.Option", "dbmodel.Option"),
+			RentalOptions: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("RentalOptions.Option.RentalOptions", "dbmodel.RentalOption"),
+			},
+		},
+	}
 
 	_option.fillFieldMap()
 
@@ -41,13 +146,14 @@ func newOption(db *gorm.DB, opts ...gen.DOOption) option {
 type option struct {
 	optionDo optionDo
 
-	ALL       field.Asterisk
-	ID        field.String
-	TenantID  field.String
-	Name      field.String
-	CreatedAt field.Time
-	UpdatedAt field.Time
-	DeletedAt field.Field
+	ALL           field.Asterisk
+	ID            field.String
+	TenantID      field.String
+	Name          field.String
+	CreatedAt     field.Time
+	UpdatedAt     field.Time
+	DeletedAt     field.Field
+	RentalOptions optionHasManyRentalOptions
 
 	fieldMap map[string]field.Expr
 }
@@ -94,23 +200,142 @@ func (o *option) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (o *option) fillFieldMap() {
-	o.fieldMap = make(map[string]field.Expr, 6)
+	o.fieldMap = make(map[string]field.Expr, 7)
 	o.fieldMap["id"] = o.ID
 	o.fieldMap["tenant_id"] = o.TenantID
 	o.fieldMap["name"] = o.Name
 	o.fieldMap["created_at"] = o.CreatedAt
 	o.fieldMap["updated_at"] = o.UpdatedAt
 	o.fieldMap["deleted_at"] = o.DeletedAt
+
 }
 
 func (o option) clone(db *gorm.DB) option {
 	o.optionDo.ReplaceConnPool(db.Statement.ConnPool)
+	o.RentalOptions.db = db.Session(&gorm.Session{Initialized: true})
+	o.RentalOptions.db.Statement.ConnPool = db.Statement.ConnPool
 	return o
 }
 
 func (o option) replaceDB(db *gorm.DB) option {
 	o.optionDo.ReplaceDB(db)
+	o.RentalOptions.db = db.Session(&gorm.Session{})
 	return o
+}
+
+type optionHasManyRentalOptions struct {
+	db *gorm.DB
+
+	field.RelationField
+
+	Rental struct {
+		field.RelationField
+		Tenant struct {
+			field.RelationField
+			Cars struct {
+				field.RelationField
+				Tenant struct {
+					field.RelationField
+				}
+				Rentals struct {
+					field.RelationField
+				}
+			}
+		}
+		Car struct {
+			field.RelationField
+		}
+		Renter struct {
+			field.RelationField
+			Rentals struct {
+				field.RelationField
+			}
+		}
+		RentalOptions struct {
+			field.RelationField
+		}
+	}
+	Option struct {
+		field.RelationField
+		RentalOptions struct {
+			field.RelationField
+		}
+	}
+}
+
+func (a optionHasManyRentalOptions) Where(conds ...field.Expr) *optionHasManyRentalOptions {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a optionHasManyRentalOptions) WithContext(ctx context.Context) *optionHasManyRentalOptions {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a optionHasManyRentalOptions) Session(session *gorm.Session) *optionHasManyRentalOptions {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a optionHasManyRentalOptions) Model(m *dbmodel.Option) *optionHasManyRentalOptionsTx {
+	return &optionHasManyRentalOptionsTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a optionHasManyRentalOptions) Unscoped() *optionHasManyRentalOptions {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type optionHasManyRentalOptionsTx struct{ tx *gorm.Association }
+
+func (a optionHasManyRentalOptionsTx) Find() (result []*dbmodel.RentalOption, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a optionHasManyRentalOptionsTx) Append(values ...*dbmodel.RentalOption) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a optionHasManyRentalOptionsTx) Replace(values ...*dbmodel.RentalOption) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a optionHasManyRentalOptionsTx) Delete(values ...*dbmodel.RentalOption) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a optionHasManyRentalOptionsTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a optionHasManyRentalOptionsTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a optionHasManyRentalOptionsTx) Unscoped() *optionHasManyRentalOptionsTx {
+	a.tx = a.tx.Unscoped()
+	return &a
 }
 
 type optionDo struct{ gen.DO }

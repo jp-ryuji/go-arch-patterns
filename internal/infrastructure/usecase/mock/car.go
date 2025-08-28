@@ -57,6 +57,21 @@ func (mr *MockCarUsecaseMockRecorder) GetByID(ctx, arg1 any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockCarUsecase)(nil).GetByID), ctx, arg1)
 }
 
+// GetByIDWithTenant mocks base method.
+func (m *MockCarUsecase) GetByIDWithTenant(ctx context.Context, arg1 input.GetCarByIDInput) (*model.Car, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByIDWithTenant", ctx, arg1)
+	ret0, _ := ret[0].(*model.Car)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByIDWithTenant indicates an expected call of GetByIDWithTenant.
+func (mr *MockCarUsecaseMockRecorder) GetByIDWithTenant(ctx, arg1 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByIDWithTenant", reflect.TypeOf((*MockCarUsecase)(nil).GetByIDWithTenant), ctx, arg1)
+}
+
 // Register mocks base method.
 func (m *MockCarUsecase) Register(ctx context.Context, arg1 input.RegisterCarInput) (*model.Car, error) {
 	m.ctrl.T.Helper()

@@ -34,6 +34,123 @@ func newIndividual(db *gorm.DB, opts ...gen.DOOption) individual {
 	_individual.CreatedAt = field.NewTime(tableName, "created_at")
 	_individual.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_individual.DeletedAt = field.NewField(tableName, "deleted_at")
+	_individual.Renters = individualHasManyRenters{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Renters", "dbmodel.Renter"),
+		Rentals: struct {
+			field.RelationField
+			Tenant struct {
+				field.RelationField
+				Cars struct {
+					field.RelationField
+					Tenant struct {
+						field.RelationField
+					}
+					Rentals struct {
+						field.RelationField
+					}
+				}
+			}
+			Car struct {
+				field.RelationField
+			}
+			Renter struct {
+				field.RelationField
+			}
+			RentalOptions struct {
+				field.RelationField
+				Rental struct {
+					field.RelationField
+				}
+				Option struct {
+					field.RelationField
+					RentalOptions struct {
+						field.RelationField
+					}
+				}
+			}
+		}{
+			RelationField: field.NewRelation("Renters.Rentals", "dbmodel.Rental"),
+			Tenant: struct {
+				field.RelationField
+				Cars struct {
+					field.RelationField
+					Tenant struct {
+						field.RelationField
+					}
+					Rentals struct {
+						field.RelationField
+					}
+				}
+			}{
+				RelationField: field.NewRelation("Renters.Rentals.Tenant", "dbmodel.Tenant"),
+				Cars: struct {
+					field.RelationField
+					Tenant struct {
+						field.RelationField
+					}
+					Rentals struct {
+						field.RelationField
+					}
+				}{
+					RelationField: field.NewRelation("Renters.Rentals.Tenant.Cars", "dbmodel.Car"),
+					Tenant: struct {
+						field.RelationField
+					}{
+						RelationField: field.NewRelation("Renters.Rentals.Tenant.Cars.Tenant", "dbmodel.Tenant"),
+					},
+					Rentals: struct {
+						field.RelationField
+					}{
+						RelationField: field.NewRelation("Renters.Rentals.Tenant.Cars.Rentals", "dbmodel.Rental"),
+					},
+				},
+			},
+			Car: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Renters.Rentals.Car", "dbmodel.Car"),
+			},
+			Renter: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Renters.Rentals.Renter", "dbmodel.Renter"),
+			},
+			RentalOptions: struct {
+				field.RelationField
+				Rental struct {
+					field.RelationField
+				}
+				Option struct {
+					field.RelationField
+					RentalOptions struct {
+						field.RelationField
+					}
+				}
+			}{
+				RelationField: field.NewRelation("Renters.Rentals.RentalOptions", "dbmodel.RentalOption"),
+				Rental: struct {
+					field.RelationField
+				}{
+					RelationField: field.NewRelation("Renters.Rentals.RentalOptions.Rental", "dbmodel.Rental"),
+				},
+				Option: struct {
+					field.RelationField
+					RentalOptions struct {
+						field.RelationField
+					}
+				}{
+					RelationField: field.NewRelation("Renters.Rentals.RentalOptions.Option", "dbmodel.Option"),
+					RentalOptions: struct {
+						field.RelationField
+					}{
+						RelationField: field.NewRelation("Renters.Rentals.RentalOptions.Option.RentalOptions", "dbmodel.RentalOption"),
+					},
+				},
+			},
+		},
+	}
 
 	_individual.fillFieldMap()
 
@@ -52,6 +169,7 @@ type individual struct {
 	CreatedAt field.Time
 	UpdatedAt field.Time
 	DeletedAt field.Field
+	Renters   individualHasManyRenters
 
 	fieldMap map[string]field.Expr
 }
@@ -102,7 +220,7 @@ func (i *individual) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (i *individual) fillFieldMap() {
-	i.fieldMap = make(map[string]field.Expr, 8)
+	i.fieldMap = make(map[string]field.Expr, 9)
 	i.fieldMap["id"] = i.ID
 	i.fieldMap["tenant_id"] = i.TenantID
 	i.fieldMap["email"] = i.Email
@@ -111,16 +229,135 @@ func (i *individual) fillFieldMap() {
 	i.fieldMap["created_at"] = i.CreatedAt
 	i.fieldMap["updated_at"] = i.UpdatedAt
 	i.fieldMap["deleted_at"] = i.DeletedAt
+
 }
 
 func (i individual) clone(db *gorm.DB) individual {
 	i.individualDo.ReplaceConnPool(db.Statement.ConnPool)
+	i.Renters.db = db.Session(&gorm.Session{Initialized: true})
+	i.Renters.db.Statement.ConnPool = db.Statement.ConnPool
 	return i
 }
 
 func (i individual) replaceDB(db *gorm.DB) individual {
 	i.individualDo.ReplaceDB(db)
+	i.Renters.db = db.Session(&gorm.Session{})
 	return i
+}
+
+type individualHasManyRenters struct {
+	db *gorm.DB
+
+	field.RelationField
+
+	Rentals struct {
+		field.RelationField
+		Tenant struct {
+			field.RelationField
+			Cars struct {
+				field.RelationField
+				Tenant struct {
+					field.RelationField
+				}
+				Rentals struct {
+					field.RelationField
+				}
+			}
+		}
+		Car struct {
+			field.RelationField
+		}
+		Renter struct {
+			field.RelationField
+		}
+		RentalOptions struct {
+			field.RelationField
+			Rental struct {
+				field.RelationField
+			}
+			Option struct {
+				field.RelationField
+				RentalOptions struct {
+					field.RelationField
+				}
+			}
+		}
+	}
+}
+
+func (a individualHasManyRenters) Where(conds ...field.Expr) *individualHasManyRenters {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a individualHasManyRenters) WithContext(ctx context.Context) *individualHasManyRenters {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a individualHasManyRenters) Session(session *gorm.Session) *individualHasManyRenters {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a individualHasManyRenters) Model(m *dbmodel.Individual) *individualHasManyRentersTx {
+	return &individualHasManyRentersTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a individualHasManyRenters) Unscoped() *individualHasManyRenters {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type individualHasManyRentersTx struct{ tx *gorm.Association }
+
+func (a individualHasManyRentersTx) Find() (result []*dbmodel.Renter, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a individualHasManyRentersTx) Append(values ...*dbmodel.Renter) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a individualHasManyRentersTx) Replace(values ...*dbmodel.Renter) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a individualHasManyRentersTx) Delete(values ...*dbmodel.Renter) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a individualHasManyRentersTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a individualHasManyRentersTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a individualHasManyRentersTx) Unscoped() *individualHasManyRentersTx {
+	a.tx = a.tx.Unscoped()
+	return &a
 }
 
 type individualDo struct{ gen.DO }
