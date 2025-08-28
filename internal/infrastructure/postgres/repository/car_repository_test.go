@@ -63,6 +63,27 @@ func TestCarRepository_GetByID(t *testing.T) {
 	require.Equal(t, car.Model, foundCar.Model)
 }
 
+// TestCarRepository_GetByIDWithTenant tests the GetByIDWithTenant method of the car repository.
+func TestCarRepository_GetByIDWithTenant(t *testing.T) {
+	repo, ctx, tenant := testSetup(t, "test-tenant-get-with-tenant")
+
+	// Create a car
+	car := model.NewCar(tenant.ID, "Prius", time.Now())
+	err := repo.Create(ctx, car)
+	require.NoError(t, err)
+
+	// Get the car by ID with tenant information
+	foundCar, err := repo.GetByIDWithTenant(ctx, car.ID)
+	require.NoError(t, err)
+	require.Equal(t, car.ID, foundCar.ID)
+	require.Equal(t, car.TenantID, foundCar.TenantID)
+	require.Equal(t, car.Model, foundCar.Model)
+	require.NotNil(t, foundCar.Refs)
+	require.NotNil(t, foundCar.Refs.Tenant)
+	require.Equal(t, tenant.ID, foundCar.Refs.Tenant.ID)
+	require.Equal(t, tenant.Code, foundCar.Refs.Tenant.Code)
+}
+
 // TestCarRepository_GetByID_NotFound tests the GetByID method when a car doesn't exist.
 func TestCarRepository_GetByID_NotFound(t *testing.T) {
 	repo, ctx, _ := testSetup(t, "test-tenant-get-not-found")

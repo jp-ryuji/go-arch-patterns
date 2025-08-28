@@ -18,7 +18,7 @@ func NewCarRepository() repository.CarRepository {
 
 // Create inserts a new car into the database
 func (r *carRepository) Create(ctx context.Context, car *model.Car) error {
-	carDB := dbmodel.FromDomain(car)
+	carDB := dbmodel.FromDomainCar(car)
 	return query.Car.WithContext(ctx).Create(carDB)
 }
 
@@ -31,9 +31,18 @@ func (r *carRepository) GetByID(ctx context.Context, id string) (*model.Car, err
 	return carDB.ToDomain(), nil
 }
 
+// GetByIDWithTenant retrieves a car by its ID along with its tenant information
+func (r *carRepository) GetByIDWithTenant(ctx context.Context, id string) (*model.Car, error) {
+	carDB, err := query.Car.WithContext(ctx).Joins(query.Car.Tenant).Where(query.Car.ID.Eq(id)).First()
+	if err != nil {
+		return nil, err
+	}
+	return carDB.ToDomain(dbmodel.CarLoadOptions{WithTenant: true}), nil
+}
+
 // Update updates an existing car
 func (r *carRepository) Update(ctx context.Context, car *model.Car) error {
-	carDB := dbmodel.FromDomain(car)
+	carDB := dbmodel.FromDomainCar(car)
 	return query.Car.WithContext(ctx).Save(carDB)
 }
 
