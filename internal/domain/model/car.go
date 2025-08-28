@@ -3,14 +3,13 @@ package model
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-sample/internal/pkg/id"
+	"github.com/google/uuid"
 )
 
-// CarRefs holds references to related entities for Car
-type CarRefs struct {
-	Tenant *Tenant
-}
+// Cars is a slice of Car
+type Cars []*Car
 
+// Car represents a car entity
 type Car struct {
 	ID        string
 	TenantID  string
@@ -18,23 +17,29 @@ type Car struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
+	// References to related entities
 	Refs *CarRefs
 }
 
-type Cars []*Car
+// CarRefs holds references to related entities
+type CarRefs struct {
+	Tenant  *Tenant
+	Rentals Rentals
+}
 
-func NewCar(
-	tenantID string,
-	model string,
-	t time.Time,
-) *Car {
+// NewCar creates a new Car
+func NewCar(tenantID, model string, createdAt time.Time) *Car {
 	return &Car{
-		ID:        id.New(),
+		ID:        uuid.New().String(),
 		TenantID:  tenantID,
 		Model:     model,
-		CreatedAt: t,
-		UpdatedAt: t,
-
-		Refs: nil,
+		CreatedAt: createdAt,
+		UpdatedAt: createdAt,
 	}
+}
+
+// WithID creates a Car with a specific ID (for testing)
+func (c *Car) WithID(id string) *Car {
+	c.ID = id
+	return c
 }

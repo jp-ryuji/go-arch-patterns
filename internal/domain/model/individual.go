@@ -4,61 +4,48 @@ import (
 	"time"
 
 	"github.com/aarondl/null/v9"
+	"github.com/google/uuid"
+
 	"github.com/jp-ryuji/go-sample/internal/domain/model/value"
-	"github.com/jp-ryuji/go-sample/internal/pkg/id"
 )
 
-// IndividualRefs holds references to related entities for Individual
-type IndividualRefs struct {
-	Tenant *Tenant
-}
+// Individuals is a slice of Individual
+type Individuals []*Individual
 
+// Individual represents an individual entity
 type Individual struct {
 	ID        string
 	TenantID  string
-	Email     *value.Email
+	Email     value.Email
 	FirstName null.String
 	LastName  null.String
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
+	// References to related entities
 	Refs *IndividualRefs
 }
 
-// Renter interface implementation for Individual
-func (i *Individual) GetID() string {
-	return i.ID
+// IndividualRefs holds references to related entities
+type IndividualRefs struct {
+	Renters Renters
 }
 
-func (i *Individual) GetEntityType() RenterEntity {
-	return RenterEntityIndividual
-}
-
-// End of Renter interface implementation
-
-type Individuals []*Individual
-
-func NewIndividual(
-	tenantID string,
-	email string,
-	firstName null.String,
-	lastName null.String,
-	t time.Time,
-) (*Individual, error) {
-	emailVO, err := value.NewEmail(email)
-	if err != nil {
-		return nil, err
-	}
-
+// NewIndividual creates a new Individual
+func NewIndividual(tenantID string, email value.Email, firstName, lastName null.String, createdAt time.Time) *Individual {
 	return &Individual{
-		ID:        id.New(),
+		ID:        uuid.New().String(),
 		TenantID:  tenantID,
-		Email:     emailVO,
+		Email:     email,
 		FirstName: firstName,
 		LastName:  lastName,
-		CreatedAt: t,
-		UpdatedAt: t,
+		CreatedAt: createdAt,
+		UpdatedAt: createdAt,
+	}
+}
 
-		Refs: nil,
-	}, nil
+// WithID creates an Individual with a specific ID (for testing)
+func (i *Individual) WithID(id string) *Individual {
+	i.ID = id
+	return i
 }

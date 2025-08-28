@@ -54,21 +54,27 @@ func TestNewIndividual(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			individual, err := NewIndividual(
+			// Create an email VO
+			emailVO, err := value.NewEmail(tt.values.email)
+			if err != nil {
+				if tt.wantErr {
+					return // Expected error
+				}
+				t.Fatalf("Failed to create email VO: %v", err)
+			}
+
+			individual := NewIndividual(
 				tt.values.tenantID,
-				tt.values.email,
+				*emailVO,
 				tt.values.firstName,
 				tt.values.lastName,
 				tt.values.time,
 			)
 
 			if tt.wantErr {
-				require.Error(t, err)
-				require.Nil(t, individual)
-				return
+				t.Fatal("Expected error but got none")
 			}
 
-			require.NoError(t, err)
 			require.NotNil(t, individual)
 			require.NotEmpty(t, individual.ID)
 
