@@ -26,7 +26,7 @@ migrate:
 
 .PHONY: gen.mocks
 gen.mocks:
-	@go generate ./internal/domain/repository/...
+	@go generate ./...
 	$(call format)
 
 .PHONY: format
