@@ -28,7 +28,8 @@ In our implementation, we coordinate between:
    - `internal/infrastructure/usecase/input/update_car.go` - Input struct for Update operation
 
 4. **Tests**:
-   - `internal/infrastructure/usecase/car_impl_test.go` - Comprehensive tests for saga pattern implementation
+   - `internal/infrastructure/usecase/car_impl_test.go` - Unit tests for saga pattern implementation
+   - `internal/infrastructure/opensearch/repository/test/car_repository_integration_test.go` - Integration tests using dockertest
 
 ### Saga Flow
 
@@ -54,7 +55,7 @@ Here's how the saga pattern is implemented in the Register method:
 // Register registers a new car with saga pattern
 func (uc *carUsecase) Register(ctx context.Context, input input.RegisterCarInput) (*model.Car, error) {
     // ... validation code ...
-
+    
     now := time.Now()
     car := model.NewCar(input.TenantID, input.Model, now)
 
@@ -64,7 +65,8 @@ func (uc *carUsecase) Register(ctx context.Context, input input.RegisterCarInput
     }
 
     // Step 2: Save to OpenSearch (saga pattern)
-    if err := uc.opensearchRepo.Create(ctx, car); err != nil {
+    opensearchRepo := uc.newOpenSearchRepo(uc.opensearchConfig, uc.opensearchIndex)
+    if err := opensearchRepo.Create(ctx, car); err != nil {
         // Compensate: Rollback PostgreSQL insert
         _ = uc.carRepo.Delete(ctx, car.ID) // Best effort rollback
         return nil, fmt.Errorf("failed to create car in opensearch: %w", err)
@@ -76,7 +78,11 @@ func (uc *carUsecase) Register(ctx context.Context, input input.RegisterCarInput
 
 ## Testing
 
-The implementation includes comprehensive tests that verify:
+The implementation includes comprehensive tests at multiple levels:
+
+### Unit Tests
+
+Unit tests verify the saga pattern logic using mocks:
 
 - Successful saga execution
 - Proper error handling when PostgreSQL operations fail
@@ -84,12 +90,32 @@ The implementation includes comprehensive tests that verify:
 - Input validation
 
 Tests can be found in `internal/infrastructure/usecase/car_impl_test.go`, specifically:
-
 - `TestCarUsecase_Register_Success`
 - `TestCarUsecase_Register_RepositoryError`
 - `TestCarUsecase_Update_Success`
 - `TestCarUsecase_Update_GetError`
 - `TestCarUsecase_Update_DatabaseError`
+
+### Integration Tests
+
+Integration tests use dockertest to spin up ephemeral OpenSearch instances for real integration testing:
+
+- Tests all CRUD operations (Create, Get, Update, Delete)
+- Verifies actual OpenSearch functionality
+- Ensures proper error handling in real scenarios
+- Provides isolated and repeatable test environment
+
+Tests can be found in `internal/infrastructure/opensearch/repository/test/car_repository_integration_test.go`.
+
+To run integration tests:
+```bash
+go test ./internal/infrastructure/opensearch/repository/test/...
+```
+
+To run only unit tests (skip integration tests):
+```bash
+go test ./internal/infrastructure/usecase/... -short
+```
 
 ## Future Improvements
 
@@ -97,8 +123,10 @@ Tests can be found in `internal/infrastructure/usecase/car_impl_test.go`, specif
 2. **Retry Logic**: Add retry mechanisms for transient failures
 3. **Dead Letter Queue**: Implement a mechanism to handle failed compensating transactions
 4. **Monitoring**: Add metrics and monitoring for saga execution
+5. **Transaction Logging**: Implement distributed transaction logging for audit and debugging
 
 ## References
 
 - [Saga Pattern - Microsoft Docs](https://docs.microsoft.com/en-us/azure/architecture/reference-architectures/saga/saga)
 - [Saga Pattern - Microservices.io](https://microservices.io/patterns/data/saga.html)
+- [Dockertest Documentation](https://github.com/ory/dockertest)
