@@ -1,6 +1,7 @@
 # External Ports
 export DB_PORT_EXTERNAL=5433
 export REDIS_PORT_EXTERNAL=6380
+export OPENSEARCH_PORT_EXTERNAL=9201
 
 # Database Configuration
 export DB_HOST=postgres
