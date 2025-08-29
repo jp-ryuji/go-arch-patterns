@@ -1,0 +1,152 @@
+# GraphQL schema for the car rental system
+
+type Tenant {
+  id: ID!
+  code: String!
+  cars: [Car!]!
+  companies: [Company!]!
+  individuals: [Individual!]!
+  renters: [Renter!]!
+  rentals: [Rental!]!
+  options: [CarOption!]!
+}
+
+type Car {
+  id: ID!
+  model: String!
+  tenant: Tenant!
+  rentals: [Rental!]!
+}
+
+type Company {
+  id: ID!
+  name: String!
+  companySize: String
+  tenant: Tenant!
+  renters: [Renter!]!
+}
+
+type Individual {
+  id: ID!
+  email: String!
+  firstName: String
+  lastName: String
+  tenant: Tenant!
+  renters: [Renter!]!
+}
+
+type Renter {
+  id: ID!
+  tenant: Tenant!
+  rentals: [Rental!]!
+  company: Company
+  individual: Individual
+}
+
+type Rental {
+  id: ID!
+  startsAt: Time!
+  endsAt: Time!
+  tenant: Tenant!
+  car: Car!
+  renter: Renter!
+  rentalOptions: [RentalOption!]!
+}
+
+type CarOption {
+  id: ID!
+  name: String!
+  tenant: Tenant!
+  rentalOptions: [RentalOption!]!
+}
+
+type RentalOption {
+  id: ID!
+  count: Int!
+  tenant: Tenant!
+  rental: Rental!
+  option: CarOption!
+}
+
+scalar Time
+
+# Inputs for creating entities
+input CreateTenantInput {
+  code: String!
+}
+
+input CreateCarInput {
+  model: String!
+  tenantID: ID!
+}
+
+input CreateCompanyInput {
+  name: String!
+  companySize: String
+  tenantID: ID!
+}
+
+input CreateIndividualInput {
+  email: String!
+  firstName: String
+  lastName: String
+  tenantID: ID!
+}
+
+input CreateRenterInput {
+  tenantID: ID!
+  renterEntityID: ID!
+  renterEntityType: String!
+}
+
+input CreateRentalInput {
+  startsAt: Time!
+  endsAt: Time!
+  carID: ID!
+  renterID: ID!
+  tenantID: ID!
+}
+
+input CreateCarOptionInput {
+  name: String!
+  tenantID: ID!
+}
+
+input CreateRentalOptionInput {
+  count: Int!
+  rentalID: ID!
+  optionID: ID!
+  tenantID: ID!
+}
+
+# Mutations
+type Mutation {
+  createTenant(input: CreateTenantInput!): Tenant!
+  createCar(input: CreateCarInput!): Car!
+  createCompany(input: CreateCompanyInput!): Company!
+  createIndividual(input: CreateIndividualInput!): Individual!
+  createRenter(input: CreateRenterInput!): Renter!
+  createRental(input: CreateRentalInput!): Rental!
+  createCarOption(input: CreateCarOptionInput!): CarOption!
+  createRentalOption(input: CreateRentalOptionInput!): RentalOption!
+}
+
+# Queries
+type Query {
+  tenants: [Tenant!]!
+  tenant(id: ID!): Tenant
+  cars: [Car!]!
+  car(id: ID!): Car
+  companies: [Company!]!
+  company(id: ID!): Company
+  individuals: [Individual!]!
+  individual(id: ID!): Individual
+  renters: [Renter!]!
+  renter(id: ID!): Renter
+  rentals: [Rental!]!
+  rental(id: ID!): Rental
+  carOptions: [CarOption!]!
+  carOption(id: ID!): CarOption
+  rentalOptions: [RentalOption!]!
+  rentalOption(id: ID!): RentalOption
+}
