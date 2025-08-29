@@ -69,6 +69,21 @@ func (mr *MockOpenSearchCarRepositoryMockRecorder) Delete(ctx, id any) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockOpenSearchCarRepository)(nil).Delete), ctx, id)
 }
 
+// Get mocks base method.
+func (m *MockOpenSearchCarRepository) Get(ctx context.Context, id string) (*model.Car, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", ctx, id)
+	ret0, _ := ret[0].(*model.Car)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockOpenSearchCarRepositoryMockRecorder) Get(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockOpenSearchCarRepository)(nil).Get), ctx, id)
+}
+
 // Update mocks base method.
 func (m *MockOpenSearchCarRepository) Update(ctx context.Context, car *model.Car) error {
 	m.ctrl.T.Helper()

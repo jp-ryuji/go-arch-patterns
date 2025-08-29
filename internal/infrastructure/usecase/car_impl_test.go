@@ -9,16 +9,17 @@ import (
 	mock_repository "github.com/jp-ryuji/go-sample/internal/domain/repository/mock"
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/usecase"
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/usecase/input"
+	mock_usecase "github.com/jp-ryuji/go-sample/internal/infrastructure/usecase/mock"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
 
 // setupTest creates a new mock controller and car usecase for testing
-func setupTest(t *testing.T) (*gomock.Controller, *mock_repository.MockCarRepository, *mock_repository.MockOpenSearchCarRepository, usecase.CarUsecase) {
+func setupTest(t *testing.T) (*gomock.Controller, *mock_repository.MockCarRepository, *mock_usecase.MockOpenSearchCarRepository, usecase.CarUsecase) {
 	t.Helper()
 	ctrl := gomock.NewController(t)
 	mockCarRepo := mock_repository.NewMockCarRepository(ctrl)
-	mockOpenSearchRepo := mock_repository.NewMockOpenSearchCarRepository(ctrl)
+	mockOpenSearchRepo := mock_usecase.NewMockOpenSearchCarRepository(ctrl)
 	carUsecase := usecase.NewCarUsecase(mockCarRepo, mockOpenSearchRepo)
 	return ctrl, mockCarRepo, mockOpenSearchRepo, carUsecase
 }

@@ -10,14 +10,23 @@ import (
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/usecase/input"
 )
 
+// OpenSearchCarRepository interface for OpenSearch operations
+type OpenSearchCarRepository interface {
+	Create(ctx context.Context, car *model.Car) error
+	Update(ctx context.Context, car *model.Car) error
+}
+
 // carUsecase implements CarUsecase interface
 type carUsecase struct {
 	carRepo        repository.CarRepository
-	opensearchRepo repository.OpenSearchCarRepository
+	opensearchRepo OpenSearchCarRepository
 }
 
 // NewCarUsecase creates a new car usecase
-func NewCarUsecase(carRepo repository.CarRepository, opensearchRepo repository.OpenSearchCarRepository) CarUsecase {
+func NewCarUsecase(
+	carRepo repository.CarRepository,
+	opensearchRepo OpenSearchCarRepository,
+) CarUsecase {
 	return &carUsecase{
 		carRepo:        carRepo,
 		opensearchRepo: opensearchRepo,
