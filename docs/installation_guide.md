@@ -97,7 +97,7 @@ docker compose down
 You can access the PostgreSQL database using the following command:
 
 ```bash
-PGPASSWORD=$POSTGRES_PASSWORD docker exec -it go-sample-postgres-1 psql -U $POSTGRES_USERNAME -d $POSTGRES_DBNAME
+PGPASSWORD=$DB_PASSWORD docker exec -it go-sample-postgres-1 psql -U $DB_USER -d $DB_DBNAME
 ```
 
 This command uses the environment variables loaded by direnv to connect to the database.
