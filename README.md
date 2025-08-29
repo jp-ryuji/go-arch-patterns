@@ -17,9 +17,9 @@ This repository demonstrates the following software engineering concepts:
 
 This repository is intended for educational and demonstration purposes. It is not recommended for production use without significant modifications.
 
-1. **Database Schema Management**: The project uses GORM's AutoMigrate feature to manage database schema changes for convenience. Proper migration strategies should be implemented for production environments. For more details on how database schema updates are handled, see [Database Schema Updates](docs/database_schema_updates.md).
+1. **Database Schema Management**: The project uses Ent's auto migration feature to manage database schema changes for convenience. Proper migration strategies should be implemented for production environments. For more details on how database schema updates are handled, see [Database Schema Updates](docs/database_schema_updates.md).
 
-2. **Database Security**: SSL mode is disabled for database access (see [internal/infrastructure/postgres/client.go](internal/infrastructure/postgres/client.go)). This configuration is insecure and should be enabled in production environments.
+2. **Database Security**: SSL mode is disabled for database access (see [internal/infrastructure/postgres/migrate/main.go](internal/infrastructure/postgres/migrate/main.go)). This configuration is insecure and should be enabled in production environments.
 
 ## Documentation
 
@@ -31,3 +31,4 @@ Find specific documentation in the [docs/](docs/) folder:
 - [Installation Guide](docs/installation_guide.md)
 - [Go Development Guide](docs/golang.md)
 - [Database Schema Updates](docs/database_schema_updates.md)
+- [Ent ORM Setup](docs/ent.md)
