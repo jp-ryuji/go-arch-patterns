@@ -7,13 +7,14 @@ import (
 	"log"
 
 	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen"
-	_ "github.com/lib/pq"
 )
 
+// Client wraps the Ent client
 type Client struct {
 	EntClient *entgen.Client
-	DB        *sql.DB
 }
 
 func NewClient(
@@ -34,15 +35,8 @@ func NewClient(
 
 	log.Printf("Connecting to database with connection string: %s", connStr)
 
-	// Create Ent client with "postgres" dialect
-	entClient, err := entgen.Open(dialect.Postgres, connStr)
-	if err != nil {
-		log.Printf("Failed to create Ent client: %v", err)
-		panic(err)
-	}
-
-	// Get the underlying sql.DB from ent for compatibility
-	sqlDB, err := sql.Open("postgres", connStr)
+	// Create database connection with pgx driver
+	db, err := sql.Open("pgx", connStr)
 	if err != nil {
 		log.Printf("Failed to open SQL DB: %v", err)
 		panic(err)
@@ -50,15 +44,20 @@ func NewClient(
 
 	// Ping to verify connection
 	log.Printf("Pinging database...")
-	if err := sqlDB.PingContext(context.Background()); err != nil {
+	if err := db.PingContext(context.Background()); err != nil {
 		log.Printf("Failed to ping database: %v", err)
 		panic(err)
 	}
+
+	// Create Ent driver with the database connection
+	drv := entsql.OpenDB(dialect.Postgres, db)
+
+	// Create Ent client with the driver
+	entClient := entgen.NewClient(entgen.Driver(drv))
 
 	log.Printf("Successfully connected to database")
 
 	return &Client{
 		EntClient: entClient,
-		DB:        sqlDB,
 	}
 }

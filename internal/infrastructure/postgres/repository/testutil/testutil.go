@@ -87,7 +87,12 @@ func SetupTestEnvironment() error {
 
 		// Create the uuid extension
 		log.Printf("Creating uuid extension...")
-		_, err := DBClient.DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
+		// Access the underlying DB connection through the Ent client's driver
+		if sqlDrv, ok := DBClient.EntClient.Driver().(*entsql.Driver); ok {
+			_, err := sqlDrv.DB().Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
+			return err
+		}
+		return fmt.Errorf("failed to get sql driver")
 		return err
 	}); err != nil {
 		log.Printf("Failed to connect to database: %v", err)
