@@ -22,11 +22,6 @@ type Individual struct {
 	Renters []Renter `json:"renters,omitempty"`
 }
 
-// TableName specifies the table name (kept for compatibility with existing code)
-func (Individual) TableName() string {
-	return "individuals"
-}
-
 // IndividualLoadOptions specifies which associations to load
 type IndividualLoadOptions struct {
 	WithRenters bool

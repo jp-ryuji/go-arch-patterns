@@ -19,11 +19,6 @@ type Company struct {
 	Renters []Renter `json:"renters,omitempty"`
 }
 
-// TableName specifies the table name (kept for compatibility with existing code)
-func (Company) TableName() string {
-	return "companies"
-}
-
 // CompanyLoadOptions specifies which associations to load
 type CompanyLoadOptions struct {
 	WithRenters bool
