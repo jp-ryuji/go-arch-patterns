@@ -8,15 +8,15 @@ import (
 
 // Company represents the database model for Company
 type Company struct {
-	ID          string     `json:"id"`
-	TenantID    string     `json:"tenant_id"`
-	Name        string     `json:"name"`
-	CompanySize string     `json:"company_size"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-	DeletedAt   *time.Time `json:"deleted_at,omitempty"`
+	ID          string
+	TenantID    string
+	Name        string
+	CompanySize string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   *time.Time
 
-	Renters []Renter `json:"renters,omitempty"`
+	Renters []Renter
 }
 
 // CompanyLoadOptions specifies which associations to load

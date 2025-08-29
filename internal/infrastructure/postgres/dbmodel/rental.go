@@ -8,20 +8,20 @@ import (
 
 // Rental represents the database model for Rental
 type Rental struct {
-	ID        string     `json:"id"`
-	TenantID  string     `json:"tenant_id"`
-	CarID     string     `json:"car_id"`
-	RenterID  string     `json:"renter_id"`
-	StartsAt  time.Time  `json:"starts_at"`
-	EndsAt    time.Time  `json:"ends_at"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	ID        string
+	TenantID  string
+	CarID     string
+	RenterID  string
+	StartsAt  time.Time
+	EndsAt    time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
 
-	Tenant        Tenant         `json:"tenant,omitempty"`
-	Car           Car            `json:"car,omitempty"`
-	Renter        Renter         `json:"renter,omitempty"`
-	RentalOptions []RentalOption `json:"rental_options,omitempty"`
+	Tenant        Tenant
+	Car           Car
+	Renter        Renter
+	RentalOptions []RentalOption
 }
 
 // RentalLoadOptions specifies which associations to load

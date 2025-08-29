@@ -8,13 +8,13 @@ import (
 
 // Tenant represents the database model for Tenant
 type Tenant struct {
-	ID        string     `json:"id"`
-	Code      string     `json:"code"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	ID        string
+	Code      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
 
-	Cars []Car `json:"cars,omitempty"`
+	Cars []Car
 }
 
 // TenantLoadOptions specifies which associations to load

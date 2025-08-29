@@ -8,15 +8,15 @@ import (
 
 // Renter represents the database model for Renter
 type Renter struct {
-	ID               string     `json:"id"`
-	TenantID         string     `json:"tenant_id"`
-	RenterEntityID   string     `json:"renter_entity_id"`
-	RenterEntityType string     `json:"renter_entity_type"`
-	CreatedAt        time.Time  `json:"created_at"`
-	UpdatedAt        time.Time  `json:"updated_at"`
-	DeletedAt        *time.Time `json:"deleted_at,omitempty"`
+	ID               string
+	TenantID         string
+	RenterEntityID   string
+	RenterEntityType string
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	DeletedAt        *time.Time
 
-	Rentals []Rental `json:"rentals,omitempty"`
+	Rentals []Rental
 }
 
 // RenterLoadOptions specifies which associations to load

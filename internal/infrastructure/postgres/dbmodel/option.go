@@ -8,14 +8,14 @@ import (
 
 // Option represents the database model for Option
 type Option struct {
-	ID        string     `json:"id"`
-	TenantID  string     `json:"tenant_id"`
-	Name      string     `json:"name"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	ID        string
+	TenantID  string
+	Name      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
 
-	RentalOptions []RentalOption `json:"rental_options,omitempty"`
+	RentalOptions []RentalOption
 }
 
 // OptionLoadOptions specifies which associations to load
