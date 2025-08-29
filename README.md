@@ -12,6 +12,7 @@ This repository demonstrates the following software engineering concepts:
   - *Definition*: See [Email value object](internal/domain/model/value/email.go) with [tests](internal/domain/model/value/email_test.go)
   - *Usage*: See [Individual entity](internal/domain/model/individual.go) using the Email value object
 - **Polymorphic Association**: See [Renter model](internal/domain/model/renter.go) representing either Individual or Company entities
+- **Saga Pattern**: See [Saga Pattern Implementation](docs/saga_pattern.md) for data consistency across PostgreSQL and OpenSearch
 
 ## Disclaimer
 
@@ -34,3 +35,4 @@ Find specific documentation in the [docs/](docs/) folder:
 - [Go Development Guide](docs/golang.md)
 - [Database Schema Updates](docs/database_schema_updates.md)
 - [Ent ORM Setup](docs/ent.md)
+- [Saga Pattern Implementation](docs/saga_pattern.md)
