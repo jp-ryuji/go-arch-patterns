@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"log"
 
 	"entgo.io/ent/dialect"
@@ -12,31 +11,12 @@ import (
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen"
 )
 
-// Client wraps the Ent client
-type Client struct {
-	EntClient *entgen.Client
-}
-
-func NewClient(
-	host,
-	user,
-	password,
-	database string,
-	logEnable bool,
-) *Client {
-	sslmode := "disable"
-	// FIXME: Enable sslmode in production
-	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
-		user,
-		password,
-		host,
-		database,
-		sslmode)
-
-	log.Printf("Connecting to database with connection string: %s", connStr)
+// NewClient creates a new Ent client with pgx driver
+func NewClient(databaseUrl string) *entgen.Client {
+	log.Printf("Connecting to database with connection string: %s", databaseUrl)
 
 	// Create database connection with pgx driver
-	db, err := sql.Open("pgx", connStr)
+	db, err := sql.Open("pgx", databaseUrl)
 	if err != nil {
 		log.Printf("Failed to open SQL DB: %v", err)
 		panic(err)
@@ -57,7 +37,5 @@ func NewClient(
 
 	log.Printf("Successfully connected to database")
 
-	return &Client{
-		EntClient: entClient,
-	}
+	return entClient
 }

@@ -22,7 +22,7 @@ func testSetup(t *testing.T, tenantCode string) (repository.CarRepository, conte
 	// Skip this test if not running integration tests
 	testutil.SkipIfShort(t)
 
-	repo := carrepo.NewCarRepository(testutil.DBClient.EntClient)
+	repo := carrepo.NewCarRepository(testutil.DBClient)
 	ctx := context.Background()
 	tenant := testutil.CreateTestTenant(t, tenantCode)
 

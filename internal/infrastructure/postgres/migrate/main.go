@@ -2,14 +2,11 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"log"
 	"os"
 
-	"entgo.io/ent/dialect"
-	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen"
+	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres"
 )
 
 func main() {
@@ -22,20 +19,11 @@ func main() {
 	sslmode := getEnv("DB_SSLMODE", "disable")
 
 	// Create connection string
-	connStr := "postgres://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname + "?sslmode=" + sslmode
+	databaseUrl := "postgres://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname + "?sslmode=" + sslmode
 
-	// Open database connection with pgx driver
-	db, err := sql.Open("pgx", connStr)
-	if err != nil {
-		log.Fatalf("failed opening connection to postgres: %v", err)
-	}
-	defer db.Close()
-
-	// Create Ent driver with the database connection
-	drv := entsql.OpenDB(dialect.Postgres, db)
-
-	// Create Ent client with the driver
-	client := entgen.NewClient(entgen.Driver(drv))
+	// Create Ent client using our NewClient function
+	client := postgres.NewClient(databaseUrl)
+	defer client.Close()
 
 	// Run the auto migration tool.
 	if err := client.Schema.Create(context.Background()); err != nil {

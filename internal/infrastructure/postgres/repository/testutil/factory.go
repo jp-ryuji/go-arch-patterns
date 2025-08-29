@@ -18,7 +18,7 @@ func CreateTestTenant(t *testing.T, code string) *model.Tenant {
 	tenant := factory.NewTenantWithCode(code)
 
 	// Create tenant in database using Ent
-	tenantDB, err := DBClient.EntClient.Tenant.
+	tenantDB, err := DBClient.Tenant.
 		Create().
 		SetID(tenant.ID).
 		SetCode(tenant.Code).
@@ -40,7 +40,7 @@ func CreateRandomTestTenant(t *testing.T) *model.Tenant {
 	tenant := factory.NewTenant()
 
 	// Create tenant in database using Ent
-	tenantDB, err := DBClient.EntClient.Tenant.
+	tenantDB, err := DBClient.Tenant.
 		Create().
 		SetID(tenant.ID).
 		SetCode(tenant.Code).
