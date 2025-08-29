@@ -14,12 +14,13 @@ import (
 )
 
 // setupTest creates a new mock controller and car usecase for testing
-func setupTest(t *testing.T) (*gomock.Controller, *mock_repository.MockCarRepository, usecase.CarUsecase) {
+func setupTest(t *testing.T) (*gomock.Controller, *mock_repository.MockCarRepository, *mock_repository.MockOpenSearchCarRepository, usecase.CarUsecase) {
 	t.Helper()
 	ctrl := gomock.NewController(t)
 	mockCarRepo := mock_repository.NewMockCarRepository(ctrl)
-	carUsecase := usecase.NewCarUsecase(mockCarRepo)
-	return ctrl, mockCarRepo, carUsecase
+	mockOpenSearchRepo := mock_repository.NewMockOpenSearchCarRepository(ctrl)
+	carUsecase := usecase.NewCarUsecase(mockCarRepo, mockOpenSearchRepo)
+	return ctrl, mockCarRepo, mockOpenSearchRepo, carUsecase
 }
 
 // TestCarUsecase_Register_Success tests the successful registration of a car
@@ -27,7 +28,7 @@ func TestCarUsecase_Register_Success(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, mockOpensearchRepo, carUsecase := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
@@ -54,6 +55,9 @@ func TestCarUsecase_Register_Success(t *testing.T) {
 		},
 	)
 
+	// Set up expectations for OpenSearch
+	mockOpensearchRepo.EXPECT().Create(ctx, gomock.Any()).Return(nil)
+
 	// Execute - Register a new car using the usecase
 	registeredCar, err := carUsecase.Register(ctx, registerInput)
 	assert.NoError(t, err)
@@ -75,7 +79,7 @@ func TestCarUsecase_Register_RepositoryError(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, carUsecase := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
@@ -92,7 +96,7 @@ func TestCarUsecase_Register_RepositoryError(t *testing.T) {
 	// Execute - Try to register a car when repository fails
 	registeredCar, err := carUsecase.Register(ctx, registerInput)
 	assert.Error(t, err)
-	assert.Equal(t, expectedError, err)
+	assert.Contains(t, err.Error(), expectedError.Error())
 	assert.Nil(t, registeredCar)
 }
 
@@ -101,7 +105,7 @@ func TestCarUsecase_GetByID_Success(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, carUsecase := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
@@ -134,7 +138,7 @@ func TestCarUsecase_GetByID_NotFound(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, carUsecase := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
@@ -160,7 +164,7 @@ func TestCarUsecase_GetByIDWithTenant_Success(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, carUsecase := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
@@ -201,7 +205,7 @@ func TestCarUsecase_GetByIDWithTenant_NotFound(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, carUsecase := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
@@ -258,7 +262,7 @@ func TestCarUsecase_Register_Validation(t *testing.T) {
 			t.Parallel()
 
 			// Setup
-			ctrl, _, carUsecase := setupTest(t)
+			ctrl, _, _, carUsecase := setupTest(t)
 			defer ctrl.Finish()
 
 			// Test data
@@ -296,7 +300,7 @@ func TestCarUsecase_GetByID_Validation(t *testing.T) {
 			t.Parallel()
 
 			// Setup
-			ctrl, _, carUsecase := setupTest(t)
+			ctrl, _, _, carUsecase := setupTest(t)
 			defer ctrl.Finish()
 
 			// Test data
@@ -311,4 +315,173 @@ func TestCarUsecase_GetByID_Validation(t *testing.T) {
 			assert.Nil(t, retrievedCar)
 		})
 	}
+}
+
+// TestCarUsecase_Update_Success tests the successful update of a car
+func TestCarUsecase_Update_Success(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	ctrl, mockCarRepo, mockOpensearchRepo, carUsecase := setupTest(t)
+	defer ctrl.Finish()
+
+	// Test data
+	ctx := context.Background()
+	updateInput := input.UpdateCarInput{
+		ID:       "car-123",
+		TenantID: "tenant-456",
+		Model:    "Honda Civic",
+	}
+
+	// Create existing car
+	now := time.Now()
+	existingCar := model.NewCar("tenant-123", "Toyota Prius", now)
+	existingCar.ID = updateInput.ID
+
+	// Set up expectations for getting the existing car
+	mockCarRepo.EXPECT().GetByID(ctx, updateInput.ID).Return(existingCar, nil)
+
+	// Set up expectations for updating the car in database
+	mockCarRepo.EXPECT().Update(ctx, gomock.Any()).DoAndReturn(
+		func(ctx context.Context, car *model.Car) error {
+			// Verify that the car has the updated properties
+			assert.Equal(t, updateInput.TenantID, car.TenantID)
+			assert.Equal(t, updateInput.Model, car.Model)
+			assert.Equal(t, updateInput.ID, car.ID)
+			assert.True(t, car.UpdatedAt.After(car.CreatedAt))
+			return nil
+		},
+	)
+
+	// Set up expectations for updating in OpenSearch
+	mockOpensearchRepo.EXPECT().Update(ctx, gomock.Any()).Return(nil)
+
+	// Execute - Update the car using the usecase
+	updatedCar, err := carUsecase.Update(ctx, updateInput)
+	assert.NoError(t, err)
+	assert.NotNil(t, updatedCar)
+
+	// Verify the returned car
+	assert.Equal(t, updateInput.ID, updatedCar.ID)
+	assert.Equal(t, updateInput.TenantID, updatedCar.TenantID)
+	assert.Equal(t, updateInput.Model, updatedCar.Model)
+	assert.True(t, updatedCar.UpdatedAt.After(updatedCar.CreatedAt))
+}
+
+// TestCarUsecase_Update_Validation tests validation failures for Update
+func TestCarUsecase_Update_Validation(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		input   input.UpdateCarInput
+		wantErr string
+	}{
+		"empty ID": {
+			input: input.UpdateCarInput{
+				ID:       "", // Missing required field
+				TenantID: "tenant-123",
+				Model:    "Toyota Prius",
+			},
+			wantErr: "validation failed",
+		},
+		"empty tenant ID": {
+			input: input.UpdateCarInput{
+				ID:       "car-123",
+				TenantID: "", // Missing required field
+				Model:    "Toyota Prius",
+			},
+			wantErr: "validation failed",
+		},
+		"empty model": {
+			input: input.UpdateCarInput{
+				ID:       "car-123",
+				TenantID: "tenant-123",
+				Model:    "", // Missing required field
+			},
+			wantErr: "validation failed",
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			ctrl, _, _, carUsecase := setupTest(t)
+			defer ctrl.Finish()
+
+			// Test data
+			ctx := context.Background()
+
+			// Execute - Try to update a car with invalid input
+			updatedCar, err := carUsecase.Update(ctx, tt.input)
+
+			// Assert
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), tt.wantErr)
+			assert.Nil(t, updatedCar)
+		})
+	}
+}
+
+// TestCarUsecase_Update_GetError tests update when getting the existing car fails
+func TestCarUsecase_Update_GetError(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	ctrl, mockCarRepo, _, carUsecase := setupTest(t)
+	defer ctrl.Finish()
+
+	// Test data
+	ctx := context.Background()
+	updateInput := input.UpdateCarInput{
+		ID:       "non-existent-car",
+		TenantID: "tenant-123",
+		Model:    "Toyota Prius",
+	}
+
+	// Set up expectations for repository error when getting car
+	expectedError := assert.AnError
+	mockCarRepo.EXPECT().GetByID(ctx, updateInput.ID).Return(nil, expectedError)
+
+	// Execute - Try to update a non-existent car
+	updatedCar, err := carUsecase.Update(ctx, updateInput)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), expectedError.Error())
+	assert.Nil(t, updatedCar)
+}
+
+// TestCarUsecase_Update_DatabaseError tests update when database update fails
+func TestCarUsecase_Update_DatabaseError(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	ctrl, mockCarRepo, _, carUsecase := setupTest(t)
+	defer ctrl.Finish()
+
+	// Test data
+	ctx := context.Background()
+	updateInput := input.UpdateCarInput{
+		ID:       "car-123",
+		TenantID: "tenant-456",
+		Model:    "Honda Civic",
+	}
+
+	// Create existing car
+	now := time.Now()
+	existingCar := model.NewCar("tenant-123", "Toyota Prius", now)
+	existingCar.ID = updateInput.ID
+
+	// Set up expectations for getting the existing car
+	mockCarRepo.EXPECT().GetByID(ctx, updateInput.ID).Return(existingCar, nil)
+
+	// Set up expectations for repository error when updating car
+	expectedError := assert.AnError
+	mockCarRepo.EXPECT().Update(ctx, gomock.Any()).Return(expectedError)
+
+	// Execute - Try to update a car when database update fails
+	updatedCar, err := carUsecase.Update(ctx, updateInput)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), expectedError.Error())
+	assert.Nil(t, updatedCar)
 }
