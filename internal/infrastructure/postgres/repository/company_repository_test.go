@@ -22,7 +22,7 @@ func testCompanySetup(t *testing.T, tenantCode string) (repository.CompanyReposi
 	// Skip this test if not running integration tests
 	testutil.SkipIfShort(t)
 
-	repo := companyrepo.NewCompanyRepository(testutil.DBClient.EntClient)
+	repo := companyrepo.NewCompanyRepository(testutil.DBClient)
 	ctx := context.Background()
 	tenant := testutil.CreateTestTenant(t, tenantCode)
 

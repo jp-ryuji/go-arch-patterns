@@ -10,6 +10,11 @@ export DB_PASSWORD=password
 export DB_NAME=mydb
 export DB_SSLMODE=disable
 
+# Database Connection Pool Configuration
+export DB_MAX_OPEN_CONNS=25
+export DB_MAX_IDLE_CONNS=25
+export DB_CONN_MAX_LIFETIME=300s
+
 # Redis Configuration
 export REDIS_HOST=redis
 export REDIS_PORT=6379

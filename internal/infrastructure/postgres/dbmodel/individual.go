@@ -10,21 +10,16 @@ import (
 
 // Individual represents the database model for Individual
 type Individual struct {
-	ID        string     `json:"id"`
-	TenantID  string     `json:"tenant_id"`
-	Email     string     `json:"email"`
-	FirstName string     `json:"first_name"`
-	LastName  string     `json:"last_name"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	ID        string
+	TenantID  string
+	Email     string
+	FirstName string
+	LastName  string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
 
-	Renters []Renter `json:"renters,omitempty"`
-}
-
-// TableName specifies the table name (kept for compatibility with existing code)
-func (Individual) TableName() string {
-	return "individuals"
+	Renters []Renter
 }
 
 // IndividualLoadOptions specifies which associations to load

@@ -8,20 +8,15 @@ import (
 
 // Car represents the database model for Car
 type Car struct {
-	ID        string     `json:"id"`
-	TenantID  string     `json:"tenant_id"`
-	Model     string     `json:"model"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	ID        string
+	TenantID  string
+	Model     string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
 
-	Tenant  Tenant   `json:"tenant,omitempty"`
-	Rentals []Rental `json:"rentals,omitempty"`
-}
-
-// TableName specifies the table name (kept for compatibility with existing code)
-func (Car) TableName() string {
-	return "cars"
+	Tenant  Tenant
+	Rentals []Rental
 }
 
 // CarLoadOptions specifies which associations to load

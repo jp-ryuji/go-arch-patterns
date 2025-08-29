@@ -11,12 +11,13 @@ import (
 	"time"
 
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres"
+	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 )
 
 var (
-	DBClient *postgres.Client     // shared database client for all repository tests
+	DBClient *entgen.Client       // shared database client for all repository tests
 	Pool     *dockertest.Pool     // shared Docker test pool
 	Resource *dockertest.Resource // shared Docker resource
 )
@@ -77,18 +78,17 @@ func SetupTestEnvironment() error {
 		log.Printf("Attempting to connect to database at 127.0.0.1:%s", hostPort)
 
 		// Try with IPv4 localhost explicitly
-		DBClient = postgres.NewClient(
-			fmt.Sprintf("127.0.0.1:%s", hostPort),
+		databaseUrl := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
 			"user",
 			"secret",
+			fmt.Sprintf("127.0.0.1:%s", hostPort),
 			"dbname",
-			false,
-		)
+			"disable")
 
-		// Create the uuid extension
-		log.Printf("Creating uuid extension...")
-		_, err := DBClient.DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
-		return err
+		DBClient = postgres.NewClient(databaseUrl)
+
+		// Just return nil since we don't need to create the uuid extension here
+		return nil
 	}); err != nil {
 		log.Printf("Failed to connect to database: %v", err)
 		return fmt.Errorf("could not connect to docker: %w", err)
@@ -96,7 +96,7 @@ func SetupTestEnvironment() error {
 
 	// Run database migrations using Ent
 	log.Printf("Running database migrations...")
-	if err := DBClient.EntClient.Schema.Create(context.Background()); err != nil {
+	if err := DBClient.Schema.Create(context.Background()); err != nil {
 		log.Printf("Failed to run database migrations: %v", err)
 		return fmt.Errorf("could not migrate: %w", err)
 	}

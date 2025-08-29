@@ -21,6 +21,8 @@ This repository is intended for educational and demonstration purposes. It is no
 
 2. **Database Security**: SSL mode is disabled for database access (see [internal/infrastructure/postgres/migrate/main.go](internal/infrastructure/postgres/migrate/main.go)). This configuration is insecure and should be enabled in production environments.
 
+3. **Configuration Management**: Environment variable handling is implemented in a basic way in [internal/infrastructure/postgres/client.go](internal/infrastructure/postgres/client.go). For production use, consider implementing a more robust configuration management solution such as [Viper](https://github.com/spf13/viper) or similar libraries to handle configuration files, defaults, and validation in a more structured manner.
+
 ## Documentation
 
 Find specific documentation in the [docs/](docs/) folder:

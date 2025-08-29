@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen"
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres"
 )
 
 func main() {
@@ -19,13 +19,10 @@ func main() {
 	sslmode := getEnv("DB_SSLMODE", "disable")
 
 	// Create connection string
-	connStr := "postgres://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname + "?sslmode=" + sslmode
+	databaseUrl := "postgres://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname + "?sslmode=" + sslmode
 
-	// Open database connection
-	client, err := entgen.Open("postgres", connStr)
-	if err != nil {
-		log.Fatalf("failed opening connection to postgres: %v", err)
-	}
+	// Create Ent client using our NewClient function
+	client := postgres.NewClient(databaseUrl)
 	defer client.Close()
 
 	// Run the auto migration tool.
