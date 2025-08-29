@@ -31,3 +31,4 @@ Find specific documentation in the [docs/](docs/) folder:
 - [Installation Guide](docs/installation_guide.md)
 - [Go Development Guide](docs/golang.md)
 - [Database Schema Updates](docs/database_schema_updates.md)
+- [Ent and Gqlgen Setup and Usage](docs/ent_gqlgen.md)
