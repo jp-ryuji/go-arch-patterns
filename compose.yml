@@ -27,6 +27,29 @@ services:
       timeout: 3s
       retries: 5
 
+  opensearch:
+    build:
+      context: .
+      dockerfile: docker/opensearch/Dockerfile
+    ports:
+      - '${OPENSEARCH_PORT_EXTERNAL:-9200}:9200'
+    environment:
+      - cluster.name=docker-cluster
+      - node.name=os-node
+      - cluster.initial_master_nodes=os-node
+      - bootstrap.memory_lock=true
+      - http.host=0.0.0.0
+      - transport.host=127.0.0.1
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=EX2R3L(,M-tR"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+
 volumes:
   postgres_data:
   redis_data:
+  opensearch_data:
