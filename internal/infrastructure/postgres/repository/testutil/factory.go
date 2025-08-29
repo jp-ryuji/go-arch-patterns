@@ -3,11 +3,11 @@
 package testutil
 
 import (
+	"context"
 	"testing"
 
 	"github.com/jp-ryuji/go-sample/internal/domain/model"
 	"github.com/jp-ryuji/go-sample/internal/domain/model/factory"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/dbmodel"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,12 +17,20 @@ func CreateTestTenant(t *testing.T, code string) *model.Tenant {
 
 	tenant := factory.NewTenantWithCode(code)
 
-	// Convert to DB model and create in database
-	tenantDB := dbmodel.FromDomainTenant(tenant)
-	err := DBClient.DB.Model(&dbmodel.Tenant{}).Create(tenantDB).Error
+	// Create tenant in database using Ent
+	tenantDB, err := DBClient.EntClient.Tenant.
+		Create().
+		SetID(tenant.ID).
+		SetCode(tenant.Code).
+		Save(context.Background())
 
 	require.NoError(t, err)
-	return tenant
+
+	// Convert back to domain model
+	return &model.Tenant{
+		ID:   tenantDB.ID,
+		Code: tenantDB.Code,
+	}
 }
 
 // CreateRandomTestTenant creates a tenant with a random code for testing and saves it to the database.
@@ -31,10 +39,18 @@ func CreateRandomTestTenant(t *testing.T) *model.Tenant {
 
 	tenant := factory.NewTenant()
 
-	// Convert to DB model and create in database
-	tenantDB := dbmodel.FromDomainTenant(tenant)
-	err := DBClient.DB.Model(&dbmodel.Tenant{}).Create(tenantDB).Error
+	// Create tenant in database using Ent
+	tenantDB, err := DBClient.EntClient.Tenant.
+		Create().
+		SetID(tenant.ID).
+		SetCode(tenant.Code).
+		Save(context.Background())
 
 	require.NoError(t, err)
-	return tenant
+
+	// Convert back to domain model
+	return &model.Tenant{
+		ID:   tenantDB.ID,
+		Code: tenantDB.Code,
+	}
 }

@@ -4,25 +4,24 @@ import (
 	"time"
 
 	"github.com/jp-ryuji/go-sample/internal/domain/model"
-	"gorm.io/gorm"
 )
 
-// RentalOption represents the GORM model for RentalOption
+// RentalOption represents the database model for RentalOption
 type RentalOption struct {
-	ID        string `gorm:"primaryKey;type:varchar(36);not null"`
-	TenantID  string `gorm:"type:varchar(36);not null;index"`
-	RentalID  string `gorm:"type:varchar(36);not null;uniqueIndex:idx_rental_option_unique"`
-	OptionID  string `gorm:"type:varchar(36);not null;uniqueIndex:idx_rental_option_unique"`
-	Count     int    `gorm:"type:integer;not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	ID        string     `json:"id"`
+	TenantID  string     `json:"tenant_id"`
+	RentalID  string     `json:"rental_id"`
+	OptionID  string     `json:"option_id"`
+	Count     int        `json:"count"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	Rental Rental `gorm:"foreignKey:RentalID"`
-	Option Option `gorm:"foreignKey:OptionID"`
+	Rental Rental `json:"rental,omitempty"`
+	Option Option `json:"option,omitempty"`
 }
 
-// TableName specifies the table name for GORM
+// TableName specifies the table name (kept for compatibility with existing code)
 func (RentalOption) TableName() string {
 	return "rental_options"
 }

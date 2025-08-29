@@ -4,28 +4,27 @@ import (
 	"time"
 
 	"github.com/jp-ryuji/go-sample/internal/domain/model"
-	"gorm.io/gorm"
 )
 
-// Rental represents the GORM model for Rental
+// Rental represents the database model for Rental
 type Rental struct {
-	ID        string `gorm:"primaryKey;type:varchar(36);not null"`
-	TenantID  string `gorm:"type:varchar(36);not null;index"`
-	CarID     string `gorm:"type:varchar(36);not null;index"`
-	RenterID  string `gorm:"type:varchar(36);not null;index"`
-	StartsAt  time.Time
-	EndsAt    time.Time
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	ID        string     `json:"id"`
+	TenantID  string     `json:"tenant_id"`
+	CarID     string     `json:"car_id"`
+	RenterID  string     `json:"renter_id"`
+	StartsAt  time.Time  `json:"starts_at"`
+	EndsAt    time.Time  `json:"ends_at"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	Tenant        Tenant         `gorm:"foreignKey:TenantID"`
-	Car           Car            `gorm:"foreignKey:CarID"`
-	Renter        Renter         `gorm:"foreignKey:RenterID"`
-	RentalOptions []RentalOption `gorm:"foreignKey:RentalID"`
+	Tenant        Tenant         `json:"tenant,omitempty"`
+	Car           Car            `json:"car,omitempty"`
+	Renter        Renter         `json:"renter,omitempty"`
+	RentalOptions []RentalOption `json:"rental_options,omitempty"`
 }
 
-// TableName specifies the table name for GORM
+// TableName specifies the table name (kept for compatibility with existing code)
 func (Rental) TableName() string {
 	return "rentals"
 }

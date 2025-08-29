@@ -4,24 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
+	"log"
 
-	_ "github.com/jackc/pgx/v5/stdlib" // pgx driver for database/sql
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/query"
-)
-
-const (
-	maxOpenConns = 25
-	maxIdleConns = 25
-	maxLifeTime  = 300 * time.Second // max connection * seconds
+	"entgo.io/ent/dialect"
+	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen"
+	_ "github.com/lib/pq"
 )
 
 type Client struct {
-	DB *gorm.DB
+	EntClient *entgen.Client
+	DB        *sql.DB
 }
 
 func NewClient(
@@ -40,44 +32,33 @@ func NewClient(
 		database,
 		sslmode)
 
-	sqlDB, err := sql.Open("pgx", connStr)
+	log.Printf("Connecting to database with connection string: %s", connStr)
+
+	// Create Ent client with "postgres" dialect
+	entClient, err := entgen.Open(dialect.Postgres, connStr)
 	if err != nil {
+		log.Printf("Failed to create Ent client: %v", err)
 		panic(err)
 	}
 
-	// Configure connection pool
-	sqlDB.SetMaxOpenConns(maxOpenConns)
-	sqlDB.SetMaxIdleConns(maxIdleConns)
-	sqlDB.SetConnMaxLifetime(maxLifeTime)
+	// Get the underlying sql.DB from ent for compatibility
+	sqlDB, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Printf("Failed to open SQL DB: %v", err)
+		panic(err)
+	}
 
 	// Ping to verify connection
+	log.Printf("Pinging database...")
 	if err := sqlDB.PingContext(context.Background()); err != nil {
+		log.Printf("Failed to ping database: %v", err)
 		panic(err)
 	}
 
-	// Configure GORM logger
-	gormLogger := logger.Default.LogMode(logger.Silent)
-	if logEnable {
-		gormLogger = logger.Default.LogMode(logger.Info)
-	}
-
-	// Create GORM DB instance
-	gormDB, err := gorm.Open(postgres.New(postgres.Config{
-		Conn: sqlDB,
-	}), &gorm.Config{
-		Logger: gormLogger,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	// Initialize the query package with the database connection
-	// This makes the type-safe generated code globally accessible through
-	// query.Car, query.Company, etc. This is a convenience pattern that
-	// allows direct access to type-safe queries from anywhere in the application.
-	query.SetDefault(gormDB)
+	log.Printf("Successfully connected to database")
 
 	return &Client{
-		DB: gormDB,
+		EntClient: entClient,
+		DB:        sqlDB,
 	}
 }

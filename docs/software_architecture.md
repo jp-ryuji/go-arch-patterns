@@ -37,7 +37,7 @@ Structure:
 │   │   ├── postgres       # PostgreSQL adapter implementation
 │   │   │   ├── dbmodel    # (ORM specific models with database annotations and relationships)
 │   │   │   ├── repository # (Implement the repository interfaces using ORM)
-│   │   │   └── query      # (Generated type-safe query code using GORM Gen)
+│   │   │   └── entgen     # (Generated type-safe query code using Ent)
 │   │   ├── redis          # Redis adapter implementation
 │   │   └── s3             # S3 adapter implementation
 │   ├── pkg                # library
@@ -58,7 +58,6 @@ Note: For most web applications, especially those with clear architectural bound
 
 ## Libraries Used
 
-- [GORM](https://gorm.io/) for ORM and database operations
-- [GORM Gen](https://gorm.io/gen/index.html) for type-safe database queries
+- [Ent](https://entgo.io/) for ORM and database operations
 - [Dockertest](https://github.com/ory/dockertest) for booting up ephermal docker images for integration tests using Postgres or such
 - [gomock](https://github.com/uber-go/mock) for mocking dependencies in tests
