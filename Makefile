@@ -35,7 +35,7 @@ format:
 
 define format
 	@go fmt ./...
-	@go tool goimports -w ./
+	@go tool goimports -w .
 	@go tool gofumpt -l -w .
 	@go mod tidy
 endef
