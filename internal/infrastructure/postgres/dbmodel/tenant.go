@@ -4,21 +4,20 @@ import (
 	"time"
 
 	"github.com/jp-ryuji/go-sample/internal/domain/model"
-	"gorm.io/gorm"
 )
 
-// Tenant represents the GORM model for Tenant
+// Tenant represents the database model for Tenant
 type Tenant struct {
-	ID        string `gorm:"primaryKey;type:varchar(36);not null"`
-	Code      string `gorm:"type:varchar(50);not null;uniqueIndex"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	ID        string     `json:"id"`
+	Code      string     `json:"code"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	Cars []Car `gorm:"foreignKey:TenantID;references:ID"`
+	Cars []Car `json:"cars,omitempty"`
 }
 
-// TableName specifies the table name for GORM
+// TableName specifies the table name (kept for compatibility with existing code)
 func (Tenant) TableName() string {
 	return "tenants"
 }

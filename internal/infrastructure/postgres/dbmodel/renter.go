@@ -4,23 +4,22 @@ import (
 	"time"
 
 	"github.com/jp-ryuji/go-sample/internal/domain/model"
-	"gorm.io/gorm"
 )
 
-// Renter represents the GORM model for Renter
+// Renter represents the database model for Renter
 type Renter struct {
-	ID               string `gorm:"primaryKey;type:varchar(36);not null"`
-	TenantID         string `gorm:"type:varchar(36);not null;index"`
-	RenterEntityID   string `gorm:"type:varchar(36);not null"`
-	RenterEntityType string `gorm:"type:varchar(20);not null"`
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
-	DeletedAt        gorm.DeletedAt `gorm:"index"`
+	ID               string     `json:"id"`
+	TenantID         string     `json:"tenant_id"`
+	RenterEntityID   string     `json:"renter_entity_id"`
+	RenterEntityType string     `json:"renter_entity_type"`
+	CreatedAt        time.Time  `json:"created_at"`
+	UpdatedAt        time.Time  `json:"updated_at"`
+	DeletedAt        *time.Time `json:"deleted_at,omitempty"`
 
-	Rentals []Rental `gorm:"foreignKey:RenterID"`
+	Rentals []Rental `json:"rentals,omitempty"`
 }
 
-// TableName specifies the table name for GORM
+// TableName specifies the table name (kept for compatibility with existing code)
 func (Renter) TableName() string {
 	return "renters"
 }
@@ -57,14 +56,12 @@ func (r *Renter) ToDomain(opts ...RenterLoadOptions) *model.Renter {
 
 		// Load company if requested and available
 		// Note: This requires the Company association to be preloaded
-		// We're not directly accessing a Company field here because GORM doesn't support
-		// polymorphic associations in the same way. This would need to be handled at a higher level.
+		// Polymorphic associations require special handling at a higher level.
 		_ = option.WithCompany && r.RenterEntityType == "company" && r.RenterEntityID != ""
 
 		// Load individual if requested and available
 		// Note: This requires the Individual association to be preloaded
-		// We're not directly accessing an Individual field here because GORM doesn't support
-		// polymorphic associations in the same way. This would need to be handled at a higher level.
+		// Polymorphic associations require special handling at a higher level.
 		_ = option.WithIndividual && r.RenterEntityType == "individual" && r.RenterEntityID != ""
 
 		// Load rentals if requested and available

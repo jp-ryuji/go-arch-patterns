@@ -4,13 +4,13 @@
 package testutil
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"testing"
 	"time"
 
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/dbmodel"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 )
@@ -21,35 +21,28 @@ var (
 	Resource *dockertest.Resource // shared Docker resource
 )
 
-// allModels is a slice of all GORM models used in the application
-// When adding new models, they should be added to this slice
-var allModels = []interface{}{
-	&dbmodel.Car{},
-	&dbmodel.Company{},
-	&dbmodel.Individual{},
-	&dbmodel.Option{},
-	&dbmodel.Rental{},
-	&dbmodel.RentalOption{},
-	&dbmodel.Renter{},
-	&dbmodel.Tenant{},
-}
-
 // SetupTestEnvironment initializes the shared test environment
 func SetupTestEnvironment() error {
+	log.Printf("Setting up test environment...")
+
 	// Create a Docker pool
 	var err error
 	Pool, err = dockertest.NewPool("")
 	if err != nil {
+		log.Printf("Failed to create Docker pool: %v", err)
 		return fmt.Errorf("could not construct pool: %w", err)
 	}
 
 	// Ping the Docker daemon to ensure it's running
+	log.Printf("Pinging Docker daemon...")
 	err = Pool.Client.Ping()
 	if err != nil {
+		log.Printf("Failed to ping Docker daemon: %v", err)
 		return fmt.Errorf("could not connect to Docker: %w", err)
 	}
 
 	// Start a PostgreSQL container
+	log.Printf("Starting PostgreSQL container...")
 	Resource, err = Pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "postgres",
 		Tag:        "17",
@@ -66,6 +59,7 @@ func SetupTestEnvironment() error {
 		}
 	})
 	if err != nil {
+		log.Printf("Failed to start PostgreSQL container: %v", err)
 		return fmt.Errorf("could not start resource: %w", err)
 	}
 
@@ -73,9 +67,11 @@ func SetupTestEnvironment() error {
 	Pool.MaxWait = 120 * time.Second
 
 	// Wait a bit for the container to start
+	log.Printf("Waiting for container to start...")
 	time.Sleep(5 * time.Second)
 
 	// Retry connecting to the database until it's ready
+	log.Printf("Retrying database connection...")
 	if err = Pool.Retry(func() error {
 		hostPort := Resource.GetPort("5432/tcp")
 		log.Printf("Attempting to connect to database at 127.0.0.1:%s", hostPort)
@@ -88,44 +84,41 @@ func SetupTestEnvironment() error {
 			"dbname",
 			false,
 		)
-		return DBClient.DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error
+
+		// Create the uuid extension
+		log.Printf("Creating uuid extension...")
+		_, err := DBClient.DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
+		return err
 	}); err != nil {
+		log.Printf("Failed to connect to database: %v", err)
 		return fmt.Errorf("could not connect to docker: %w", err)
 	}
 
-	// Run database migrations using the actual GORM models
-	if err := DBClient.DB.AutoMigrate(allModels...); err != nil {
+	// Run database migrations using Ent
+	log.Printf("Running database migrations...")
+	if err := DBClient.EntClient.Schema.Create(context.Background()); err != nil {
+		log.Printf("Failed to run database migrations: %v", err)
 		return fmt.Errorf("could not migrate: %w", err)
 	}
 
-	// Drop foreign key constraints on renters table that were automatically created by GORM
-	// These constraints are problematic for polymorphic relationships
-	if err := DBClient.DB.Exec("ALTER TABLE renters DROP CONSTRAINT IF EXISTS fk_companies_renters").Error; err != nil {
-		log.Printf("Warning: failed to drop fk_companies_renters: %v", err)
-	}
-	if err := DBClient.DB.Exec("ALTER TABLE renters DROP CONSTRAINT IF EXISTS fk_individuals_renters").Error; err != nil {
-		log.Printf("Warning: failed to drop fk_individuals_renters: %v", err)
-	}
-
-	// Drop duplicate foreign key constraints
-	if err := DBClient.DB.Exec("ALTER TABLE rentals DROP CONSTRAINT IF EXISTS fk_renters_rentals").Error; err != nil {
-		log.Printf("Warning: failed to drop fk_renters_rentals: %v", err)
-	}
-	if err := DBClient.DB.Exec("ALTER TABLE cars DROP CONSTRAINT IF EXISTS fk_tenants_cars").Error; err != nil {
-		log.Printf("Warning: failed to drop fk_tenants_cars: %v", err)
-	}
-	if err := DBClient.DB.Exec("ALTER TABLE rentals DROP CONSTRAINT IF EXISTS fk_rentals_car").Error; err != nil {
-		log.Printf("Warning: failed to drop fk_rentals_car: %v", err)
-	}
-
+	log.Printf("Test environment setup completed successfully")
 	return nil
 }
 
 // TeardownTestEnvironment cleans up the shared test environment
 func TeardownTestEnvironment() error {
-	if err := Pool.Purge(Resource); err != nil {
-		return fmt.Errorf("could not purge resource: %w", err)
+	log.Printf("Tearing down test environment...")
+	if Pool != nil && Resource != nil {
+		log.Printf("Purging Docker resource...")
+		if err := Pool.Purge(Resource); err != nil {
+			log.Printf("Warning: could not purge resource: %v", err)
+			// Don't return the error, just log it
+		}
+		log.Printf("Successfully purged Docker resource")
+	} else {
+		log.Printf("Pool or Resource is nil, skipping purge")
 	}
+	log.Printf("Finished tearing down test environment")
 	return nil
 }
 

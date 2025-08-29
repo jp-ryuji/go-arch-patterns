@@ -4,22 +4,21 @@ import (
 	"time"
 
 	"github.com/jp-ryuji/go-sample/internal/domain/model"
-	"gorm.io/gorm"
 )
 
-// Option represents the GORM model for Option
+// Option represents the database model for Option
 type Option struct {
-	ID        string `gorm:"primaryKey;type:varchar(36);not null"`
-	TenantID  string `gorm:"type:varchar(36);not null;index"`
-	Name      string `gorm:"type:varchar(255);not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	ID        string     `json:"id"`
+	TenantID  string     `json:"tenant_id"`
+	Name      string     `json:"name"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	RentalOptions []RentalOption `gorm:"foreignKey:OptionID"`
+	RentalOptions []RentalOption `json:"rental_options,omitempty"`
 }
 
-// TableName specifies the table name for GORM
+// TableName specifies the table name (kept for compatibility with existing code)
 func (Option) TableName() string {
 	return "options"
 }

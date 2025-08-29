@@ -6,24 +6,23 @@ import (
 	"github.com/aarondl/null/v9"
 	"github.com/jp-ryuji/go-sample/internal/domain/model"
 	"github.com/jp-ryuji/go-sample/internal/domain/model/value"
-	"gorm.io/gorm"
 )
 
-// Individual represents the GORM model for Individual
+// Individual represents the database model for Individual
 type Individual struct {
-	ID        string `gorm:"primaryKey;type:varchar(36);not null"`
-	TenantID  string `gorm:"type:varchar(36);not null;uniqueIndex:idx_individual_tenant_email"`
-	Email     string `gorm:"type:varchar(255);not null;uniqueIndex:idx_individual_tenant_email"`
-	FirstName string `gorm:"type:varchar(100)"` // Empty string represents NULL in domain model
-	LastName  string `gorm:"type:varchar(100)"` // Empty string represents NULL in domain model
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	ID        string     `json:"id"`
+	TenantID  string     `json:"tenant_id"`
+	Email     string     `json:"email"`
+	FirstName string     `json:"first_name"`
+	LastName  string     `json:"last_name"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	Renters []Renter `gorm:"foreignKey:RenterEntityID"`
+	Renters []Renter `json:"renters,omitempty"`
 }
 
-// TableName specifies the table name for GORM
+// TableName specifies the table name (kept for compatibility with existing code)
 func (Individual) TableName() string {
 	return "individuals"
 }
