@@ -1538,23 +1538,22 @@ func (m *CarOptionMutation) ResetEdge(name string) error {
 // CompanyMutation represents an operation that mutates the Company nodes in the graph.
 type CompanyMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *string
-	name           *string
-	company_size   *string
-	created_at     *time.Time
-	updated_at     *time.Time
-	deleted_at     *time.Time
-	clearedFields  map[string]struct{}
-	tenant         *string
-	clearedtenant  bool
-	renters        map[string]struct{}
-	removedrenters map[string]struct{}
-	clearedrenters bool
-	done           bool
-	oldValue       func(context.Context) (*Company, error)
-	predicates     []predicate.Company
+	op            Op
+	typ           string
+	id            *string
+	name          *string
+	company_size  *string
+	created_at    *time.Time
+	updated_at    *time.Time
+	deleted_at    *time.Time
+	clearedFields map[string]struct{}
+	tenant        *string
+	clearedtenant bool
+	renter        *string
+	clearedrenter bool
+	done          bool
+	oldValue      func(context.Context) (*Company, error)
+	predicates    []predicate.Company
 }
 
 var _ ent.Mutation = (*CompanyMutation)(nil)
@@ -1659,6 +1658,42 @@ func (m *CompanyMutation) IDs(ctx context.Context) ([]string, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetRenterID sets the "renter_id" field.
+func (m *CompanyMutation) SetRenterID(s string) {
+	m.renter = &s
+}
+
+// RenterID returns the value of the "renter_id" field in the mutation.
+func (m *CompanyMutation) RenterID() (r string, exists bool) {
+	v := m.renter
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRenterID returns the old "renter_id" field's value of the Company entity.
+// If the Company object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompanyMutation) OldRenterID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRenterID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRenterID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRenterID: %w", err)
+	}
+	return oldValue.RenterID, nil
+}
+
+// ResetRenterID resets all changes to the "renter_id" field.
+func (m *CompanyMutation) ResetRenterID() {
+	m.renter = nil
 }
 
 // SetTenantID sets the "tenant_id" field.
@@ -1943,58 +1978,31 @@ func (m *CompanyMutation) ResetTenant() {
 	m.clearedtenant = false
 }
 
-// AddRenterIDs adds the "renters" edge to the Renter entity by ids.
-func (m *CompanyMutation) AddRenterIDs(ids ...string) {
-	if m.renters == nil {
-		m.renters = make(map[string]struct{})
-	}
-	for i := range ids {
-		m.renters[ids[i]] = struct{}{}
-	}
+// ClearRenter clears the "renter" edge to the Renter entity.
+func (m *CompanyMutation) ClearRenter() {
+	m.clearedrenter = true
+	m.clearedFields[company.FieldRenterID] = struct{}{}
 }
 
-// ClearRenters clears the "renters" edge to the Renter entity.
-func (m *CompanyMutation) ClearRenters() {
-	m.clearedrenters = true
+// RenterCleared reports if the "renter" edge to the Renter entity was cleared.
+func (m *CompanyMutation) RenterCleared() bool {
+	return m.clearedrenter
 }
 
-// RentersCleared reports if the "renters" edge to the Renter entity was cleared.
-func (m *CompanyMutation) RentersCleared() bool {
-	return m.clearedrenters
-}
-
-// RemoveRenterIDs removes the "renters" edge to the Renter entity by IDs.
-func (m *CompanyMutation) RemoveRenterIDs(ids ...string) {
-	if m.removedrenters == nil {
-		m.removedrenters = make(map[string]struct{})
-	}
-	for i := range ids {
-		delete(m.renters, ids[i])
-		m.removedrenters[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedRenters returns the removed IDs of the "renters" edge to the Renter entity.
-func (m *CompanyMutation) RemovedRentersIDs() (ids []string) {
-	for id := range m.removedrenters {
-		ids = append(ids, id)
+// RenterIDs returns the "renter" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RenterID instead. It exists only for internal usage by the builders.
+func (m *CompanyMutation) RenterIDs() (ids []string) {
+	if id := m.renter; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
 
-// RentersIDs returns the "renters" edge IDs in the mutation.
-func (m *CompanyMutation) RentersIDs() (ids []string) {
-	for id := range m.renters {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetRenters resets all changes to the "renters" edge.
-func (m *CompanyMutation) ResetRenters() {
-	m.renters = nil
-	m.clearedrenters = false
-	m.removedrenters = nil
+// ResetRenter resets all changes to the "renter" edge.
+func (m *CompanyMutation) ResetRenter() {
+	m.renter = nil
+	m.clearedrenter = false
 }
 
 // Where appends a list predicates to the CompanyMutation builder.
@@ -2031,7 +2039,10 @@ func (m *CompanyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CompanyMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
+	if m.renter != nil {
+		fields = append(fields, company.FieldRenterID)
+	}
 	if m.tenant != nil {
 		fields = append(fields, company.FieldTenantID)
 	}
@@ -2058,6 +2069,8 @@ func (m *CompanyMutation) Fields() []string {
 // schema.
 func (m *CompanyMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case company.FieldRenterID:
+		return m.RenterID()
 	case company.FieldTenantID:
 		return m.TenantID()
 	case company.FieldName:
@@ -2079,6 +2092,8 @@ func (m *CompanyMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *CompanyMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case company.FieldRenterID:
+		return m.OldRenterID(ctx)
 	case company.FieldTenantID:
 		return m.OldTenantID(ctx)
 	case company.FieldName:
@@ -2100,6 +2115,13 @@ func (m *CompanyMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *CompanyMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case company.FieldRenterID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRenterID(v)
+		return nil
 	case company.FieldTenantID:
 		v, ok := value.(string)
 		if !ok {
@@ -2212,6 +2234,9 @@ func (m *CompanyMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *CompanyMutation) ResetField(name string) error {
 	switch name {
+	case company.FieldRenterID:
+		m.ResetRenterID()
+		return nil
 	case company.FieldTenantID:
 		m.ResetTenantID()
 		return nil
@@ -2240,8 +2265,8 @@ func (m *CompanyMutation) AddedEdges() []string {
 	if m.tenant != nil {
 		edges = append(edges, company.EdgeTenant)
 	}
-	if m.renters != nil {
-		edges = append(edges, company.EdgeRenters)
+	if m.renter != nil {
+		edges = append(edges, company.EdgeRenter)
 	}
 	return edges
 }
@@ -2254,12 +2279,10 @@ func (m *CompanyMutation) AddedIDs(name string) []ent.Value {
 		if id := m.tenant; id != nil {
 			return []ent.Value{*id}
 		}
-	case company.EdgeRenters:
-		ids := make([]ent.Value, 0, len(m.renters))
-		for id := range m.renters {
-			ids = append(ids, id)
+	case company.EdgeRenter:
+		if id := m.renter; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -2267,23 +2290,12 @@ func (m *CompanyMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CompanyMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.removedrenters != nil {
-		edges = append(edges, company.EdgeRenters)
-	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *CompanyMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case company.EdgeRenters:
-		ids := make([]ent.Value, 0, len(m.removedrenters))
-		for id := range m.removedrenters {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
@@ -2293,8 +2305,8 @@ func (m *CompanyMutation) ClearedEdges() []string {
 	if m.clearedtenant {
 		edges = append(edges, company.EdgeTenant)
 	}
-	if m.clearedrenters {
-		edges = append(edges, company.EdgeRenters)
+	if m.clearedrenter {
+		edges = append(edges, company.EdgeRenter)
 	}
 	return edges
 }
@@ -2305,8 +2317,8 @@ func (m *CompanyMutation) EdgeCleared(name string) bool {
 	switch name {
 	case company.EdgeTenant:
 		return m.clearedtenant
-	case company.EdgeRenters:
-		return m.clearedrenters
+	case company.EdgeRenter:
+		return m.clearedrenter
 	}
 	return false
 }
@@ -2317,6 +2329,9 @@ func (m *CompanyMutation) ClearEdge(name string) error {
 	switch name {
 	case company.EdgeTenant:
 		m.ClearTenant()
+		return nil
+	case company.EdgeRenter:
+		m.ClearRenter()
 		return nil
 	}
 	return fmt.Errorf("unknown Company unique edge %s", name)
@@ -2329,8 +2344,8 @@ func (m *CompanyMutation) ResetEdge(name string) error {
 	case company.EdgeTenant:
 		m.ResetTenant()
 		return nil
-	case company.EdgeRenters:
-		m.ResetRenters()
+	case company.EdgeRenter:
+		m.ResetRenter()
 		return nil
 	}
 	return fmt.Errorf("unknown Company edge %s", name)
@@ -2339,24 +2354,23 @@ func (m *CompanyMutation) ResetEdge(name string) error {
 // IndividualMutation represents an operation that mutates the Individual nodes in the graph.
 type IndividualMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *string
-	email          *string
-	first_name     *string
-	last_name      *string
-	created_at     *time.Time
-	updated_at     *time.Time
-	deleted_at     *time.Time
-	clearedFields  map[string]struct{}
-	tenant         *string
-	clearedtenant  bool
-	renters        map[string]struct{}
-	removedrenters map[string]struct{}
-	clearedrenters bool
-	done           bool
-	oldValue       func(context.Context) (*Individual, error)
-	predicates     []predicate.Individual
+	op            Op
+	typ           string
+	id            *string
+	email         *string
+	first_name    *string
+	last_name     *string
+	created_at    *time.Time
+	updated_at    *time.Time
+	deleted_at    *time.Time
+	clearedFields map[string]struct{}
+	tenant        *string
+	clearedtenant bool
+	renter        *string
+	clearedrenter bool
+	done          bool
+	oldValue      func(context.Context) (*Individual, error)
+	predicates    []predicate.Individual
 }
 
 var _ ent.Mutation = (*IndividualMutation)(nil)
@@ -2461,6 +2475,42 @@ func (m *IndividualMutation) IDs(ctx context.Context) ([]string, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetRenterID sets the "renter_id" field.
+func (m *IndividualMutation) SetRenterID(s string) {
+	m.renter = &s
+}
+
+// RenterID returns the value of the "renter_id" field in the mutation.
+func (m *IndividualMutation) RenterID() (r string, exists bool) {
+	v := m.renter
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRenterID returns the old "renter_id" field's value of the Individual entity.
+// If the Individual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IndividualMutation) OldRenterID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRenterID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRenterID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRenterID: %w", err)
+	}
+	return oldValue.RenterID, nil
+}
+
+// ResetRenterID resets all changes to the "renter_id" field.
+func (m *IndividualMutation) ResetRenterID() {
+	m.renter = nil
 }
 
 // SetTenantID sets the "tenant_id" field.
@@ -2807,58 +2857,31 @@ func (m *IndividualMutation) ResetTenant() {
 	m.clearedtenant = false
 }
 
-// AddRenterIDs adds the "renters" edge to the Renter entity by ids.
-func (m *IndividualMutation) AddRenterIDs(ids ...string) {
-	if m.renters == nil {
-		m.renters = make(map[string]struct{})
-	}
-	for i := range ids {
-		m.renters[ids[i]] = struct{}{}
-	}
+// ClearRenter clears the "renter" edge to the Renter entity.
+func (m *IndividualMutation) ClearRenter() {
+	m.clearedrenter = true
+	m.clearedFields[individual.FieldRenterID] = struct{}{}
 }
 
-// ClearRenters clears the "renters" edge to the Renter entity.
-func (m *IndividualMutation) ClearRenters() {
-	m.clearedrenters = true
+// RenterCleared reports if the "renter" edge to the Renter entity was cleared.
+func (m *IndividualMutation) RenterCleared() bool {
+	return m.clearedrenter
 }
 
-// RentersCleared reports if the "renters" edge to the Renter entity was cleared.
-func (m *IndividualMutation) RentersCleared() bool {
-	return m.clearedrenters
-}
-
-// RemoveRenterIDs removes the "renters" edge to the Renter entity by IDs.
-func (m *IndividualMutation) RemoveRenterIDs(ids ...string) {
-	if m.removedrenters == nil {
-		m.removedrenters = make(map[string]struct{})
-	}
-	for i := range ids {
-		delete(m.renters, ids[i])
-		m.removedrenters[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedRenters returns the removed IDs of the "renters" edge to the Renter entity.
-func (m *IndividualMutation) RemovedRentersIDs() (ids []string) {
-	for id := range m.removedrenters {
-		ids = append(ids, id)
+// RenterIDs returns the "renter" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RenterID instead. It exists only for internal usage by the builders.
+func (m *IndividualMutation) RenterIDs() (ids []string) {
+	if id := m.renter; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
 
-// RentersIDs returns the "renters" edge IDs in the mutation.
-func (m *IndividualMutation) RentersIDs() (ids []string) {
-	for id := range m.renters {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetRenters resets all changes to the "renters" edge.
-func (m *IndividualMutation) ResetRenters() {
-	m.renters = nil
-	m.clearedrenters = false
-	m.removedrenters = nil
+// ResetRenter resets all changes to the "renter" edge.
+func (m *IndividualMutation) ResetRenter() {
+	m.renter = nil
+	m.clearedrenter = false
 }
 
 // Where appends a list predicates to the IndividualMutation builder.
@@ -2895,7 +2918,10 @@ func (m *IndividualMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *IndividualMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
+	if m.renter != nil {
+		fields = append(fields, individual.FieldRenterID)
+	}
 	if m.tenant != nil {
 		fields = append(fields, individual.FieldTenantID)
 	}
@@ -2925,6 +2951,8 @@ func (m *IndividualMutation) Fields() []string {
 // schema.
 func (m *IndividualMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case individual.FieldRenterID:
+		return m.RenterID()
 	case individual.FieldTenantID:
 		return m.TenantID()
 	case individual.FieldEmail:
@@ -2948,6 +2976,8 @@ func (m *IndividualMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *IndividualMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case individual.FieldRenterID:
+		return m.OldRenterID(ctx)
 	case individual.FieldTenantID:
 		return m.OldTenantID(ctx)
 	case individual.FieldEmail:
@@ -2971,6 +3001,13 @@ func (m *IndividualMutation) OldField(ctx context.Context, name string) (ent.Val
 // type.
 func (m *IndividualMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case individual.FieldRenterID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRenterID(v)
+		return nil
 	case individual.FieldTenantID:
 		v, ok := value.(string)
 		if !ok {
@@ -3102,6 +3139,9 @@ func (m *IndividualMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *IndividualMutation) ResetField(name string) error {
 	switch name {
+	case individual.FieldRenterID:
+		m.ResetRenterID()
+		return nil
 	case individual.FieldTenantID:
 		m.ResetTenantID()
 		return nil
@@ -3133,8 +3173,8 @@ func (m *IndividualMutation) AddedEdges() []string {
 	if m.tenant != nil {
 		edges = append(edges, individual.EdgeTenant)
 	}
-	if m.renters != nil {
-		edges = append(edges, individual.EdgeRenters)
+	if m.renter != nil {
+		edges = append(edges, individual.EdgeRenter)
 	}
 	return edges
 }
@@ -3147,12 +3187,10 @@ func (m *IndividualMutation) AddedIDs(name string) []ent.Value {
 		if id := m.tenant; id != nil {
 			return []ent.Value{*id}
 		}
-	case individual.EdgeRenters:
-		ids := make([]ent.Value, 0, len(m.renters))
-		for id := range m.renters {
-			ids = append(ids, id)
+	case individual.EdgeRenter:
+		if id := m.renter; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -3160,23 +3198,12 @@ func (m *IndividualMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *IndividualMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.removedrenters != nil {
-		edges = append(edges, individual.EdgeRenters)
-	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *IndividualMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case individual.EdgeRenters:
-		ids := make([]ent.Value, 0, len(m.removedrenters))
-		for id := range m.removedrenters {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
@@ -3186,8 +3213,8 @@ func (m *IndividualMutation) ClearedEdges() []string {
 	if m.clearedtenant {
 		edges = append(edges, individual.EdgeTenant)
 	}
-	if m.clearedrenters {
-		edges = append(edges, individual.EdgeRenters)
+	if m.clearedrenter {
+		edges = append(edges, individual.EdgeRenter)
 	}
 	return edges
 }
@@ -3198,8 +3225,8 @@ func (m *IndividualMutation) EdgeCleared(name string) bool {
 	switch name {
 	case individual.EdgeTenant:
 		return m.clearedtenant
-	case individual.EdgeRenters:
-		return m.clearedrenters
+	case individual.EdgeRenter:
+		return m.clearedrenter
 	}
 	return false
 }
@@ -3210,6 +3237,9 @@ func (m *IndividualMutation) ClearEdge(name string) error {
 	switch name {
 	case individual.EdgeTenant:
 		m.ClearTenant()
+		return nil
+	case individual.EdgeRenter:
+		m.ClearRenter()
 		return nil
 	}
 	return fmt.Errorf("unknown Individual unique edge %s", name)
@@ -3222,8 +3252,8 @@ func (m *IndividualMutation) ResetEdge(name string) error {
 	case individual.EdgeTenant:
 		m.ResetTenant()
 		return nil
-	case individual.EdgeRenters:
-		m.ResetRenters()
+	case individual.EdgeRenter:
+		m.ResetRenter()
 		return nil
 	}
 	return fmt.Errorf("unknown Individual edge %s", name)
@@ -5169,23 +5199,26 @@ func (m *RentalOptionMutation) ResetEdge(name string) error {
 // RenterMutation represents an operation that mutates the Renter nodes in the graph.
 type RenterMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *string
-	renter_entity_id   *string
-	renter_entity_type *string
-	created_at         *time.Time
-	updated_at         *time.Time
-	deleted_at         *time.Time
-	clearedFields      map[string]struct{}
-	tenant             *string
-	clearedtenant      bool
-	rentals            map[string]struct{}
-	removedrentals     map[string]struct{}
-	clearedrentals     bool
-	done               bool
-	oldValue           func(context.Context) (*Renter, error)
-	predicates         []predicate.Renter
+	op                Op
+	typ               string
+	id                *string
+	_type             *string
+	created_at        *time.Time
+	updated_at        *time.Time
+	deleted_at        *time.Time
+	clearedFields     map[string]struct{}
+	tenant            *string
+	clearedtenant     bool
+	rentals           map[string]struct{}
+	removedrentals    map[string]struct{}
+	clearedrentals    bool
+	company           *string
+	clearedcompany    bool
+	individual        *string
+	clearedindividual bool
+	done              bool
+	oldValue          func(context.Context) (*Renter, error)
+	predicates        []predicate.Renter
 }
 
 var _ ent.Mutation = (*RenterMutation)(nil)
@@ -5328,76 +5361,40 @@ func (m *RenterMutation) ResetTenantID() {
 	m.tenant = nil
 }
 
-// SetRenterEntityID sets the "renter_entity_id" field.
-func (m *RenterMutation) SetRenterEntityID(s string) {
-	m.renter_entity_id = &s
+// SetType sets the "type" field.
+func (m *RenterMutation) SetType(s string) {
+	m._type = &s
 }
 
-// RenterEntityID returns the value of the "renter_entity_id" field in the mutation.
-func (m *RenterMutation) RenterEntityID() (r string, exists bool) {
-	v := m.renter_entity_id
+// GetType returns the value of the "type" field in the mutation.
+func (m *RenterMutation) GetType() (r string, exists bool) {
+	v := m._type
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldRenterEntityID returns the old "renter_entity_id" field's value of the Renter entity.
+// OldType returns the old "type" field's value of the Renter entity.
 // If the Renter object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RenterMutation) OldRenterEntityID(ctx context.Context) (v string, err error) {
+func (m *RenterMutation) OldType(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRenterEntityID is only allowed on UpdateOne operations")
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRenterEntityID requires an ID field in the mutation")
+		return v, errors.New("OldType requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRenterEntityID: %w", err)
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
 	}
-	return oldValue.RenterEntityID, nil
+	return oldValue.Type, nil
 }
 
-// ResetRenterEntityID resets all changes to the "renter_entity_id" field.
-func (m *RenterMutation) ResetRenterEntityID() {
-	m.renter_entity_id = nil
-}
-
-// SetRenterEntityType sets the "renter_entity_type" field.
-func (m *RenterMutation) SetRenterEntityType(s string) {
-	m.renter_entity_type = &s
-}
-
-// RenterEntityType returns the value of the "renter_entity_type" field in the mutation.
-func (m *RenterMutation) RenterEntityType() (r string, exists bool) {
-	v := m.renter_entity_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldRenterEntityType returns the old "renter_entity_type" field's value of the Renter entity.
-// If the Renter object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RenterMutation) OldRenterEntityType(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRenterEntityType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRenterEntityType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRenterEntityType: %w", err)
-	}
-	return oldValue.RenterEntityType, nil
-}
-
-// ResetRenterEntityType resets all changes to the "renter_entity_type" field.
-func (m *RenterMutation) ResetRenterEntityType() {
-	m.renter_entity_type = nil
+// ResetType resets all changes to the "type" field.
+func (m *RenterMutation) ResetType() {
+	m._type = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -5628,6 +5625,84 @@ func (m *RenterMutation) ResetRentals() {
 	m.removedrentals = nil
 }
 
+// SetCompanyID sets the "company" edge to the Company entity by id.
+func (m *RenterMutation) SetCompanyID(id string) {
+	m.company = &id
+}
+
+// ClearCompany clears the "company" edge to the Company entity.
+func (m *RenterMutation) ClearCompany() {
+	m.clearedcompany = true
+}
+
+// CompanyCleared reports if the "company" edge to the Company entity was cleared.
+func (m *RenterMutation) CompanyCleared() bool {
+	return m.clearedcompany
+}
+
+// CompanyID returns the "company" edge ID in the mutation.
+func (m *RenterMutation) CompanyID() (id string, exists bool) {
+	if m.company != nil {
+		return *m.company, true
+	}
+	return
+}
+
+// CompanyIDs returns the "company" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CompanyID instead. It exists only for internal usage by the builders.
+func (m *RenterMutation) CompanyIDs() (ids []string) {
+	if id := m.company; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetCompany resets all changes to the "company" edge.
+func (m *RenterMutation) ResetCompany() {
+	m.company = nil
+	m.clearedcompany = false
+}
+
+// SetIndividualID sets the "individual" edge to the Individual entity by id.
+func (m *RenterMutation) SetIndividualID(id string) {
+	m.individual = &id
+}
+
+// ClearIndividual clears the "individual" edge to the Individual entity.
+func (m *RenterMutation) ClearIndividual() {
+	m.clearedindividual = true
+}
+
+// IndividualCleared reports if the "individual" edge to the Individual entity was cleared.
+func (m *RenterMutation) IndividualCleared() bool {
+	return m.clearedindividual
+}
+
+// IndividualID returns the "individual" edge ID in the mutation.
+func (m *RenterMutation) IndividualID() (id string, exists bool) {
+	if m.individual != nil {
+		return *m.individual, true
+	}
+	return
+}
+
+// IndividualIDs returns the "individual" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// IndividualID instead. It exists only for internal usage by the builders.
+func (m *RenterMutation) IndividualIDs() (ids []string) {
+	if id := m.individual; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetIndividual resets all changes to the "individual" edge.
+func (m *RenterMutation) ResetIndividual() {
+	m.individual = nil
+	m.clearedindividual = false
+}
+
 // Where appends a list predicates to the RenterMutation builder.
 func (m *RenterMutation) Where(ps ...predicate.Renter) {
 	m.predicates = append(m.predicates, ps...)
@@ -5662,15 +5737,12 @@ func (m *RenterMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RenterMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 5)
 	if m.tenant != nil {
 		fields = append(fields, renter.FieldTenantID)
 	}
-	if m.renter_entity_id != nil {
-		fields = append(fields, renter.FieldRenterEntityID)
-	}
-	if m.renter_entity_type != nil {
-		fields = append(fields, renter.FieldRenterEntityType)
+	if m._type != nil {
+		fields = append(fields, renter.FieldType)
 	}
 	if m.created_at != nil {
 		fields = append(fields, renter.FieldCreatedAt)
@@ -5691,10 +5763,8 @@ func (m *RenterMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case renter.FieldTenantID:
 		return m.TenantID()
-	case renter.FieldRenterEntityID:
-		return m.RenterEntityID()
-	case renter.FieldRenterEntityType:
-		return m.RenterEntityType()
+	case renter.FieldType:
+		return m.GetType()
 	case renter.FieldCreatedAt:
 		return m.CreatedAt()
 	case renter.FieldUpdatedAt:
@@ -5712,10 +5782,8 @@ func (m *RenterMutation) OldField(ctx context.Context, name string) (ent.Value, 
 	switch name {
 	case renter.FieldTenantID:
 		return m.OldTenantID(ctx)
-	case renter.FieldRenterEntityID:
-		return m.OldRenterEntityID(ctx)
-	case renter.FieldRenterEntityType:
-		return m.OldRenterEntityType(ctx)
+	case renter.FieldType:
+		return m.OldType(ctx)
 	case renter.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case renter.FieldUpdatedAt:
@@ -5738,19 +5806,12 @@ func (m *RenterMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTenantID(v)
 		return nil
-	case renter.FieldRenterEntityID:
+	case renter.FieldType:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetRenterEntityID(v)
-		return nil
-	case renter.FieldRenterEntityType:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetRenterEntityType(v)
+		m.SetType(v)
 		return nil
 	case renter.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -5846,11 +5907,8 @@ func (m *RenterMutation) ResetField(name string) error {
 	case renter.FieldTenantID:
 		m.ResetTenantID()
 		return nil
-	case renter.FieldRenterEntityID:
-		m.ResetRenterEntityID()
-		return nil
-	case renter.FieldRenterEntityType:
-		m.ResetRenterEntityType()
+	case renter.FieldType:
+		m.ResetType()
 		return nil
 	case renter.FieldCreatedAt:
 		m.ResetCreatedAt()
@@ -5867,12 +5925,18 @@ func (m *RenterMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *RenterMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.tenant != nil {
 		edges = append(edges, renter.EdgeTenant)
 	}
 	if m.rentals != nil {
 		edges = append(edges, renter.EdgeRentals)
+	}
+	if m.company != nil {
+		edges = append(edges, renter.EdgeCompany)
+	}
+	if m.individual != nil {
+		edges = append(edges, renter.EdgeIndividual)
 	}
 	return edges
 }
@@ -5891,13 +5955,21 @@ func (m *RenterMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case renter.EdgeCompany:
+		if id := m.company; id != nil {
+			return []ent.Value{*id}
+		}
+	case renter.EdgeIndividual:
+		if id := m.individual; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *RenterMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.removedrentals != nil {
 		edges = append(edges, renter.EdgeRentals)
 	}
@@ -5920,12 +5992,18 @@ func (m *RenterMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *RenterMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.clearedtenant {
 		edges = append(edges, renter.EdgeTenant)
 	}
 	if m.clearedrentals {
 		edges = append(edges, renter.EdgeRentals)
+	}
+	if m.clearedcompany {
+		edges = append(edges, renter.EdgeCompany)
+	}
+	if m.clearedindividual {
+		edges = append(edges, renter.EdgeIndividual)
 	}
 	return edges
 }
@@ -5938,6 +6016,10 @@ func (m *RenterMutation) EdgeCleared(name string) bool {
 		return m.clearedtenant
 	case renter.EdgeRentals:
 		return m.clearedrentals
+	case renter.EdgeCompany:
+		return m.clearedcompany
+	case renter.EdgeIndividual:
+		return m.clearedindividual
 	}
 	return false
 }
@@ -5948,6 +6030,12 @@ func (m *RenterMutation) ClearEdge(name string) error {
 	switch name {
 	case renter.EdgeTenant:
 		m.ClearTenant()
+		return nil
+	case renter.EdgeCompany:
+		m.ClearCompany()
+		return nil
+	case renter.EdgeIndividual:
+		m.ClearIndividual()
 		return nil
 	}
 	return fmt.Errorf("unknown Renter unique edge %s", name)
@@ -5962,6 +6050,12 @@ func (m *RenterMutation) ResetEdge(name string) error {
 		return nil
 	case renter.EdgeRentals:
 		m.ResetRentals()
+		return nil
+	case renter.EdgeCompany:
+		m.ResetCompany()
+		return nil
+	case renter.EdgeIndividual:
+		m.ResetIndividual()
 		return nil
 	}
 	return fmt.Errorf("unknown Renter edge %s", name)

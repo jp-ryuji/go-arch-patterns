@@ -132,8 +132,26 @@ func init() {
 	}()
 	companyFields := schema.Company{}.Fields()
 	_ = companyFields
+	// companyDescRenterID is the schema descriptor for renter_id field.
+	companyDescRenterID := companyFields[1].Descriptor()
+	// company.RenterIDValidator is a validator for the "renter_id" field. It is called by the builders before save.
+	company.RenterIDValidator = func() func(string) error {
+		validators := companyDescRenterID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(renter string) error {
+			for _, fn := range fns {
+				if err := fn(renter); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// companyDescTenantID is the schema descriptor for tenant_id field.
-	companyDescTenantID := companyFields[1].Descriptor()
+	companyDescTenantID := companyFields[2].Descriptor()
 	// company.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
 	company.TenantIDValidator = func() func(string) error {
 		validators := companyDescTenantID.Validators
@@ -151,7 +169,7 @@ func init() {
 		}
 	}()
 	// companyDescName is the schema descriptor for name field.
-	companyDescName := companyFields[2].Descriptor()
+	companyDescName := companyFields[3].Descriptor()
 	// company.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	company.NameValidator = func() func(string) error {
 		validators := companyDescName.Validators
@@ -169,7 +187,7 @@ func init() {
 		}
 	}()
 	// companyDescCompanySize is the schema descriptor for company_size field.
-	companyDescCompanySize := companyFields[3].Descriptor()
+	companyDescCompanySize := companyFields[4].Descriptor()
 	// company.CompanySizeValidator is a validator for the "company_size" field. It is called by the builders before save.
 	company.CompanySizeValidator = func() func(string) error {
 		validators := companyDescCompanySize.Validators
@@ -206,8 +224,26 @@ func init() {
 	}()
 	individualFields := schema.Individual{}.Fields()
 	_ = individualFields
+	// individualDescRenterID is the schema descriptor for renter_id field.
+	individualDescRenterID := individualFields[1].Descriptor()
+	// individual.RenterIDValidator is a validator for the "renter_id" field. It is called by the builders before save.
+	individual.RenterIDValidator = func() func(string) error {
+		validators := individualDescRenterID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(renter string) error {
+			for _, fn := range fns {
+				if err := fn(renter); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// individualDescTenantID is the schema descriptor for tenant_id field.
-	individualDescTenantID := individualFields[1].Descriptor()
+	individualDescTenantID := individualFields[2].Descriptor()
 	// individual.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
 	individual.TenantIDValidator = func() func(string) error {
 		validators := individualDescTenantID.Validators
@@ -225,7 +261,7 @@ func init() {
 		}
 	}()
 	// individualDescEmail is the schema descriptor for email field.
-	individualDescEmail := individualFields[2].Descriptor()
+	individualDescEmail := individualFields[3].Descriptor()
 	// individual.EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	individual.EmailValidator = func() func(string) error {
 		validators := individualDescEmail.Validators
@@ -243,11 +279,11 @@ func init() {
 		}
 	}()
 	// individualDescFirstName is the schema descriptor for first_name field.
-	individualDescFirstName := individualFields[3].Descriptor()
+	individualDescFirstName := individualFields[4].Descriptor()
 	// individual.FirstNameValidator is a validator for the "first_name" field. It is called by the builders before save.
 	individual.FirstNameValidator = individualDescFirstName.Validators[0].(func(string) error)
 	// individualDescLastName is the schema descriptor for last_name field.
-	individualDescLastName := individualFields[4].Descriptor()
+	individualDescLastName := individualFields[5].Descriptor()
 	// individual.LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	individual.LastNameValidator = individualDescLastName.Validators[0].(func(string) error)
 	// individualDescID is the schema descriptor for id field.
@@ -436,36 +472,18 @@ func init() {
 			return nil
 		}
 	}()
-	// renterDescRenterEntityID is the schema descriptor for renter_entity_id field.
-	renterDescRenterEntityID := renterFields[2].Descriptor()
-	// renter.RenterEntityIDValidator is a validator for the "renter_entity_id" field. It is called by the builders before save.
-	renter.RenterEntityIDValidator = func() func(string) error {
-		validators := renterDescRenterEntityID.Validators
+	// renterDescType is the schema descriptor for type field.
+	renterDescType := renterFields[2].Descriptor()
+	// renter.TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	renter.TypeValidator = func() func(string) error {
+		validators := renterDescType.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
 		}
-		return func(renter_entity_id string) error {
+		return func(_type string) error {
 			for _, fn := range fns {
-				if err := fn(renter_entity_id); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// renterDescRenterEntityType is the schema descriptor for renter_entity_type field.
-	renterDescRenterEntityType := renterFields[3].Descriptor()
-	// renter.RenterEntityTypeValidator is a validator for the "renter_entity_type" field. It is called by the builders before save.
-	renter.RenterEntityTypeValidator = func() func(string) error {
-		validators := renterDescRenterEntityType.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(renter_entity_type string) error {
-			for _, fn := range fns {
-				if err := fn(renter_entity_type); err != nil {
+				if err := fn(_type); err != nil {
 					return err
 				}
 			}

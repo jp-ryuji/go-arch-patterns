@@ -11,6 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/company"
+	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/individual"
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/predicate"
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/rental"
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/renter"
@@ -44,30 +46,16 @@ func (_u *RenterUpdate) SetNillableTenantID(v *string) *RenterUpdate {
 	return _u
 }
 
-// SetRenterEntityID sets the "renter_entity_id" field.
-func (_u *RenterUpdate) SetRenterEntityID(v string) *RenterUpdate {
-	_u.mutation.SetRenterEntityID(v)
+// SetType sets the "type" field.
+func (_u *RenterUpdate) SetType(v string) *RenterUpdate {
+	_u.mutation.SetType(v)
 	return _u
 }
 
-// SetNillableRenterEntityID sets the "renter_entity_id" field if the given value is not nil.
-func (_u *RenterUpdate) SetNillableRenterEntityID(v *string) *RenterUpdate {
+// SetNillableType sets the "type" field if the given value is not nil.
+func (_u *RenterUpdate) SetNillableType(v *string) *RenterUpdate {
 	if v != nil {
-		_u.SetRenterEntityID(*v)
-	}
-	return _u
-}
-
-// SetRenterEntityType sets the "renter_entity_type" field.
-func (_u *RenterUpdate) SetRenterEntityType(v string) *RenterUpdate {
-	_u.mutation.SetRenterEntityType(v)
-	return _u
-}
-
-// SetNillableRenterEntityType sets the "renter_entity_type" field if the given value is not nil.
-func (_u *RenterUpdate) SetNillableRenterEntityType(v *string) *RenterUpdate {
-	if v != nil {
-		_u.SetRenterEntityType(*v)
+		_u.SetType(*v)
 	}
 	return _u
 }
@@ -152,6 +140,44 @@ func (_u *RenterUpdate) AddRentals(v ...*Rental) *RenterUpdate {
 	return _u.AddRentalIDs(ids...)
 }
 
+// SetCompanyID sets the "company" edge to the Company entity by ID.
+func (_u *RenterUpdate) SetCompanyID(id string) *RenterUpdate {
+	_u.mutation.SetCompanyID(id)
+	return _u
+}
+
+// SetNillableCompanyID sets the "company" edge to the Company entity by ID if the given value is not nil.
+func (_u *RenterUpdate) SetNillableCompanyID(id *string) *RenterUpdate {
+	if id != nil {
+		_u = _u.SetCompanyID(*id)
+	}
+	return _u
+}
+
+// SetCompany sets the "company" edge to the Company entity.
+func (_u *RenterUpdate) SetCompany(v *Company) *RenterUpdate {
+	return _u.SetCompanyID(v.ID)
+}
+
+// SetIndividualID sets the "individual" edge to the Individual entity by ID.
+func (_u *RenterUpdate) SetIndividualID(id string) *RenterUpdate {
+	_u.mutation.SetIndividualID(id)
+	return _u
+}
+
+// SetNillableIndividualID sets the "individual" edge to the Individual entity by ID if the given value is not nil.
+func (_u *RenterUpdate) SetNillableIndividualID(id *string) *RenterUpdate {
+	if id != nil {
+		_u = _u.SetIndividualID(*id)
+	}
+	return _u
+}
+
+// SetIndividual sets the "individual" edge to the Individual entity.
+func (_u *RenterUpdate) SetIndividual(v *Individual) *RenterUpdate {
+	return _u.SetIndividualID(v.ID)
+}
+
 // Mutation returns the RenterMutation object of the builder.
 func (_u *RenterUpdate) Mutation() *RenterMutation {
 	return _u.mutation
@@ -182,6 +208,18 @@ func (_u *RenterUpdate) RemoveRentals(v ...*Rental) *RenterUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveRentalIDs(ids...)
+}
+
+// ClearCompany clears the "company" edge to the Company entity.
+func (_u *RenterUpdate) ClearCompany() *RenterUpdate {
+	_u.mutation.ClearCompany()
+	return _u
+}
+
+// ClearIndividual clears the "individual" edge to the Individual entity.
+func (_u *RenterUpdate) ClearIndividual() *RenterUpdate {
+	_u.mutation.ClearIndividual()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -218,14 +256,9 @@ func (_u *RenterUpdate) check() error {
 			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`entgen: validator failed for field "Renter.tenant_id": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.RenterEntityID(); ok {
-		if err := renter.RenterEntityIDValidator(v); err != nil {
-			return &ValidationError{Name: "renter_entity_id", err: fmt.Errorf(`entgen: validator failed for field "Renter.renter_entity_id": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.RenterEntityType(); ok {
-		if err := renter.RenterEntityTypeValidator(v); err != nil {
-			return &ValidationError{Name: "renter_entity_type", err: fmt.Errorf(`entgen: validator failed for field "Renter.renter_entity_type": %w`, err)}
+	if v, ok := _u.mutation.GetType(); ok {
+		if err := renter.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`entgen: validator failed for field "Renter.type": %w`, err)}
 		}
 	}
 	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
@@ -246,11 +279,8 @@ func (_u *RenterUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.RenterEntityID(); ok {
-		_spec.SetField(renter.FieldRenterEntityID, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.RenterEntityType(); ok {
-		_spec.SetField(renter.FieldRenterEntityType, field.TypeString, value)
+	if value, ok := _u.mutation.GetType(); ok {
+		_spec.SetField(renter.FieldType, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(renter.FieldCreatedAt, field.TypeTime, value)
@@ -344,6 +374,64 @@ func (_u *RenterUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.CompanyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   renter.CompanyTable,
+			Columns: []string{renter.CompanyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(company.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CompanyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   renter.CompanyTable,
+			Columns: []string{renter.CompanyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(company.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.IndividualCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   renter.IndividualTable,
+			Columns: []string{renter.IndividualColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(individual.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IndividualIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   renter.IndividualTable,
+			Columns: []string{renter.IndividualColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(individual.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{renter.Label}
@@ -378,30 +466,16 @@ func (_u *RenterUpdateOne) SetNillableTenantID(v *string) *RenterUpdateOne {
 	return _u
 }
 
-// SetRenterEntityID sets the "renter_entity_id" field.
-func (_u *RenterUpdateOne) SetRenterEntityID(v string) *RenterUpdateOne {
-	_u.mutation.SetRenterEntityID(v)
+// SetType sets the "type" field.
+func (_u *RenterUpdateOne) SetType(v string) *RenterUpdateOne {
+	_u.mutation.SetType(v)
 	return _u
 }
 
-// SetNillableRenterEntityID sets the "renter_entity_id" field if the given value is not nil.
-func (_u *RenterUpdateOne) SetNillableRenterEntityID(v *string) *RenterUpdateOne {
+// SetNillableType sets the "type" field if the given value is not nil.
+func (_u *RenterUpdateOne) SetNillableType(v *string) *RenterUpdateOne {
 	if v != nil {
-		_u.SetRenterEntityID(*v)
-	}
-	return _u
-}
-
-// SetRenterEntityType sets the "renter_entity_type" field.
-func (_u *RenterUpdateOne) SetRenterEntityType(v string) *RenterUpdateOne {
-	_u.mutation.SetRenterEntityType(v)
-	return _u
-}
-
-// SetNillableRenterEntityType sets the "renter_entity_type" field if the given value is not nil.
-func (_u *RenterUpdateOne) SetNillableRenterEntityType(v *string) *RenterUpdateOne {
-	if v != nil {
-		_u.SetRenterEntityType(*v)
+		_u.SetType(*v)
 	}
 	return _u
 }
@@ -486,6 +560,44 @@ func (_u *RenterUpdateOne) AddRentals(v ...*Rental) *RenterUpdateOne {
 	return _u.AddRentalIDs(ids...)
 }
 
+// SetCompanyID sets the "company" edge to the Company entity by ID.
+func (_u *RenterUpdateOne) SetCompanyID(id string) *RenterUpdateOne {
+	_u.mutation.SetCompanyID(id)
+	return _u
+}
+
+// SetNillableCompanyID sets the "company" edge to the Company entity by ID if the given value is not nil.
+func (_u *RenterUpdateOne) SetNillableCompanyID(id *string) *RenterUpdateOne {
+	if id != nil {
+		_u = _u.SetCompanyID(*id)
+	}
+	return _u
+}
+
+// SetCompany sets the "company" edge to the Company entity.
+func (_u *RenterUpdateOne) SetCompany(v *Company) *RenterUpdateOne {
+	return _u.SetCompanyID(v.ID)
+}
+
+// SetIndividualID sets the "individual" edge to the Individual entity by ID.
+func (_u *RenterUpdateOne) SetIndividualID(id string) *RenterUpdateOne {
+	_u.mutation.SetIndividualID(id)
+	return _u
+}
+
+// SetNillableIndividualID sets the "individual" edge to the Individual entity by ID if the given value is not nil.
+func (_u *RenterUpdateOne) SetNillableIndividualID(id *string) *RenterUpdateOne {
+	if id != nil {
+		_u = _u.SetIndividualID(*id)
+	}
+	return _u
+}
+
+// SetIndividual sets the "individual" edge to the Individual entity.
+func (_u *RenterUpdateOne) SetIndividual(v *Individual) *RenterUpdateOne {
+	return _u.SetIndividualID(v.ID)
+}
+
 // Mutation returns the RenterMutation object of the builder.
 func (_u *RenterUpdateOne) Mutation() *RenterMutation {
 	return _u.mutation
@@ -516,6 +628,18 @@ func (_u *RenterUpdateOne) RemoveRentals(v ...*Rental) *RenterUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveRentalIDs(ids...)
+}
+
+// ClearCompany clears the "company" edge to the Company entity.
+func (_u *RenterUpdateOne) ClearCompany() *RenterUpdateOne {
+	_u.mutation.ClearCompany()
+	return _u
+}
+
+// ClearIndividual clears the "individual" edge to the Individual entity.
+func (_u *RenterUpdateOne) ClearIndividual() *RenterUpdateOne {
+	_u.mutation.ClearIndividual()
+	return _u
 }
 
 // Where appends a list predicates to the RenterUpdate builder.
@@ -565,14 +689,9 @@ func (_u *RenterUpdateOne) check() error {
 			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`entgen: validator failed for field "Renter.tenant_id": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.RenterEntityID(); ok {
-		if err := renter.RenterEntityIDValidator(v); err != nil {
-			return &ValidationError{Name: "renter_entity_id", err: fmt.Errorf(`entgen: validator failed for field "Renter.renter_entity_id": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.RenterEntityType(); ok {
-		if err := renter.RenterEntityTypeValidator(v); err != nil {
-			return &ValidationError{Name: "renter_entity_type", err: fmt.Errorf(`entgen: validator failed for field "Renter.renter_entity_type": %w`, err)}
+	if v, ok := _u.mutation.GetType(); ok {
+		if err := renter.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`entgen: validator failed for field "Renter.type": %w`, err)}
 		}
 	}
 	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
@@ -610,11 +729,8 @@ func (_u *RenterUpdateOne) sqlSave(ctx context.Context) (_node *Renter, err erro
 			}
 		}
 	}
-	if value, ok := _u.mutation.RenterEntityID(); ok {
-		_spec.SetField(renter.FieldRenterEntityID, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.RenterEntityType(); ok {
-		_spec.SetField(renter.FieldRenterEntityType, field.TypeString, value)
+	if value, ok := _u.mutation.GetType(); ok {
+		_spec.SetField(renter.FieldType, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(renter.FieldCreatedAt, field.TypeTime, value)
@@ -701,6 +817,64 @@ func (_u *RenterUpdateOne) sqlSave(ctx context.Context) (_node *Renter, err erro
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(rental.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CompanyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   renter.CompanyTable,
+			Columns: []string{renter.CompanyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(company.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CompanyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   renter.CompanyTable,
+			Columns: []string{renter.CompanyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(company.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.IndividualCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   renter.IndividualTable,
+			Columns: []string{renter.IndividualColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(individual.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IndividualIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   renter.IndividualTable,
+			Columns: []string{renter.IndividualColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(individual.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

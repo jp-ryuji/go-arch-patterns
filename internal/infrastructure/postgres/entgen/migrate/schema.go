@@ -91,6 +91,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "renter_id", Type: field.TypeString, Size: 36},
 		{Name: "tenant_id", Type: field.TypeString, Size: 36},
 	}
 	// CompaniesTable holds the schema information for the "companies" table.
@@ -100,13 +101,24 @@ var (
 		PrimaryKey: []*schema.Column{CompaniesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "companies_tenants_companies",
+				Symbol:     "companies_renters_renter",
 				Columns:    []*schema.Column{CompaniesColumns[6]},
+				RefColumns: []*schema.Column{RentersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "companies_tenants_companies",
+				Columns:    []*schema.Column{CompaniesColumns[7]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
+			{
+				Name:    "company_renter_id",
+				Unique:  true,
+				Columns: []*schema.Column{CompaniesColumns[6]},
+			},
 			{
 				Name:    "company_deleted_at",
 				Unique:  false,
@@ -115,7 +127,7 @@ var (
 			{
 				Name:    "company_tenant_id",
 				Unique:  false,
-				Columns: []*schema.Column{CompaniesColumns[6]},
+				Columns: []*schema.Column{CompaniesColumns[7]},
 			},
 		},
 	}
@@ -128,6 +140,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "renter_id", Type: field.TypeString, Size: 36},
 		{Name: "tenant_id", Type: field.TypeString, Size: 36},
 	}
 	// IndividualsTable holds the schema information for the "individuals" table.
@@ -137,17 +150,28 @@ var (
 		PrimaryKey: []*schema.Column{IndividualsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "individuals_tenants_individuals",
+				Symbol:     "individuals_renters_renter",
 				Columns:    []*schema.Column{IndividualsColumns[7]},
+				RefColumns: []*schema.Column{RentersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "individuals_tenants_individuals",
+				Columns:    []*schema.Column{IndividualsColumns[8]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
+				Name:    "individual_renter_id",
+				Unique:  true,
+				Columns: []*schema.Column{IndividualsColumns[7]},
+			},
+			{
 				Name:    "individual_tenant_id_email",
 				Unique:  true,
-				Columns: []*schema.Column{IndividualsColumns[7], IndividualsColumns[1]},
+				Columns: []*schema.Column{IndividualsColumns[8], IndividualsColumns[1]},
 			},
 			{
 				Name:    "individual_deleted_at",
@@ -273,13 +297,12 @@ var (
 	// RentersColumns holds the columns for the "renters" table.
 	RentersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Size: 36},
-		{Name: "renter_entity_id", Type: field.TypeString, Size: 36},
-		{Name: "renter_entity_type", Type: field.TypeString, Size: 20},
+		{Name: "type", Type: field.TypeString, Size: 20},
 		{Name: "created_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "company_renters", Type: field.TypeString, Nullable: true, Size: 36},
-		{Name: "individual_renters", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "renter_company", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "renter_individual", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "tenant_id", Type: field.TypeString, Size: 36},
 	}
 	// RentersTable holds the schema information for the "renters" table.
@@ -289,39 +312,34 @@ var (
 		PrimaryKey: []*schema.Column{RentersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "renters_companies_renters",
-				Columns:    []*schema.Column{RentersColumns[6]},
+				Symbol:     "renters_companies_company",
+				Columns:    []*schema.Column{RentersColumns[5]},
 				RefColumns: []*schema.Column{CompaniesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "renters_individuals_renters",
-				Columns:    []*schema.Column{RentersColumns[7]},
+				Symbol:     "renters_individuals_individual",
+				Columns:    []*schema.Column{RentersColumns[6]},
 				RefColumns: []*schema.Column{IndividualsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "renters_tenants_renters",
-				Columns:    []*schema.Column{RentersColumns[8]},
+				Columns:    []*schema.Column{RentersColumns[7]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "renter_renter_entity_id_renter_entity_type",
-				Unique:  true,
-				Columns: []*schema.Column{RentersColumns[1], RentersColumns[2]},
-			},
-			{
 				Name:    "renter_deleted_at",
 				Unique:  false,
-				Columns: []*schema.Column{RentersColumns[5]},
+				Columns: []*schema.Column{RentersColumns[4]},
 			},
 			{
 				Name:    "renter_tenant_id",
 				Unique:  false,
-				Columns: []*schema.Column{RentersColumns[8]},
+				Columns: []*schema.Column{RentersColumns[7]},
 			},
 		},
 	}
@@ -367,8 +385,10 @@ var (
 func init() {
 	CarsTable.ForeignKeys[0].RefTable = TenantsTable
 	CarOptionsTable.ForeignKeys[0].RefTable = TenantsTable
-	CompaniesTable.ForeignKeys[0].RefTable = TenantsTable
-	IndividualsTable.ForeignKeys[0].RefTable = TenantsTable
+	CompaniesTable.ForeignKeys[0].RefTable = RentersTable
+	CompaniesTable.ForeignKeys[1].RefTable = TenantsTable
+	IndividualsTable.ForeignKeys[0].RefTable = RentersTable
+	IndividualsTable.ForeignKeys[1].RefTable = TenantsTable
 	RentalsTable.ForeignKeys[0].RefTable = CarsTable
 	RentalsTable.ForeignKeys[1].RefTable = RentersTable
 	RentalsTable.ForeignKeys[2].RefTable = TenantsTable

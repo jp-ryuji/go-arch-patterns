@@ -10,6 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/company"
+	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/individual"
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/rental"
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/renter"
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/tenant"
@@ -28,15 +30,9 @@ func (_c *RenterCreate) SetTenantID(v string) *RenterCreate {
 	return _c
 }
 
-// SetRenterEntityID sets the "renter_entity_id" field.
-func (_c *RenterCreate) SetRenterEntityID(v string) *RenterCreate {
-	_c.mutation.SetRenterEntityID(v)
-	return _c
-}
-
-// SetRenterEntityType sets the "renter_entity_type" field.
-func (_c *RenterCreate) SetRenterEntityType(v string) *RenterCreate {
-	_c.mutation.SetRenterEntityType(v)
+// SetType sets the "type" field.
+func (_c *RenterCreate) SetType(v string) *RenterCreate {
+	_c.mutation.SetType(v)
 	return _c
 }
 
@@ -108,6 +104,44 @@ func (_c *RenterCreate) AddRentals(v ...*Rental) *RenterCreate {
 	return _c.AddRentalIDs(ids...)
 }
 
+// SetCompanyID sets the "company" edge to the Company entity by ID.
+func (_c *RenterCreate) SetCompanyID(id string) *RenterCreate {
+	_c.mutation.SetCompanyID(id)
+	return _c
+}
+
+// SetNillableCompanyID sets the "company" edge to the Company entity by ID if the given value is not nil.
+func (_c *RenterCreate) SetNillableCompanyID(id *string) *RenterCreate {
+	if id != nil {
+		_c = _c.SetCompanyID(*id)
+	}
+	return _c
+}
+
+// SetCompany sets the "company" edge to the Company entity.
+func (_c *RenterCreate) SetCompany(v *Company) *RenterCreate {
+	return _c.SetCompanyID(v.ID)
+}
+
+// SetIndividualID sets the "individual" edge to the Individual entity by ID.
+func (_c *RenterCreate) SetIndividualID(id string) *RenterCreate {
+	_c.mutation.SetIndividualID(id)
+	return _c
+}
+
+// SetNillableIndividualID sets the "individual" edge to the Individual entity by ID if the given value is not nil.
+func (_c *RenterCreate) SetNillableIndividualID(id *string) *RenterCreate {
+	if id != nil {
+		_c = _c.SetIndividualID(*id)
+	}
+	return _c
+}
+
+// SetIndividual sets the "individual" edge to the Individual entity.
+func (_c *RenterCreate) SetIndividual(v *Individual) *RenterCreate {
+	return _c.SetIndividualID(v.ID)
+}
+
 // Mutation returns the RenterMutation object of the builder.
 func (_c *RenterCreate) Mutation() *RenterMutation {
 	return _c.mutation
@@ -150,20 +184,12 @@ func (_c *RenterCreate) check() error {
 			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`entgen: validator failed for field "Renter.tenant_id": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.RenterEntityID(); !ok {
-		return &ValidationError{Name: "renter_entity_id", err: errors.New(`entgen: missing required field "Renter.renter_entity_id"`)}
+	if _, ok := _c.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`entgen: missing required field "Renter.type"`)}
 	}
-	if v, ok := _c.mutation.RenterEntityID(); ok {
-		if err := renter.RenterEntityIDValidator(v); err != nil {
-			return &ValidationError{Name: "renter_entity_id", err: fmt.Errorf(`entgen: validator failed for field "Renter.renter_entity_id": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.RenterEntityType(); !ok {
-		return &ValidationError{Name: "renter_entity_type", err: errors.New(`entgen: missing required field "Renter.renter_entity_type"`)}
-	}
-	if v, ok := _c.mutation.RenterEntityType(); ok {
-		if err := renter.RenterEntityTypeValidator(v); err != nil {
-			return &ValidationError{Name: "renter_entity_type", err: fmt.Errorf(`entgen: validator failed for field "Renter.renter_entity_type": %w`, err)}
+	if v, ok := _c.mutation.GetType(); ok {
+		if err := renter.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`entgen: validator failed for field "Renter.type": %w`, err)}
 		}
 	}
 	if v, ok := _c.mutation.ID(); ok {
@@ -209,13 +235,9 @@ func (_c *RenterCreate) createSpec() (*Renter, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.RenterEntityID(); ok {
-		_spec.SetField(renter.FieldRenterEntityID, field.TypeString, value)
-		_node.RenterEntityID = value
-	}
-	if value, ok := _c.mutation.RenterEntityType(); ok {
-		_spec.SetField(renter.FieldRenterEntityType, field.TypeString, value)
-		_node.RenterEntityType = value
+	if value, ok := _c.mutation.GetType(); ok {
+		_spec.SetField(renter.FieldType, field.TypeString, value)
+		_node.Type = value
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(renter.FieldCreatedAt, field.TypeTime, value)
@@ -260,6 +282,40 @@ func (_c *RenterCreate) createSpec() (*Renter, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CompanyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   renter.CompanyTable,
+			Columns: []string{renter.CompanyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(company.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.renter_company = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.IndividualIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   renter.IndividualTable,
+			Columns: []string{renter.IndividualColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(individual.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.renter_individual = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

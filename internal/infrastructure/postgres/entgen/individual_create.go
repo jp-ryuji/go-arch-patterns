@@ -22,6 +22,12 @@ type IndividualCreate struct {
 	hooks    []Hook
 }
 
+// SetRenterID sets the "renter_id" field.
+func (_c *IndividualCreate) SetRenterID(v string) *IndividualCreate {
+	_c.mutation.SetRenterID(v)
+	return _c
+}
+
 // SetTenantID sets the "tenant_id" field.
 func (_c *IndividualCreate) SetTenantID(v string) *IndividualCreate {
 	_c.mutation.SetTenantID(v)
@@ -115,19 +121,9 @@ func (_c *IndividualCreate) SetTenant(v *Tenant) *IndividualCreate {
 	return _c.SetTenantID(v.ID)
 }
 
-// AddRenterIDs adds the "renters" edge to the Renter entity by IDs.
-func (_c *IndividualCreate) AddRenterIDs(ids ...string) *IndividualCreate {
-	_c.mutation.AddRenterIDs(ids...)
-	return _c
-}
-
-// AddRenters adds the "renters" edges to the Renter entity.
-func (_c *IndividualCreate) AddRenters(v ...*Renter) *IndividualCreate {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddRenterIDs(ids...)
+// SetRenter sets the "renter" edge to the Renter entity.
+func (_c *IndividualCreate) SetRenter(v *Renter) *IndividualCreate {
+	return _c.SetRenterID(v.ID)
 }
 
 // Mutation returns the IndividualMutation object of the builder.
@@ -164,6 +160,14 @@ func (_c *IndividualCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *IndividualCreate) check() error {
+	if _, ok := _c.mutation.RenterID(); !ok {
+		return &ValidationError{Name: "renter_id", err: errors.New(`entgen: missing required field "Individual.renter_id"`)}
+	}
+	if v, ok := _c.mutation.RenterID(); ok {
+		if err := individual.RenterIDValidator(v); err != nil {
+			return &ValidationError{Name: "renter_id", err: fmt.Errorf(`entgen: validator failed for field "Individual.renter_id": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.TenantID(); !ok {
 		return &ValidationError{Name: "tenant_id", err: errors.New(`entgen: missing required field "Individual.tenant_id"`)}
 	}
@@ -197,6 +201,9 @@ func (_c *IndividualCreate) check() error {
 	}
 	if len(_c.mutation.TenantIDs()) == 0 {
 		return &ValidationError{Name: "tenant", err: errors.New(`entgen: missing required edge "Individual.tenant"`)}
+	}
+	if len(_c.mutation.RenterIDs()) == 0 {
+		return &ValidationError{Name: "renter", err: errors.New(`entgen: missing required edge "Individual.renter"`)}
 	}
 	return nil
 }
@@ -274,12 +281,12 @@ func (_c *IndividualCreate) createSpec() (*Individual, *sqlgraph.CreateSpec) {
 		_node.TenantID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.RentersIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.RenterIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   individual.RentersTable,
-			Columns: []string{individual.RentersColumn},
+			Table:   individual.RenterTable,
+			Columns: []string{individual.RenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(renter.FieldID, field.TypeString),
@@ -288,6 +295,7 @@ func (_c *IndividualCreate) createSpec() (*Individual, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.RenterID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

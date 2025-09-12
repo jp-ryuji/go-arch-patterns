@@ -65,6 +65,11 @@ func IDContainsFold(id string) predicate.Company {
 	return predicate.Company(sql.FieldContainsFold(FieldID, id))
 }
 
+// RenterID applies equality check predicate on the "renter_id" field. It's identical to RenterIDEQ.
+func RenterID(v string) predicate.Company {
+	return predicate.Company(sql.FieldEQ(FieldRenterID, v))
+}
+
 // TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
 func TenantID(v string) predicate.Company {
 	return predicate.Company(sql.FieldEQ(FieldTenantID, v))
@@ -93,6 +98,71 @@ func UpdatedAt(v time.Time) predicate.Company {
 // DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
 func DeletedAt(v time.Time) predicate.Company {
 	return predicate.Company(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// RenterIDEQ applies the EQ predicate on the "renter_id" field.
+func RenterIDEQ(v string) predicate.Company {
+	return predicate.Company(sql.FieldEQ(FieldRenterID, v))
+}
+
+// RenterIDNEQ applies the NEQ predicate on the "renter_id" field.
+func RenterIDNEQ(v string) predicate.Company {
+	return predicate.Company(sql.FieldNEQ(FieldRenterID, v))
+}
+
+// RenterIDIn applies the In predicate on the "renter_id" field.
+func RenterIDIn(vs ...string) predicate.Company {
+	return predicate.Company(sql.FieldIn(FieldRenterID, vs...))
+}
+
+// RenterIDNotIn applies the NotIn predicate on the "renter_id" field.
+func RenterIDNotIn(vs ...string) predicate.Company {
+	return predicate.Company(sql.FieldNotIn(FieldRenterID, vs...))
+}
+
+// RenterIDGT applies the GT predicate on the "renter_id" field.
+func RenterIDGT(v string) predicate.Company {
+	return predicate.Company(sql.FieldGT(FieldRenterID, v))
+}
+
+// RenterIDGTE applies the GTE predicate on the "renter_id" field.
+func RenterIDGTE(v string) predicate.Company {
+	return predicate.Company(sql.FieldGTE(FieldRenterID, v))
+}
+
+// RenterIDLT applies the LT predicate on the "renter_id" field.
+func RenterIDLT(v string) predicate.Company {
+	return predicate.Company(sql.FieldLT(FieldRenterID, v))
+}
+
+// RenterIDLTE applies the LTE predicate on the "renter_id" field.
+func RenterIDLTE(v string) predicate.Company {
+	return predicate.Company(sql.FieldLTE(FieldRenterID, v))
+}
+
+// RenterIDContains applies the Contains predicate on the "renter_id" field.
+func RenterIDContains(v string) predicate.Company {
+	return predicate.Company(sql.FieldContains(FieldRenterID, v))
+}
+
+// RenterIDHasPrefix applies the HasPrefix predicate on the "renter_id" field.
+func RenterIDHasPrefix(v string) predicate.Company {
+	return predicate.Company(sql.FieldHasPrefix(FieldRenterID, v))
+}
+
+// RenterIDHasSuffix applies the HasSuffix predicate on the "renter_id" field.
+func RenterIDHasSuffix(v string) predicate.Company {
+	return predicate.Company(sql.FieldHasSuffix(FieldRenterID, v))
+}
+
+// RenterIDEqualFold applies the EqualFold predicate on the "renter_id" field.
+func RenterIDEqualFold(v string) predicate.Company {
+	return predicate.Company(sql.FieldEqualFold(FieldRenterID, v))
+}
+
+// RenterIDContainsFold applies the ContainsFold predicate on the "renter_id" field.
+func RenterIDContainsFold(v string) predicate.Company {
+	return predicate.Company(sql.FieldContainsFold(FieldRenterID, v))
 }
 
 // TenantIDEQ applies the EQ predicate on the "tenant_id" field.
@@ -463,21 +533,21 @@ func HasTenantWith(preds ...predicate.Tenant) predicate.Company {
 	})
 }
 
-// HasRenters applies the HasEdge predicate on the "renters" edge.
-func HasRenters() predicate.Company {
+// HasRenter applies the HasEdge predicate on the "renter" edge.
+func HasRenter() predicate.Company {
 	return predicate.Company(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, RentersTable, RentersColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, RenterTable, RenterColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasRentersWith applies the HasEdge predicate on the "renters" edge with a given conditions (other predicates).
-func HasRentersWith(preds ...predicate.Renter) predicate.Company {
+// HasRenterWith applies the HasEdge predicate on the "renter" edge with a given conditions (other predicates).
+func HasRenterWith(preds ...predicate.Renter) predicate.Company {
 	return predicate.Company(func(s *sql.Selector) {
-		step := newRentersStep()
+		step := newRenterStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

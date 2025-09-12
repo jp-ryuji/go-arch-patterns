@@ -14,10 +14,8 @@ const (
 	FieldID = "id"
 	// FieldTenantID holds the string denoting the tenant_id field in the database.
 	FieldTenantID = "tenant_id"
-	// FieldRenterEntityID holds the string denoting the renter_entity_id field in the database.
-	FieldRenterEntityID = "renter_entity_id"
-	// FieldRenterEntityType holds the string denoting the renter_entity_type field in the database.
-	FieldRenterEntityType = "renter_entity_type"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -28,6 +26,10 @@ const (
 	EdgeTenant = "tenant"
 	// EdgeRentals holds the string denoting the rentals edge name in mutations.
 	EdgeRentals = "rentals"
+	// EdgeCompany holds the string denoting the company edge name in mutations.
+	EdgeCompany = "company"
+	// EdgeIndividual holds the string denoting the individual edge name in mutations.
+	EdgeIndividual = "individual"
 	// Table holds the table name of the renter in the database.
 	Table = "renters"
 	// TenantTable is the table that holds the tenant relation/edge.
@@ -44,14 +46,27 @@ const (
 	RentalsInverseTable = "rentals"
 	// RentalsColumn is the table column denoting the rentals relation/edge.
 	RentalsColumn = "renter_id"
+	// CompanyTable is the table that holds the company relation/edge.
+	CompanyTable = "renters"
+	// CompanyInverseTable is the table name for the Company entity.
+	// It exists in this package in order to avoid circular dependency with the "company" package.
+	CompanyInverseTable = "companies"
+	// CompanyColumn is the table column denoting the company relation/edge.
+	CompanyColumn = "renter_company"
+	// IndividualTable is the table that holds the individual relation/edge.
+	IndividualTable = "renters"
+	// IndividualInverseTable is the table name for the Individual entity.
+	// It exists in this package in order to avoid circular dependency with the "individual" package.
+	IndividualInverseTable = "individuals"
+	// IndividualColumn is the table column denoting the individual relation/edge.
+	IndividualColumn = "renter_individual"
 )
 
 // Columns holds all SQL columns for renter fields.
 var Columns = []string{
 	FieldID,
 	FieldTenantID,
-	FieldRenterEntityID,
-	FieldRenterEntityType,
+	FieldType,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
@@ -60,8 +75,8 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "renters"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"company_renters",
-	"individual_renters",
+	"renter_company",
+	"renter_individual",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -82,10 +97,8 @@ func ValidColumn(column string) bool {
 var (
 	// TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
 	TenantIDValidator func(string) error
-	// RenterEntityIDValidator is a validator for the "renter_entity_id" field. It is called by the builders before save.
-	RenterEntityIDValidator func(string) error
-	// RenterEntityTypeValidator is a validator for the "renter_entity_type" field. It is called by the builders before save.
-	RenterEntityTypeValidator func(string) error
+	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	TypeValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
@@ -103,14 +116,9 @@ func ByTenantID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTenantID, opts...).ToFunc()
 }
 
-// ByRenterEntityID orders the results by the renter_entity_id field.
-func ByRenterEntityID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRenterEntityID, opts...).ToFunc()
-}
-
-// ByRenterEntityType orders the results by the renter_entity_type field.
-func ByRenterEntityType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRenterEntityType, opts...).ToFunc()
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.
@@ -148,6 +156,20 @@ func ByRentals(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newRentalsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByCompanyField orders the results by company field.
+func ByCompanyField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCompanyStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByIndividualField orders the results by individual field.
+func ByIndividualField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIndividualStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newTenantStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -160,5 +182,19 @@ func newRentalsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(RentalsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, RentalsTable, RentalsColumn),
+	)
+}
+func newCompanyStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CompanyInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, CompanyTable, CompanyColumn),
+	)
+}
+func newIndividualStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IndividualInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, IndividualTable, IndividualColumn),
 	)
 }

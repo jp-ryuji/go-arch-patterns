@@ -30,6 +30,20 @@ func (_u *CompanyUpdate) Where(ps ...predicate.Company) *CompanyUpdate {
 	return _u
 }
 
+// SetRenterID sets the "renter_id" field.
+func (_u *CompanyUpdate) SetRenterID(v string) *CompanyUpdate {
+	_u.mutation.SetRenterID(v)
+	return _u
+}
+
+// SetNillableRenterID sets the "renter_id" field if the given value is not nil.
+func (_u *CompanyUpdate) SetNillableRenterID(v *string) *CompanyUpdate {
+	if v != nil {
+		_u.SetRenterID(*v)
+	}
+	return _u
+}
+
 // SetTenantID sets the "tenant_id" field.
 func (_u *CompanyUpdate) SetTenantID(v string) *CompanyUpdate {
 	_u.mutation.SetTenantID(v)
@@ -137,19 +151,9 @@ func (_u *CompanyUpdate) SetTenant(v *Tenant) *CompanyUpdate {
 	return _u.SetTenantID(v.ID)
 }
 
-// AddRenterIDs adds the "renters" edge to the Renter entity by IDs.
-func (_u *CompanyUpdate) AddRenterIDs(ids ...string) *CompanyUpdate {
-	_u.mutation.AddRenterIDs(ids...)
-	return _u
-}
-
-// AddRenters adds the "renters" edges to the Renter entity.
-func (_u *CompanyUpdate) AddRenters(v ...*Renter) *CompanyUpdate {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddRenterIDs(ids...)
+// SetRenter sets the "renter" edge to the Renter entity.
+func (_u *CompanyUpdate) SetRenter(v *Renter) *CompanyUpdate {
+	return _u.SetRenterID(v.ID)
 }
 
 // Mutation returns the CompanyMutation object of the builder.
@@ -163,25 +167,10 @@ func (_u *CompanyUpdate) ClearTenant() *CompanyUpdate {
 	return _u
 }
 
-// ClearRenters clears all "renters" edges to the Renter entity.
-func (_u *CompanyUpdate) ClearRenters() *CompanyUpdate {
-	_u.mutation.ClearRenters()
+// ClearRenter clears the "renter" edge to the Renter entity.
+func (_u *CompanyUpdate) ClearRenter() *CompanyUpdate {
+	_u.mutation.ClearRenter()
 	return _u
-}
-
-// RemoveRenterIDs removes the "renters" edge to Renter entities by IDs.
-func (_u *CompanyUpdate) RemoveRenterIDs(ids ...string) *CompanyUpdate {
-	_u.mutation.RemoveRenterIDs(ids...)
-	return _u
-}
-
-// RemoveRenters removes "renters" edges to Renter entities.
-func (_u *CompanyUpdate) RemoveRenters(v ...*Renter) *CompanyUpdate {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveRenterIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -213,6 +202,11 @@ func (_u *CompanyUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *CompanyUpdate) check() error {
+	if v, ok := _u.mutation.RenterID(); ok {
+		if err := company.RenterIDValidator(v); err != nil {
+			return &ValidationError{Name: "renter_id", err: fmt.Errorf(`entgen: validator failed for field "Company.renter_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.TenantID(); ok {
 		if err := company.TenantIDValidator(v); err != nil {
 			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`entgen: validator failed for field "Company.tenant_id": %w`, err)}
@@ -230,6 +224,9 @@ func (_u *CompanyUpdate) check() error {
 	}
 	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
 		return errors.New(`entgen: clearing a required unique edge "Company.tenant"`)
+	}
+	if _u.mutation.RenterCleared() && len(_u.mutation.RenterIDs()) > 0 {
+		return errors.New(`entgen: clearing a required unique edge "Company.renter"`)
 	}
 	return nil
 }
@@ -299,12 +296,12 @@ func (_u *CompanyUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.RentersCleared() {
+	if _u.mutation.RenterCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   company.RentersTable,
-			Columns: []string{company.RentersColumn},
+			Table:   company.RenterTable,
+			Columns: []string{company.RenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(renter.FieldID, field.TypeString),
@@ -312,28 +309,12 @@ func (_u *CompanyUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedRentersIDs(); len(nodes) > 0 && !_u.mutation.RentersCleared() {
+	if nodes := _u.mutation.RenterIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   company.RentersTable,
-			Columns: []string{company.RentersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(renter.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RentersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   company.RentersTable,
-			Columns: []string{company.RentersColumn},
+			Table:   company.RenterTable,
+			Columns: []string{company.RenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(renter.FieldID, field.TypeString),
@@ -362,6 +343,20 @@ type CompanyUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *CompanyMutation
+}
+
+// SetRenterID sets the "renter_id" field.
+func (_u *CompanyUpdateOne) SetRenterID(v string) *CompanyUpdateOne {
+	_u.mutation.SetRenterID(v)
+	return _u
+}
+
+// SetNillableRenterID sets the "renter_id" field if the given value is not nil.
+func (_u *CompanyUpdateOne) SetNillableRenterID(v *string) *CompanyUpdateOne {
+	if v != nil {
+		_u.SetRenterID(*v)
+	}
+	return _u
 }
 
 // SetTenantID sets the "tenant_id" field.
@@ -471,19 +466,9 @@ func (_u *CompanyUpdateOne) SetTenant(v *Tenant) *CompanyUpdateOne {
 	return _u.SetTenantID(v.ID)
 }
 
-// AddRenterIDs adds the "renters" edge to the Renter entity by IDs.
-func (_u *CompanyUpdateOne) AddRenterIDs(ids ...string) *CompanyUpdateOne {
-	_u.mutation.AddRenterIDs(ids...)
-	return _u
-}
-
-// AddRenters adds the "renters" edges to the Renter entity.
-func (_u *CompanyUpdateOne) AddRenters(v ...*Renter) *CompanyUpdateOne {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddRenterIDs(ids...)
+// SetRenter sets the "renter" edge to the Renter entity.
+func (_u *CompanyUpdateOne) SetRenter(v *Renter) *CompanyUpdateOne {
+	return _u.SetRenterID(v.ID)
 }
 
 // Mutation returns the CompanyMutation object of the builder.
@@ -497,25 +482,10 @@ func (_u *CompanyUpdateOne) ClearTenant() *CompanyUpdateOne {
 	return _u
 }
 
-// ClearRenters clears all "renters" edges to the Renter entity.
-func (_u *CompanyUpdateOne) ClearRenters() *CompanyUpdateOne {
-	_u.mutation.ClearRenters()
+// ClearRenter clears the "renter" edge to the Renter entity.
+func (_u *CompanyUpdateOne) ClearRenter() *CompanyUpdateOne {
+	_u.mutation.ClearRenter()
 	return _u
-}
-
-// RemoveRenterIDs removes the "renters" edge to Renter entities by IDs.
-func (_u *CompanyUpdateOne) RemoveRenterIDs(ids ...string) *CompanyUpdateOne {
-	_u.mutation.RemoveRenterIDs(ids...)
-	return _u
-}
-
-// RemoveRenters removes "renters" edges to Renter entities.
-func (_u *CompanyUpdateOne) RemoveRenters(v ...*Renter) *CompanyUpdateOne {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveRenterIDs(ids...)
 }
 
 // Where appends a list predicates to the CompanyUpdate builder.
@@ -560,6 +530,11 @@ func (_u *CompanyUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *CompanyUpdateOne) check() error {
+	if v, ok := _u.mutation.RenterID(); ok {
+		if err := company.RenterIDValidator(v); err != nil {
+			return &ValidationError{Name: "renter_id", err: fmt.Errorf(`entgen: validator failed for field "Company.renter_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.TenantID(); ok {
 		if err := company.TenantIDValidator(v); err != nil {
 			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`entgen: validator failed for field "Company.tenant_id": %w`, err)}
@@ -577,6 +552,9 @@ func (_u *CompanyUpdateOne) check() error {
 	}
 	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
 		return errors.New(`entgen: clearing a required unique edge "Company.tenant"`)
+	}
+	if _u.mutation.RenterCleared() && len(_u.mutation.RenterIDs()) > 0 {
+		return errors.New(`entgen: clearing a required unique edge "Company.renter"`)
 	}
 	return nil
 }
@@ -663,12 +641,12 @@ func (_u *CompanyUpdateOne) sqlSave(ctx context.Context) (_node *Company, err er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.RentersCleared() {
+	if _u.mutation.RenterCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   company.RentersTable,
-			Columns: []string{company.RentersColumn},
+			Table:   company.RenterTable,
+			Columns: []string{company.RenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(renter.FieldID, field.TypeString),
@@ -676,28 +654,12 @@ func (_u *CompanyUpdateOne) sqlSave(ctx context.Context) (_node *Company, err er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedRentersIDs(); len(nodes) > 0 && !_u.mutation.RentersCleared() {
+	if nodes := _u.mutation.RenterIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   company.RentersTable,
-			Columns: []string{company.RentersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(renter.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RentersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   company.RentersTable,
-			Columns: []string{company.RentersColumn},
+			Table:   company.RenterTable,
+			Columns: []string{company.RenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(renter.FieldID, field.TypeString),
