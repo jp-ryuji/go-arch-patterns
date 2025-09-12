@@ -29,7 +29,6 @@ type Individual struct {
 
 // IndividualRefs holds references to related entities
 type IndividualRefs struct {
-	Renters Renters
 }
 
 // NewIndividual creates a new Individual

@@ -25,7 +25,6 @@ type Company struct {
 
 // CompanyRefs holds references to related entities
 type CompanyRefs struct {
-	Renters Renters
 }
 
 // NewCompany creates a new Company

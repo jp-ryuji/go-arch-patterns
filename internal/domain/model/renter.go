@@ -31,9 +31,7 @@ type Renter struct {
 
 // RenterRefs holds references to related entities
 type RenterRefs struct {
-	Company    *Company
-	Individual *Individual
-	Rentals    Rentals
+	Rentals Rentals
 }
 
 // NewRenter creates a new Renter

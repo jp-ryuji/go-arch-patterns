@@ -20,9 +20,7 @@ type Renter struct {
 
 // RenterLoadOptions specifies which associations to load
 type RenterLoadOptions struct {
-	WithCompany    bool
-	WithIndividual bool
-	WithRentals    bool
+	WithRentals bool
 }
 
 // ToDomain converts Renter to domain model with specified associations
@@ -44,7 +42,7 @@ func (r *Renter) ToDomain(opts ...RenterLoadOptions) *model.Renter {
 	option := opts[0]
 
 	// Create Refs if any associations need to be loaded
-	if option.WithCompany || option.WithIndividual || option.WithRentals {
+	if option.WithRentals {
 		renter.Refs = &model.RenterRefs{}
 
 		// Load rentals if requested and available
