@@ -9,22 +9,21 @@ import (
 // Renters is a slice of Renter
 type Renters []*Renter
 
-// RenterEntity represents the type of entity that can be a renter
-type RenterEntity string
+// RenterType represents the type of renter
+type RenterType string
 
 const (
-	CompanyRenter    RenterEntity = "company"
-	IndividualRenter RenterEntity = "individual"
+	CompanyRenter    RenterType = "company"
+	IndividualRenter RenterType = "individual"
 )
 
-// Renter represents a renter entity
+// Renter represents a renter entity (base class for Company and Individual)
 type Renter struct {
-	ID               string
-	TenantID         string
-	RenterEntityID   string
-	RenterEntityType RenterEntity
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
+	ID        string
+	TenantID  string
+	Type      RenterType
+	CreatedAt time.Time
+	UpdatedAt time.Time
 
 	// References to related entities
 	Refs *RenterRefs
@@ -38,14 +37,13 @@ type RenterRefs struct {
 }
 
 // NewRenter creates a new Renter
-func NewRenter(tenantID, renterEntityID string, renterEntityType RenterEntity, createdAt time.Time) *Renter {
+func NewRenter(tenantID string, renterType RenterType, createdAt time.Time) *Renter {
 	return &Renter{
-		ID:               uuid.New().String(),
-		TenantID:         tenantID,
-		RenterEntityID:   renterEntityID,
-		RenterEntityType: renterEntityType,
-		CreatedAt:        createdAt,
-		UpdatedAt:        createdAt,
+		ID:        uuid.New().String(),
+		TenantID:  tenantID,
+		Type:      renterType,
+		CreatedAt: createdAt,
+		UpdatedAt: createdAt,
 	}
 }
 

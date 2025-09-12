@@ -21,10 +21,7 @@ func (Renter) Fields() []ent.Field {
 		field.String("tenant_id").
 			MaxLen(36).
 			NotEmpty(),
-		field.String("renter_entity_id").
-			MaxLen(36).
-			NotEmpty(),
-		field.String("renter_entity_type").
+		field.String("type").
 			MaxLen(20).
 			NotEmpty(),
 		field.Time("created_at").
@@ -46,15 +43,16 @@ func (Renter) Edges() []ent.Edge {
 			Required().
 			Unique(),
 		edge.To("rentals", Rental.Type),
-		// Polymorphic relationship - will be handled in code, not in schema
+		edge.To("company", Company.Type).
+			Unique(),
+		edge.To("individual", Individual.Type).
+			Unique(),
 	}
 }
 
 // Indexes of the Renter.
 func (Renter) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("renter_entity_id", "renter_entity_type").
-			Unique(),
 		index.Fields("deleted_at"),
 		index.Fields("tenant_id"),
 	}

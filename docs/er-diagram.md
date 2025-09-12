@@ -5,17 +5,17 @@ This system represents a SaaS platform for car rental companies.
 Key characteristics of this system:
 
 - **SaaS Platform**: Multi-tenant architecture where each tenant is a separate car rental company
-- **Polymorphic Association**: Renter can be either a Company or an Individual (demonstrated through the Renter entity)
+- **Class Table Inheritance**: Renter is implemented using Class Table Inheritance pattern where Company and Individual are specialized types of Renter
 - **Many-to-Many Association**: Rental and Option entities are connected through the RentalOption entity, with a composite unique index applied to RentalID and OptionID to ensure that the same option cannot be attached to a rental more than once
 
-> **Note**: For simplicity, common columns such as `ID`, `CreatedAt`, and `UpdatedAt` have been omitted from the diagram below. Additionally, the explicit associations with the Tenant entity have been removed, though in the actual implementation all entities are associated with a Tenant in a multi-tenant architecture.
+> **Note**: For simplicity, common columns such as `ID`, `CreatedAt`, and `UpdatedAt` have been omitted from the diagram below.
+> **Note**: The explicit associations with the Tenant entity have been removed, though in the actual implementation all entities are associated with a Tenant in a multi-tenant architecture.
 
 ```mermaid
 erDiagram
     Company ||--o{ Renter : "can be"
     Individual ||--o{ Renter : "can be"
     Car ||--o{ Rental : has
-
     Renter ||--o{ Rental : has
     Option ||--o{ RentalOption : has
     Rental ||--o{ RentalOption : has
@@ -29,24 +29,27 @@ erDiagram
     }
 
     Company {
+        string ID
+        string RenterID "FK"
         string Name
         string CompanySize
     }
 
     Individual {
+        string ID
+        string RenterID "FK"
         string Email
         string FirstName
         string LastName
     }
 
     Renter {
-        string RenterEntityID
-        string RenterEntityType
+        string ID
     }
 
     Rental {
-        string CarID
-        string RenterID
+        string CarID "FK"
+        string RenterID "FK"
         time StartsAt
         time EndsAt
     }
@@ -66,16 +69,14 @@ erDiagram
 
 ```mermaid
 erDiagram
-    tenants ||--o{ cars : owns
-    tenants ||--o{ companies : owns
-    tenants ||--o{ individuals : owns
     tenants ||--o{ renters : owns
+    tenants ||--o{ cars : owns
     tenants ||--o{ rentals : owns
     tenants ||--o{ options : owns
     tenants ||--o{ rental_options : owns
 
-    companies ||--o{ renters : "polymorphic (type=company)"
-    individuals ||--o{ renters : "polymorphic (type=individual)"
+    renters ||--o{ companies : "class table inheritance"
+    renters ||--o{ individuals : "class table inheritance"
 
     cars ||--o{ rentals : has
     renters ||--o{ rentals : places
@@ -91,10 +92,9 @@ erDiagram
         timestamp deleted_at
     }
 
-    cars {
+    renters {
         string id PK
         string tenant_id FK
-        string model
         timestamp created_at
         timestamp updated_at
         timestamp deleted_at
@@ -102,6 +102,7 @@ erDiagram
 
     companies {
         string id PK
+        string renter_id FK
         string tenant_id FK
         string name
         string company_size
@@ -112,6 +113,7 @@ erDiagram
 
     individuals {
         string id PK
+        string renter_id FK
         string tenant_id FK
         string email
         string first_name
@@ -121,11 +123,10 @@ erDiagram
         timestamp deleted_at
     }
 
-    renters {
+    cars {
         string id PK
         string tenant_id FK
-        string renter_entity_id
-        string renter_entity_type
+        string model
         timestamp created_at
         timestamp updated_at
         timestamp deleted_at

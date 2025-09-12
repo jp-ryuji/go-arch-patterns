@@ -11,6 +11,7 @@ import (
 // Individual represents the database model for Individual
 type Individual struct {
 	ID        string
+	RenterID  string
 	TenantID  string
 	Email     string
 	FirstName string
@@ -44,6 +45,7 @@ func (i *Individual) ToDomain(opts ...IndividualLoadOptions) (*model.Individual,
 
 	individual := &model.Individual{
 		ID:        i.ID,
+		RenterID:  i.RenterID,
 		TenantID:  i.TenantID,
 		Email:     *emailVO,
 		FirstName: firstName,
@@ -89,6 +91,7 @@ func FromDomainIndividual(individual *model.Individual) *Individual {
 
 	return &Individual{
 		ID:        individual.ID,
+		RenterID:  individual.RenterID,
 		TenantID:  individual.TenantID,
 		Email:     individual.Email.String(),
 		FirstName: firstName,
