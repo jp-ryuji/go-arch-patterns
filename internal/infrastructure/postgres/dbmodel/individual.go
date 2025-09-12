@@ -19,13 +19,10 @@ type Individual struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time
-
-	Renters []Renter
 }
 
 // IndividualLoadOptions specifies which associations to load
 type IndividualLoadOptions struct {
-	WithRenters bool
 }
 
 // ToDomain converts Individual to domain model with specified associations
@@ -60,19 +57,8 @@ func (i *Individual) ToDomain(opts ...IndividualLoadOptions) (*model.Individual,
 		return individual, nil
 	}
 
-	option := opts[0]
-
-	// Only create Refs if renters need to be loaded
-	if option.WithRenters && len(i.Renters) > 0 {
-		renters := make(model.Renters, len(i.Renters))
-		for j, renter := range i.Renters {
-			renters[j] = renter.ToDomain()
-		}
-
-		individual.Refs = &model.IndividualRefs{
-			Renters: renters,
-		}
-	}
+	// Create Refs if any associations need to be loaded
+	individual.Refs = &model.IndividualRefs{}
 
 	return individual, nil
 }

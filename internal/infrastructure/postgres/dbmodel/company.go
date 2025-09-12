@@ -16,13 +16,10 @@ type Company struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   *time.Time
-
-	Renters []Renter
 }
 
 // CompanyLoadOptions specifies which associations to load
 type CompanyLoadOptions struct {
-	WithRenters bool
 }
 
 // ToDomain converts Company to domain model with specified associations
@@ -43,19 +40,8 @@ func (c *Company) ToDomain(opts ...CompanyLoadOptions) *model.Company {
 		return company
 	}
 
-	option := opts[0]
-
-	// Only create Refs if renters need to be loaded
-	if option.WithRenters && len(c.Renters) > 0 {
-		renters := make(model.Renters, len(c.Renters))
-		for i, renter := range c.Renters {
-			renters[i] = renter.ToDomain()
-		}
-
-		company.Refs = &model.CompanyRefs{
-			Renters: renters,
-		}
-	}
+	// Create Refs if any associations need to be loaded
+	company.Refs = &model.CompanyRefs{}
 
 	return company
 }
