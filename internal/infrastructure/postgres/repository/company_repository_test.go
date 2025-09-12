@@ -16,32 +16,38 @@ import (
 )
 
 // testCompanySetup is a helper function that provides common test setup for company tests
-func testCompanySetup(t *testing.T, tenantCode string) (repository.CompanyRepository, context.Context, *model.Tenant) {
+func testCompanySetup(t *testing.T, tenantCode string) (repository.CompanyRepository, repository.RenterRepository, context.Context, *model.Tenant) {
 	t.Helper()
 
 	// Skip this test if not running integration tests
 	testutil.SkipIfShort(t)
 
 	repo := companyrepo.NewCompanyRepository(testutil.DBClient)
+	renterRepo := companyrepo.NewRenterRepository(testutil.DBClient)
 	ctx := context.Background()
 	tenant := testutil.CreateTestTenant(t, tenantCode)
 
-	return repo, ctx, tenant
+	return repo, renterRepo, ctx, tenant
 }
 
 // TestCompanyRepository_Create tests the Create method of the company repository.
 func TestCompanyRepository_Create(t *testing.T) {
-	repo, ctx, tenant := testCompanySetup(t, "test-tenant-company-create")
+	repo, renterRepo, ctx, tenant := testCompanySetup(t, "test-tenant-company-create")
+
+	// Create a renter first
+	renter := model.NewRenter(tenant.ID, model.CompanyRenter, time.Now())
+	err := renterRepo.Create(ctx, renter)
+	require.NoError(t, err)
 
 	// Create a company
-	company := model.NewCompany(tenant.ID, "Test Company", model.CompanySizeMedium, time.Now())
-	err := repo.Create(ctx, company)
+	company := model.NewCompany(renter.ID, tenant.ID, "Test Company", model.CompanySizeMedium, time.Now())
+	err = repo.Create(ctx, company)
 	require.NoError(t, err)
 
 	// Verify the company was created
-	foundCompany, err := repo.GetByID(ctx, company.ID)
+	foundCompany, err := repo.GetByID(ctx, company.RenterID)
 	require.NoError(t, err)
-	require.Equal(t, company.ID, foundCompany.ID)
+	require.Equal(t, company.RenterID, foundCompany.RenterID)
 	require.Equal(t, company.TenantID, foundCompany.TenantID)
 	require.Equal(t, company.Name, foundCompany.Name)
 	require.Equal(t, company.CompanySize, foundCompany.CompanySize)
@@ -49,17 +55,22 @@ func TestCompanyRepository_Create(t *testing.T) {
 
 // TestCompanyRepository_GetByID tests the GetByID method of the company repository.
 func TestCompanyRepository_GetByID(t *testing.T) {
-	repo, ctx, tenant := testCompanySetup(t, "test-tenant-company-get")
+	repo, renterRepo, ctx, tenant := testCompanySetup(t, "test-tenant-company-get")
+
+	// Create a renter first
+	renter := model.NewRenter(tenant.ID, model.CompanyRenter, time.Now())
+	err := renterRepo.Create(ctx, renter)
+	require.NoError(t, err)
 
 	// Create a company
-	company := model.NewCompany(tenant.ID, "Another Test Company", model.CompanySizeLarge, time.Now())
-	err := repo.Create(ctx, company)
+	company := model.NewCompany(renter.ID, tenant.ID, "Another Test Company", model.CompanySizeLarge, time.Now())
+	err = repo.Create(ctx, company)
 	require.NoError(t, err)
 
 	// Get the company by ID
-	foundCompany, err := repo.GetByID(ctx, company.ID)
+	foundCompany, err := repo.GetByID(ctx, company.RenterID)
 	require.NoError(t, err)
-	require.Equal(t, company.ID, foundCompany.ID)
+	require.Equal(t, company.RenterID, foundCompany.RenterID)
 	require.Equal(t, company.TenantID, foundCompany.TenantID)
 	require.Equal(t, company.Name, foundCompany.Name)
 	require.Equal(t, company.CompanySize, foundCompany.CompanySize)
@@ -67,7 +78,7 @@ func TestCompanyRepository_GetByID(t *testing.T) {
 
 // TestCompanyRepository_GetByID_NotFound tests the GetByID method when a company doesn't exist.
 func TestCompanyRepository_GetByID_NotFound(t *testing.T) {
-	repo, ctx, _ := testCompanySetup(t, "test-tenant-company-get-not-found")
+	repo, _, ctx, _ := testCompanySetup(t, "test-tenant-company-get-not-found")
 
 	// Try to get a company that doesn't exist
 	_, err := repo.GetByID(ctx, "non-existent-id")
@@ -76,11 +87,16 @@ func TestCompanyRepository_GetByID_NotFound(t *testing.T) {
 
 // TestCompanyRepository_Update tests the Update method of the company repository.
 func TestCompanyRepository_Update(t *testing.T) {
-	repo, ctx, tenant := testCompanySetup(t, "test-tenant-company-update")
+	repo, renterRepo, ctx, tenant := testCompanySetup(t, "test-tenant-company-update")
+
+	// Create a renter first
+	renter := model.NewRenter(tenant.ID, model.CompanyRenter, time.Now())
+	err := renterRepo.Create(ctx, renter)
+	require.NoError(t, err)
 
 	// Create a company
-	company := model.NewCompany(tenant.ID, "Original Company", model.CompanySizeSmall, time.Now())
-	err := repo.Create(ctx, company)
+	company := model.NewCompany(renter.ID, tenant.ID, "Original Company", model.CompanySizeSmall, time.Now())
+	err = repo.Create(ctx, company)
 	require.NoError(t, err)
 
 	// Update the company
@@ -92,7 +108,7 @@ func TestCompanyRepository_Update(t *testing.T) {
 	require.NoError(t, err)
 
 	// Verify the update
-	updatedCompany, err := repo.GetByID(ctx, company.ID)
+	updatedCompany, err := repo.GetByID(ctx, company.RenterID)
 	require.NoError(t, err)
 	require.Equal(t, "Updated Company", updatedCompany.Name)
 	require.Equal(t, model.CompanySizeLarge, updatedCompany.CompanySize)
@@ -101,25 +117,30 @@ func TestCompanyRepository_Update(t *testing.T) {
 
 // TestCompanyRepository_Delete tests the Delete method of the company repository.
 func TestCompanyRepository_Delete(t *testing.T) {
-	repo, ctx, tenant := testCompanySetup(t, "test-tenant-company-delete")
+	repo, renterRepo, ctx, tenant := testCompanySetup(t, "test-tenant-company-delete")
+
+	// Create a renter first
+	renter := model.NewRenter(tenant.ID, model.CompanyRenter, time.Now())
+	err := renterRepo.Create(ctx, renter)
+	require.NoError(t, err)
 
 	// Create a company
-	company := model.NewCompany(tenant.ID, "Company to Delete", model.CompanySizeSmall, time.Now())
-	err := repo.Create(ctx, company)
+	company := model.NewCompany(renter.ID, tenant.ID, "Company to Delete", model.CompanySizeSmall, time.Now())
+	err = repo.Create(ctx, company)
 	require.NoError(t, err)
 
 	// Delete the company
-	err = repo.Delete(ctx, company.ID)
+	err = repo.Delete(ctx, company.RenterID)
 	require.NoError(t, err)
 
 	// Verify the company is deleted
-	_, err = repo.GetByID(ctx, company.ID)
+	_, err = repo.GetByID(ctx, company.RenterID)
 	require.Error(t, err)
 }
 
 // TestCompanyRepository_Delete_NotFound tests the Delete method when a company doesn't exist.
 func TestCompanyRepository_Delete_NotFound(t *testing.T) {
-	repo, ctx, _ := testCompanySetup(t, "test-tenant-company-delete-not-found")
+	repo, _, ctx, _ := testCompanySetup(t, "test-tenant-company-delete-not-found")
 
 	// Try to delete a company that doesn't exist
 	err := repo.Delete(ctx, "non-existent-id")

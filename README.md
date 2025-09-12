@@ -11,7 +11,7 @@ This repository demonstrates the following software engineering concepts:
 - **Value Object**:
   - *Definition*: See [Email value object](internal/domain/model/value/email.go) with [tests](internal/domain/model/value/email_test.go)
   - *Usage*: See [Individual entity](internal/domain/model/individual.go) using the Email value object
-- **Polymorphic Association**: See [Renter model](internal/domain/model/renter.go) representing either Individual or Company entities
+- **Class Table Inheritance**: See [Renter model](internal/domain/model/renter.go) as the base class with [Company](internal/domain/model/company.go) and [Individual](internal/domain/model/individual.go) as specialized subclasses
 
 ## Disclaimer
 

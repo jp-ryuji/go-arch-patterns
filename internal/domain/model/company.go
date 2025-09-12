@@ -9,9 +9,10 @@ import (
 // Companies is a slice of Company
 type Companies []*Company
 
-// Company represents a company entity
+// Company represents a company entity (inherits from Renter)
 type Company struct {
 	ID          string
+	RenterID    string
 	TenantID    string
 	Name        string
 	CompanySize CompanySize
@@ -28,9 +29,10 @@ type CompanyRefs struct {
 }
 
 // NewCompany creates a new Company
-func NewCompany(tenantID, name string, companySize CompanySize, createdAt time.Time) *Company {
+func NewCompany(renterID, tenantID, name string, companySize CompanySize, createdAt time.Time) *Company {
 	return &Company{
 		ID:          uuid.New().String(),
+		RenterID:    renterID,
 		TenantID:    tenantID,
 		Name:        name,
 		CompanySize: companySize,
@@ -39,9 +41,9 @@ func NewCompany(tenantID, name string, companySize CompanySize, createdAt time.T
 	}
 }
 
-// WithID creates a Company with a specific ID (for testing)
-func (c *Company) WithID(id string) *Company {
-	c.ID = id
+// WithRenterID creates a Company with a specific RenterID (for testing)
+func (c *Company) WithRenterID(renterID string) *Company {
+	c.RenterID = renterID
 	return c
 }
 

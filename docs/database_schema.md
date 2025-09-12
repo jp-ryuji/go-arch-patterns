@@ -24,6 +24,7 @@ This document provides an overview of the database schema for the Go Sample appl
 ### companies
 
 - **id** (varchar(36), primary key): Unique identifier for the company
+- **renter_id** (varchar(36), foreign key to renters.id): Reference to the parent renter entity
 - **tenant_id** (varchar(36), foreign key to tenants.id): Tenant that owns the company
 - **name** (varchar(255)): Company name
 - **company_size** (varchar(50)): Size of the company
@@ -34,6 +35,7 @@ This document provides an overview of the database schema for the Go Sample appl
 ### individuals
 
 - **id** (varchar(36), primary key): Unique identifier for the individual
+- **renter_id** (varchar(36), foreign key to renters.id): Reference to the parent renter entity
 - **tenant_id** (varchar(36), foreign key to tenants.id): Tenant that owns the individual
 - **email** (varchar(255), unique): Individual's email address
 - **first_name** (varchar(100)): Individual's first name (nullable)
@@ -46,8 +48,7 @@ This document provides an overview of the database schema for the Go Sample appl
 
 - **id** (varchar(36), primary key): Unique identifier for the renter
 - **tenant_id** (varchar(36), foreign key to tenants.id): Tenant that owns the renter
-- **renter_entity_id** (varchar(36)): ID of the entity (company or individual) that is the renter
-- **renter_entity_type** (varchar(20)): Type of entity ("company" or "individual")
+- **type** (varchar(20)): Type of renter ("company" or "individual")
 - **created_at** (timestamp with time zone): Creation timestamp
 - **updated_at** (timestamp with time zone): Last update timestamp
 - **deleted_at** (timestamp with time zone): Soft delete timestamp
@@ -114,13 +115,13 @@ This document provides an overview of the database schema for the Go Sample appl
    - One tenant can own many rental options
    - Foreign key: rental_options.tenant_id → tenants.id
 
-8. **Company ↔ Renters** (One-to-Many)
-   - One company can be associated with many renters
-   - Foreign key: renters.renter_entity_id → companies.id (when renter_entity_type = "company")
+8. **Renter ↔ Company** (One-to-One)
+   - One renter has one company (when the renter is a company)
+   - Foreign key: companies.renter_id → renters.id
 
-9. **Individual ↔ Renters** (One-to-Many)
-   - One individual can be associated with many renters
-   - Foreign key: renters.renter_entity_id → individuals.id (when renter_entity_type = "individual")
+9. **Renter ↔ Individual** (One-to-One)
+   - One renter has one individual (when the renter is an individual)
+   - Foreign key: individuals.renter_id → renters.id
 
 10. **Car ↔ Rentals** (One-to-Many)
     - One car can be rented many times
@@ -138,11 +139,11 @@ This document provides an overview of the database schema for the Go Sample appl
     - One rental can have many rental options
     - Foreign key: rental_options.rental_id → rentals.id
 
-## Polymorphic Relationship
+## Class Table Inheritance
 
-The renters table has a polymorphic relationship with companies and individuals:
+The renters table uses Class Table Inheritance pattern with companies and individuals tables:
 
-- renters.renter_entity_id references either companies.id or individuals.id
-- renters.renter_entity_type indicates which table is referenced ("company" or "individual")
+- companies.renter_id is a foreign key referencing renters.id
+- individuals.renter_id is a foreign key referencing renters.id
 
-This relationship is handled at the application level rather than using database foreign key constraints due to the polymorphic nature.
+This relationship enforces that each company or individual record is associated with exactly one renter record, implementing a true inheritance hierarchy at the database level.

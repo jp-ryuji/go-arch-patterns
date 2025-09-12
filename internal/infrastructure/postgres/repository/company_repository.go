@@ -28,6 +28,7 @@ func (r *companyRepository) Create(ctx context.Context, company *model.Company) 
 	_, err := r.client.Company.
 		Create().
 		SetID(company.ID).
+		SetRenterID(company.RenterID).
 		SetTenantID(company.TenantID).
 		SetName(company.Name).
 		SetCompanySize(company.CompanySize.String()).
@@ -39,7 +40,7 @@ func (r *companyRepository) Create(ctx context.Context, company *model.Company) 
 func (r *companyRepository) GetByID(ctx context.Context, id string) (*model.Company, error) {
 	companyDB, err := r.client.Company.
 		Query().
-		Where(company.ID(id)).
+		Where(company.RenterIDEQ(id)).
 		Only(ctx)
 	if err != nil {
 		return nil, err
@@ -48,6 +49,7 @@ func (r *companyRepository) GetByID(ctx context.Context, id string) (*model.Comp
 	// Convert Ent model to dbmodel and then to domain model
 	dbModel := &dbmodel.Company{
 		ID:          companyDB.ID,
+		RenterID:    companyDB.RenterID,
 		TenantID:    companyDB.TenantID,
 		Name:        companyDB.Name,
 		CompanySize: companyDB.CompanySize,
@@ -58,27 +60,29 @@ func (r *companyRepository) GetByID(ctx context.Context, id string) (*model.Comp
 }
 
 // Update updates an existing company
-func (r *companyRepository) Update(ctx context.Context, company *model.Company) error {
+func (r *companyRepository) Update(ctx context.Context, comp *model.Company) error {
 	// Update the UpdatedAt field to the current time
-	company.UpdatedAt = time.Now()
+	comp.UpdatedAt = time.Now()
 
 	_, err := r.client.Company.
-		UpdateOneID(company.ID).
-		SetTenantID(company.TenantID).
-		SetName(company.Name).
-		SetCompanySize(company.CompanySize.String()).
-		SetUpdatedAt(company.UpdatedAt).
+		Update().
+		Where(company.RenterIDEQ(comp.RenterID)).
+		SetTenantID(comp.TenantID).
+		SetName(comp.Name).
+		SetCompanySize(comp.CompanySize.String()).
+		SetUpdatedAt(comp.UpdatedAt).
 		Save(ctx)
 	return err
 }
 
 // Delete removes a company by its ID
 func (r *companyRepository) Delete(ctx context.Context, id string) error {
-	err := r.client.Company.
-		DeleteOneID(id).
+	affected, err := r.client.Company.
+		Delete().
+		Where(company.RenterIDEQ(id)).
 		Exec(ctx)
 		// Make the delete operation idempotent by ignoring "not found" errors
-		// If the record doesn't exist, DeleteOneID.Exec() will return an error
+		// If the record doesn't exist, Delete.Exec() will return an error
 		// We want Delete to be idempotent, so we ignore "not found" errors
 	if err != nil {
 		// Check if it's a "not found" error by checking the error message
@@ -88,6 +92,10 @@ func (r *companyRepository) Delete(ctx context.Context, id string) error {
 		}
 		return err
 	}
+
+	// If no rows were affected, it means the record didn't exist
+	// This is also an idempotent case, so we don't return an error
+	_ = affected
 
 	return nil
 }

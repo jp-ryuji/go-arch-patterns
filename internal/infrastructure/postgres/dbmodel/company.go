@@ -9,6 +9,7 @@ import (
 // Company represents the database model for Company
 type Company struct {
 	ID          string
+	RenterID    string
 	TenantID    string
 	Name        string
 	CompanySize string
@@ -28,6 +29,7 @@ type CompanyLoadOptions struct {
 func (c *Company) ToDomain(opts ...CompanyLoadOptions) *model.Company {
 	company := &model.Company{
 		ID:          c.ID,
+		RenterID:    c.RenterID,
 		TenantID:    c.TenantID,
 		Name:        c.Name,
 		CompanySize: model.NewCompanySize(c.CompanySize),
@@ -62,6 +64,7 @@ func (c *Company) ToDomain(opts ...CompanyLoadOptions) *model.Company {
 func FromDomainCompany(company *model.Company) *Company {
 	return &Company{
 		ID:          company.ID,
+		RenterID:    company.RenterID,
 		TenantID:    company.TenantID,
 		Name:        company.Name,
 		CompanySize: company.CompanySize.String(),

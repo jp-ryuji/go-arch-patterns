@@ -9,6 +9,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/company"
+	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/individual"
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/renter"
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/tenant"
 )
@@ -20,10 +22,8 @@ type Renter struct {
 	ID string `json:"id,omitempty"`
 	// TenantID holds the value of the "tenant_id" field.
 	TenantID string `json:"tenant_id,omitempty"`
-	// RenterEntityID holds the value of the "renter_entity_id" field.
-	RenterEntityID string `json:"renter_entity_id,omitempty"`
-	// RenterEntityType holds the value of the "renter_entity_type" field.
-	RenterEntityType string `json:"renter_entity_type,omitempty"`
+	// Type holds the value of the "type" field.
+	Type string `json:"type,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -32,10 +32,10 @@ type Renter struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RenterQuery when eager-loading is set.
-	Edges              RenterEdges `json:"edges"`
-	company_renters    *string
-	individual_renters *string
-	selectValues       sql.SelectValues
+	Edges             RenterEdges `json:"edges"`
+	renter_company    *string
+	renter_individual *string
+	selectValues      sql.SelectValues
 }
 
 // RenterEdges holds the relations/edges for other nodes in the graph.
@@ -44,9 +44,13 @@ type RenterEdges struct {
 	Tenant *Tenant `json:"tenant,omitempty"`
 	// Rentals holds the value of the rentals edge.
 	Rentals []*Rental `json:"rentals,omitempty"`
+	// Company holds the value of the company edge.
+	Company *Company `json:"company,omitempty"`
+	// Individual holds the value of the individual edge.
+	Individual *Individual `json:"individual,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [4]bool
 }
 
 // TenantOrErr returns the Tenant value or an error if the edge
@@ -69,18 +73,40 @@ func (e RenterEdges) RentalsOrErr() ([]*Rental, error) {
 	return nil, &NotLoadedError{edge: "rentals"}
 }
 
+// CompanyOrErr returns the Company value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RenterEdges) CompanyOrErr() (*Company, error) {
+	if e.Company != nil {
+		return e.Company, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: company.Label}
+	}
+	return nil, &NotLoadedError{edge: "company"}
+}
+
+// IndividualOrErr returns the Individual value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RenterEdges) IndividualOrErr() (*Individual, error) {
+	if e.Individual != nil {
+		return e.Individual, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: individual.Label}
+	}
+	return nil, &NotLoadedError{edge: "individual"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Renter) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case renter.FieldID, renter.FieldTenantID, renter.FieldRenterEntityID, renter.FieldRenterEntityType:
+		case renter.FieldID, renter.FieldTenantID, renter.FieldType:
 			values[i] = new(sql.NullString)
 		case renter.FieldCreatedAt, renter.FieldUpdatedAt, renter.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
-		case renter.ForeignKeys[0]: // company_renters
+		case renter.ForeignKeys[0]: // renter_company
 			values[i] = new(sql.NullString)
-		case renter.ForeignKeys[1]: // individual_renters
+		case renter.ForeignKeys[1]: // renter_individual
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -109,17 +135,11 @@ func (_m *Renter) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.TenantID = value.String
 			}
-		case renter.FieldRenterEntityID:
+		case renter.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field renter_entity_id", values[i])
+				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				_m.RenterEntityID = value.String
-			}
-		case renter.FieldRenterEntityType:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field renter_entity_type", values[i])
-			} else if value.Valid {
-				_m.RenterEntityType = value.String
+				_m.Type = value.String
 			}
 		case renter.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -142,17 +162,17 @@ func (_m *Renter) assignValues(columns []string, values []any) error {
 			}
 		case renter.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field company_renters", values[i])
+				return fmt.Errorf("unexpected type %T for field renter_company", values[i])
 			} else if value.Valid {
-				_m.company_renters = new(string)
-				*_m.company_renters = value.String
+				_m.renter_company = new(string)
+				*_m.renter_company = value.String
 			}
 		case renter.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field individual_renters", values[i])
+				return fmt.Errorf("unexpected type %T for field renter_individual", values[i])
 			} else if value.Valid {
-				_m.individual_renters = new(string)
-				*_m.individual_renters = value.String
+				_m.renter_individual = new(string)
+				*_m.renter_individual = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -175,6 +195,16 @@ func (_m *Renter) QueryTenant() *TenantQuery {
 // QueryRentals queries the "rentals" edge of the Renter entity.
 func (_m *Renter) QueryRentals() *RentalQuery {
 	return NewRenterClient(_m.config).QueryRentals(_m)
+}
+
+// QueryCompany queries the "company" edge of the Renter entity.
+func (_m *Renter) QueryCompany() *CompanyQuery {
+	return NewRenterClient(_m.config).QueryCompany(_m)
+}
+
+// QueryIndividual queries the "individual" edge of the Renter entity.
+func (_m *Renter) QueryIndividual() *IndividualQuery {
+	return NewRenterClient(_m.config).QueryIndividual(_m)
 }
 
 // Update returns a builder for updating this Renter.
@@ -203,11 +233,8 @@ func (_m *Renter) String() string {
 	builder.WriteString("tenant_id=")
 	builder.WriteString(_m.TenantID)
 	builder.WriteString(", ")
-	builder.WriteString("renter_entity_id=")
-	builder.WriteString(_m.RenterEntityID)
-	builder.WriteString(", ")
-	builder.WriteString("renter_entity_type=")
-	builder.WriteString(_m.RenterEntityType)
+	builder.WriteString("type=")
+	builder.WriteString(_m.Type)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

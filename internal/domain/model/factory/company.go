@@ -9,7 +9,13 @@ import (
 
 // NewCompany creates a new Company for testing purposes
 func NewCompany() *model.Company {
+	renter := model.NewRenter(
+		id.New(),
+		model.CompanyRenter,
+		time.Now(),
+	)
 	return model.NewCompany(
+		renter.ID,
 		id.New(),
 		"Test Company",
 		model.CompanySizeSmall,

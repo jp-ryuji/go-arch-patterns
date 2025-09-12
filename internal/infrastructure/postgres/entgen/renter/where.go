@@ -70,14 +70,9 @@ func TenantID(v string) predicate.Renter {
 	return predicate.Renter(sql.FieldEQ(FieldTenantID, v))
 }
 
-// RenterEntityID applies equality check predicate on the "renter_entity_id" field. It's identical to RenterEntityIDEQ.
-func RenterEntityID(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldEQ(FieldRenterEntityID, v))
-}
-
-// RenterEntityType applies equality check predicate on the "renter_entity_type" field. It's identical to RenterEntityTypeEQ.
-func RenterEntityType(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldEQ(FieldRenterEntityType, v))
+// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
+func Type(v string) predicate.Renter {
+	return predicate.Renter(sql.FieldEQ(FieldType, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -160,134 +155,69 @@ func TenantIDContainsFold(v string) predicate.Renter {
 	return predicate.Renter(sql.FieldContainsFold(FieldTenantID, v))
 }
 
-// RenterEntityIDEQ applies the EQ predicate on the "renter_entity_id" field.
-func RenterEntityIDEQ(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldEQ(FieldRenterEntityID, v))
+// TypeEQ applies the EQ predicate on the "type" field.
+func TypeEQ(v string) predicate.Renter {
+	return predicate.Renter(sql.FieldEQ(FieldType, v))
 }
 
-// RenterEntityIDNEQ applies the NEQ predicate on the "renter_entity_id" field.
-func RenterEntityIDNEQ(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldNEQ(FieldRenterEntityID, v))
+// TypeNEQ applies the NEQ predicate on the "type" field.
+func TypeNEQ(v string) predicate.Renter {
+	return predicate.Renter(sql.FieldNEQ(FieldType, v))
 }
 
-// RenterEntityIDIn applies the In predicate on the "renter_entity_id" field.
-func RenterEntityIDIn(vs ...string) predicate.Renter {
-	return predicate.Renter(sql.FieldIn(FieldRenterEntityID, vs...))
+// TypeIn applies the In predicate on the "type" field.
+func TypeIn(vs ...string) predicate.Renter {
+	return predicate.Renter(sql.FieldIn(FieldType, vs...))
 }
 
-// RenterEntityIDNotIn applies the NotIn predicate on the "renter_entity_id" field.
-func RenterEntityIDNotIn(vs ...string) predicate.Renter {
-	return predicate.Renter(sql.FieldNotIn(FieldRenterEntityID, vs...))
+// TypeNotIn applies the NotIn predicate on the "type" field.
+func TypeNotIn(vs ...string) predicate.Renter {
+	return predicate.Renter(sql.FieldNotIn(FieldType, vs...))
 }
 
-// RenterEntityIDGT applies the GT predicate on the "renter_entity_id" field.
-func RenterEntityIDGT(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldGT(FieldRenterEntityID, v))
+// TypeGT applies the GT predicate on the "type" field.
+func TypeGT(v string) predicate.Renter {
+	return predicate.Renter(sql.FieldGT(FieldType, v))
 }
 
-// RenterEntityIDGTE applies the GTE predicate on the "renter_entity_id" field.
-func RenterEntityIDGTE(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldGTE(FieldRenterEntityID, v))
+// TypeGTE applies the GTE predicate on the "type" field.
+func TypeGTE(v string) predicate.Renter {
+	return predicate.Renter(sql.FieldGTE(FieldType, v))
 }
 
-// RenterEntityIDLT applies the LT predicate on the "renter_entity_id" field.
-func RenterEntityIDLT(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldLT(FieldRenterEntityID, v))
+// TypeLT applies the LT predicate on the "type" field.
+func TypeLT(v string) predicate.Renter {
+	return predicate.Renter(sql.FieldLT(FieldType, v))
 }
 
-// RenterEntityIDLTE applies the LTE predicate on the "renter_entity_id" field.
-func RenterEntityIDLTE(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldLTE(FieldRenterEntityID, v))
+// TypeLTE applies the LTE predicate on the "type" field.
+func TypeLTE(v string) predicate.Renter {
+	return predicate.Renter(sql.FieldLTE(FieldType, v))
 }
 
-// RenterEntityIDContains applies the Contains predicate on the "renter_entity_id" field.
-func RenterEntityIDContains(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldContains(FieldRenterEntityID, v))
+// TypeContains applies the Contains predicate on the "type" field.
+func TypeContains(v string) predicate.Renter {
+	return predicate.Renter(sql.FieldContains(FieldType, v))
 }
 
-// RenterEntityIDHasPrefix applies the HasPrefix predicate on the "renter_entity_id" field.
-func RenterEntityIDHasPrefix(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldHasPrefix(FieldRenterEntityID, v))
+// TypeHasPrefix applies the HasPrefix predicate on the "type" field.
+func TypeHasPrefix(v string) predicate.Renter {
+	return predicate.Renter(sql.FieldHasPrefix(FieldType, v))
 }
 
-// RenterEntityIDHasSuffix applies the HasSuffix predicate on the "renter_entity_id" field.
-func RenterEntityIDHasSuffix(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldHasSuffix(FieldRenterEntityID, v))
+// TypeHasSuffix applies the HasSuffix predicate on the "type" field.
+func TypeHasSuffix(v string) predicate.Renter {
+	return predicate.Renter(sql.FieldHasSuffix(FieldType, v))
 }
 
-// RenterEntityIDEqualFold applies the EqualFold predicate on the "renter_entity_id" field.
-func RenterEntityIDEqualFold(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldEqualFold(FieldRenterEntityID, v))
+// TypeEqualFold applies the EqualFold predicate on the "type" field.
+func TypeEqualFold(v string) predicate.Renter {
+	return predicate.Renter(sql.FieldEqualFold(FieldType, v))
 }
 
-// RenterEntityIDContainsFold applies the ContainsFold predicate on the "renter_entity_id" field.
-func RenterEntityIDContainsFold(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldContainsFold(FieldRenterEntityID, v))
-}
-
-// RenterEntityTypeEQ applies the EQ predicate on the "renter_entity_type" field.
-func RenterEntityTypeEQ(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldEQ(FieldRenterEntityType, v))
-}
-
-// RenterEntityTypeNEQ applies the NEQ predicate on the "renter_entity_type" field.
-func RenterEntityTypeNEQ(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldNEQ(FieldRenterEntityType, v))
-}
-
-// RenterEntityTypeIn applies the In predicate on the "renter_entity_type" field.
-func RenterEntityTypeIn(vs ...string) predicate.Renter {
-	return predicate.Renter(sql.FieldIn(FieldRenterEntityType, vs...))
-}
-
-// RenterEntityTypeNotIn applies the NotIn predicate on the "renter_entity_type" field.
-func RenterEntityTypeNotIn(vs ...string) predicate.Renter {
-	return predicate.Renter(sql.FieldNotIn(FieldRenterEntityType, vs...))
-}
-
-// RenterEntityTypeGT applies the GT predicate on the "renter_entity_type" field.
-func RenterEntityTypeGT(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldGT(FieldRenterEntityType, v))
-}
-
-// RenterEntityTypeGTE applies the GTE predicate on the "renter_entity_type" field.
-func RenterEntityTypeGTE(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldGTE(FieldRenterEntityType, v))
-}
-
-// RenterEntityTypeLT applies the LT predicate on the "renter_entity_type" field.
-func RenterEntityTypeLT(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldLT(FieldRenterEntityType, v))
-}
-
-// RenterEntityTypeLTE applies the LTE predicate on the "renter_entity_type" field.
-func RenterEntityTypeLTE(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldLTE(FieldRenterEntityType, v))
-}
-
-// RenterEntityTypeContains applies the Contains predicate on the "renter_entity_type" field.
-func RenterEntityTypeContains(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldContains(FieldRenterEntityType, v))
-}
-
-// RenterEntityTypeHasPrefix applies the HasPrefix predicate on the "renter_entity_type" field.
-func RenterEntityTypeHasPrefix(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldHasPrefix(FieldRenterEntityType, v))
-}
-
-// RenterEntityTypeHasSuffix applies the HasSuffix predicate on the "renter_entity_type" field.
-func RenterEntityTypeHasSuffix(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldHasSuffix(FieldRenterEntityType, v))
-}
-
-// RenterEntityTypeEqualFold applies the EqualFold predicate on the "renter_entity_type" field.
-func RenterEntityTypeEqualFold(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldEqualFold(FieldRenterEntityType, v))
-}
-
-// RenterEntityTypeContainsFold applies the ContainsFold predicate on the "renter_entity_type" field.
-func RenterEntityTypeContainsFold(v string) predicate.Renter {
-	return predicate.Renter(sql.FieldContainsFold(FieldRenterEntityType, v))
+// TypeContainsFold applies the ContainsFold predicate on the "type" field.
+func TypeContainsFold(v string) predicate.Renter {
+	return predicate.Renter(sql.FieldContainsFold(FieldType, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -478,6 +408,52 @@ func HasRentals() predicate.Renter {
 func HasRentalsWith(preds ...predicate.Rental) predicate.Renter {
 	return predicate.Renter(func(s *sql.Selector) {
 		step := newRentalsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCompany applies the HasEdge predicate on the "company" edge.
+func HasCompany() predicate.Renter {
+	return predicate.Renter(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, CompanyTable, CompanyColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCompanyWith applies the HasEdge predicate on the "company" edge with a given conditions (other predicates).
+func HasCompanyWith(preds ...predicate.Company) predicate.Renter {
+	return predicate.Renter(func(s *sql.Selector) {
+		step := newCompanyStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasIndividual applies the HasEdge predicate on the "individual" edge.
+func HasIndividual() predicate.Renter {
+	return predicate.Renter(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, IndividualTable, IndividualColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasIndividualWith applies the HasEdge predicate on the "individual" edge with a given conditions (other predicates).
+func HasIndividualWith(preds ...predicate.Individual) predicate.Renter {
+	return predicate.Renter(func(s *sql.Selector) {
+		step := newIndividualStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

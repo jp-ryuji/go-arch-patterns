@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/individual"
+	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/renter"
 	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/tenant"
 )
 
@@ -18,6 +19,8 @@ type Individual struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
+	// RenterID holds the value of the "renter_id" field.
+	RenterID string `json:"renter_id"`
 	// TenantID holds the value of the "tenant_id" field.
 	TenantID string `json:"tenant_id,omitempty"`
 	// Email holds the value of the "email" field.
@@ -42,8 +45,8 @@ type Individual struct {
 type IndividualEdges struct {
 	// Tenant holds the value of the tenant edge.
 	Tenant *Tenant `json:"tenant,omitempty"`
-	// Renters holds the value of the renters edge.
-	Renters []*Renter `json:"renters,omitempty"`
+	// Renter holds the value of the renter edge.
+	Renter *Renter `json:"renter,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -60,13 +63,15 @@ func (e IndividualEdges) TenantOrErr() (*Tenant, error) {
 	return nil, &NotLoadedError{edge: "tenant"}
 }
 
-// RentersOrErr returns the Renters value or an error if the edge
-// was not loaded in eager-loading.
-func (e IndividualEdges) RentersOrErr() ([]*Renter, error) {
-	if e.loadedTypes[1] {
-		return e.Renters, nil
+// RenterOrErr returns the Renter value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e IndividualEdges) RenterOrErr() (*Renter, error) {
+	if e.Renter != nil {
+		return e.Renter, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: renter.Label}
 	}
-	return nil, &NotLoadedError{edge: "renters"}
+	return nil, &NotLoadedError{edge: "renter"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -74,7 +79,7 @@ func (*Individual) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case individual.FieldID, individual.FieldTenantID, individual.FieldEmail, individual.FieldFirstName, individual.FieldLastName:
+		case individual.FieldID, individual.FieldRenterID, individual.FieldTenantID, individual.FieldEmail, individual.FieldFirstName, individual.FieldLastName:
 			values[i] = new(sql.NullString)
 		case individual.FieldCreatedAt, individual.FieldUpdatedAt, individual.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -98,6 +103,12 @@ func (_m *Individual) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value.Valid {
 				_m.ID = value.String
+			}
+		case individual.FieldRenterID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field renter_id", values[i])
+			} else if value.Valid {
+				_m.RenterID = value.String
 			}
 		case individual.FieldTenantID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -160,9 +171,9 @@ func (_m *Individual) QueryTenant() *TenantQuery {
 	return NewIndividualClient(_m.config).QueryTenant(_m)
 }
 
-// QueryRenters queries the "renters" edge of the Individual entity.
-func (_m *Individual) QueryRenters() *RenterQuery {
-	return NewIndividualClient(_m.config).QueryRenters(_m)
+// QueryRenter queries the "renter" edge of the Individual entity.
+func (_m *Individual) QueryRenter() *RenterQuery {
+	return NewIndividualClient(_m.config).QueryRenter(_m)
 }
 
 // Update returns a builder for updating this Individual.
@@ -188,6 +199,9 @@ func (_m *Individual) String() string {
 	var builder strings.Builder
 	builder.WriteString("Individual(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("renter_id=")
+	builder.WriteString(_m.RenterID)
+	builder.WriteString(", ")
 	builder.WriteString("tenant_id=")
 	builder.WriteString(_m.TenantID)
 	builder.WriteString(", ")

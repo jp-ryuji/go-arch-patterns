@@ -64,6 +64,7 @@ func TestNewIndividual(t *testing.T) {
 			}
 
 			individual := NewIndividual(
+				"renter-123",
 				tt.values.tenantID,
 				*emailVO,
 				tt.values.firstName,
@@ -76,7 +77,7 @@ func TestNewIndividual(t *testing.T) {
 			}
 
 			require.NotNil(t, individual)
-			require.NotEmpty(t, individual.ID)
+			require.NotEmpty(t, individual.RenterID)
 
 			// Create an email VO to compare with the individual's email
 			expectedEmail, err := value.NewEmail(tt.values.email)

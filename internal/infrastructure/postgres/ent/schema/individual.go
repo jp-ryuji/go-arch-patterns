@@ -18,6 +18,12 @@ func (Individual) Fields() []ent.Field {
 		field.String("id").
 			MaxLen(36).
 			NotEmpty(),
+		field.String("renter_id").
+			MaxLen(36).
+			NotEmpty().
+			Unique().
+			StructTag(`json:"renter_id"`).
+			StorageKey("renter_id"),
 		field.String("tenant_id").
 			MaxLen(36).
 			NotEmpty(),
@@ -48,13 +54,18 @@ func (Individual) Edges() []ent.Edge {
 			Field("tenant_id").
 			Required().
 			Unique(),
-		edge.To("renters", Renter.Type),
+		edge.To("renter", Renter.Type).
+			Field("renter_id").
+			Required().
+			Unique(),
 	}
 }
 
 // Indexes of the Individual.
 func (Individual) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("renter_id").
+			Unique(),
 		index.Fields("tenant_id", "email").
 			Unique(),
 		index.Fields("deleted_at"),

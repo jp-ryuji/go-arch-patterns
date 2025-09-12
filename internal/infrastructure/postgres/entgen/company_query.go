@@ -4,7 +4,6 @@ package entgen
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -21,12 +20,12 @@ import (
 // CompanyQuery is the builder for querying Company entities.
 type CompanyQuery struct {
 	config
-	ctx         *QueryContext
-	order       []company.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.Company
-	withTenant  *TenantQuery
-	withRenters *RenterQuery
+	ctx        *QueryContext
+	order      []company.OrderOption
+	inters     []Interceptor
+	predicates []predicate.Company
+	withTenant *TenantQuery
+	withRenter *RenterQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -85,8 +84,8 @@ func (_q *CompanyQuery) QueryTenant() *TenantQuery {
 	return query
 }
 
-// QueryRenters chains the current query on the "renters" edge.
-func (_q *CompanyQuery) QueryRenters() *RenterQuery {
+// QueryRenter chains the current query on the "renter" edge.
+func (_q *CompanyQuery) QueryRenter() *RenterQuery {
 	query := (&RenterClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -99,7 +98,7 @@ func (_q *CompanyQuery) QueryRenters() *RenterQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(company.Table, company.FieldID, selector),
 			sqlgraph.To(renter.Table, renter.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, company.RentersTable, company.RentersColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, company.RenterTable, company.RenterColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -294,13 +293,13 @@ func (_q *CompanyQuery) Clone() *CompanyQuery {
 		return nil
 	}
 	return &CompanyQuery{
-		config:      _q.config,
-		ctx:         _q.ctx.Clone(),
-		order:       append([]company.OrderOption{}, _q.order...),
-		inters:      append([]Interceptor{}, _q.inters...),
-		predicates:  append([]predicate.Company{}, _q.predicates...),
-		withTenant:  _q.withTenant.Clone(),
-		withRenters: _q.withRenters.Clone(),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]company.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.Company{}, _q.predicates...),
+		withTenant: _q.withTenant.Clone(),
+		withRenter: _q.withRenter.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -318,14 +317,14 @@ func (_q *CompanyQuery) WithTenant(opts ...func(*TenantQuery)) *CompanyQuery {
 	return _q
 }
 
-// WithRenters tells the query-builder to eager-load the nodes that are connected to
-// the "renters" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *CompanyQuery) WithRenters(opts ...func(*RenterQuery)) *CompanyQuery {
+// WithRenter tells the query-builder to eager-load the nodes that are connected to
+// the "renter" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *CompanyQuery) WithRenter(opts ...func(*RenterQuery)) *CompanyQuery {
 	query := (&RenterClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withRenters = query
+	_q.withRenter = query
 	return _q
 }
 
@@ -335,12 +334,12 @@ func (_q *CompanyQuery) WithRenters(opts ...func(*RenterQuery)) *CompanyQuery {
 // Example:
 //
 //	var v []struct {
-//		TenantID string `json:"tenant_id,omitempty"`
+//		RenterID string `json:"renter_id"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Company.Query().
-//		GroupBy(company.FieldTenantID).
+//		GroupBy(company.FieldRenterID).
 //		Aggregate(entgen.Count()).
 //		Scan(ctx, &v)
 func (_q *CompanyQuery) GroupBy(field string, fields ...string) *CompanyGroupBy {
@@ -358,11 +357,11 @@ func (_q *CompanyQuery) GroupBy(field string, fields ...string) *CompanyGroupBy 
 // Example:
 //
 //	var v []struct {
-//		TenantID string `json:"tenant_id,omitempty"`
+//		RenterID string `json:"renter_id"`
 //	}
 //
 //	client.Company.Query().
-//		Select(company.FieldTenantID).
+//		Select(company.FieldRenterID).
 //		Scan(ctx, &v)
 func (_q *CompanyQuery) Select(fields ...string) *CompanySelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
@@ -409,7 +408,7 @@ func (_q *CompanyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comp
 		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
 			_q.withTenant != nil,
-			_q.withRenters != nil,
+			_q.withRenter != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -436,10 +435,9 @@ func (_q *CompanyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comp
 			return nil, err
 		}
 	}
-	if query := _q.withRenters; query != nil {
-		if err := _q.loadRenters(ctx, query, nodes,
-			func(n *Company) { n.Edges.Renters = []*Renter{} },
-			func(n *Company, e *Renter) { n.Edges.Renters = append(n.Edges.Renters, e) }); err != nil {
+	if query := _q.withRenter; query != nil {
+		if err := _q.loadRenter(ctx, query, nodes, nil,
+			func(n *Company, e *Renter) { n.Edges.Renter = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -475,34 +473,32 @@ func (_q *CompanyQuery) loadTenant(ctx context.Context, query *TenantQuery, node
 	}
 	return nil
 }
-func (_q *CompanyQuery) loadRenters(ctx context.Context, query *RenterQuery, nodes []*Company, init func(*Company), assign func(*Company, *Renter)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*Company)
+func (_q *CompanyQuery) loadRenter(ctx context.Context, query *RenterQuery, nodes []*Company, init func(*Company), assign func(*Company, *Renter)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Company)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
+		fk := nodes[i].RenterID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
 		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.withFKs = true
-	query.Where(predicate.Renter(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(company.RentersColumn), fks...))
-	}))
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(renter.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.company_renters
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "company_renters" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "company_renters" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "renter_id" returned %v`, n.ID)
 		}
-		assign(node, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }
@@ -534,6 +530,9 @@ func (_q *CompanyQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if _q.withTenant != nil {
 			_spec.Node.AddColumnOnce(company.FieldTenantID)
+		}
+		if _q.withRenter != nil {
+			_spec.Node.AddColumnOnce(company.FieldRenterID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

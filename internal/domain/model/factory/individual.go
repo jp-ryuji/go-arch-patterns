@@ -16,7 +16,13 @@ func NewIndividual() (*model.Individual, error) {
 		return nil, err
 	}
 
+	renter := model.NewRenter(
+		id.New(),
+		model.IndividualRenter,
+		time.Now(),
+	)
 	return model.NewIndividual(
+		renter.ID,
 		id.New(),
 		*email,
 		null.StringFrom("First"),

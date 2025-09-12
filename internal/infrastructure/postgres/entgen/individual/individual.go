@@ -12,6 +12,8 @@ const (
 	Label = "individual"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldRenterID holds the string denoting the renter_id field in the database.
+	FieldRenterID = "renter_id"
 	// FieldTenantID holds the string denoting the tenant_id field in the database.
 	FieldTenantID = "tenant_id"
 	// FieldEmail holds the string denoting the email field in the database.
@@ -28,8 +30,8 @@ const (
 	FieldDeletedAt = "deleted_at"
 	// EdgeTenant holds the string denoting the tenant edge name in mutations.
 	EdgeTenant = "tenant"
-	// EdgeRenters holds the string denoting the renters edge name in mutations.
-	EdgeRenters = "renters"
+	// EdgeRenter holds the string denoting the renter edge name in mutations.
+	EdgeRenter = "renter"
 	// Table holds the table name of the individual in the database.
 	Table = "individuals"
 	// TenantTable is the table that holds the tenant relation/edge.
@@ -39,18 +41,19 @@ const (
 	TenantInverseTable = "tenants"
 	// TenantColumn is the table column denoting the tenant relation/edge.
 	TenantColumn = "tenant_id"
-	// RentersTable is the table that holds the renters relation/edge.
-	RentersTable = "renters"
-	// RentersInverseTable is the table name for the Renter entity.
+	// RenterTable is the table that holds the renter relation/edge.
+	RenterTable = "individuals"
+	// RenterInverseTable is the table name for the Renter entity.
 	// It exists in this package in order to avoid circular dependency with the "renter" package.
-	RentersInverseTable = "renters"
-	// RentersColumn is the table column denoting the renters relation/edge.
-	RentersColumn = "individual_renters"
+	RenterInverseTable = "renters"
+	// RenterColumn is the table column denoting the renter relation/edge.
+	RenterColumn = "renter_id"
 )
 
 // Columns holds all SQL columns for individual fields.
 var Columns = []string{
 	FieldID,
+	FieldRenterID,
 	FieldTenantID,
 	FieldEmail,
 	FieldFirstName,
@@ -71,6 +74,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// RenterIDValidator is a validator for the "renter_id" field. It is called by the builders before save.
+	RenterIDValidator func(string) error
 	// TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
 	TenantIDValidator func(string) error
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
@@ -89,6 +94,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByRenterID orders the results by the renter_id field.
+func ByRenterID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRenterID, opts...).ToFunc()
 }
 
 // ByTenantID orders the results by the tenant_id field.
@@ -133,17 +143,10 @@ func ByTenantField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByRentersCount orders the results by renters count.
-func ByRentersCount(opts ...sql.OrderTermOption) OrderOption {
+// ByRenterField orders the results by renter field.
+func ByRenterField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newRentersStep(), opts...)
-	}
-}
-
-// ByRenters orders the results by renters terms.
-func ByRenters(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newRentersStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newRenterStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newTenantStep() *sqlgraph.Step {
@@ -153,10 +156,10 @@ func newTenantStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, TenantTable, TenantColumn),
 	)
 }
-func newRentersStep() *sqlgraph.Step {
+func newRenterStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(RentersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, RentersTable, RentersColumn),
+		sqlgraph.To(RenterInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, RenterTable, RenterColumn),
 	)
 }

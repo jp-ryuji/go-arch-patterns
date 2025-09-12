@@ -717,15 +717,15 @@ func (c *CompanyClient) QueryTenant(_m *Company) *TenantQuery {
 	return query
 }
 
-// QueryRenters queries the renters edge of a Company.
-func (c *CompanyClient) QueryRenters(_m *Company) *RenterQuery {
+// QueryRenter queries the renter edge of a Company.
+func (c *CompanyClient) QueryRenter(_m *Company) *RenterQuery {
 	query := (&RenterClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(company.Table, company.FieldID, id),
 			sqlgraph.To(renter.Table, renter.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, company.RentersTable, company.RentersColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, company.RenterTable, company.RenterColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -882,15 +882,15 @@ func (c *IndividualClient) QueryTenant(_m *Individual) *TenantQuery {
 	return query
 }
 
-// QueryRenters queries the renters edge of a Individual.
-func (c *IndividualClient) QueryRenters(_m *Individual) *RenterQuery {
+// QueryRenter queries the renter edge of a Individual.
+func (c *IndividualClient) QueryRenter(_m *Individual) *RenterQuery {
 	query := (&RenterClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(individual.Table, individual.FieldID, id),
 			sqlgraph.To(renter.Table, renter.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, individual.RentersTable, individual.RentersColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, individual.RenterTable, individual.RenterColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1434,6 +1434,38 @@ func (c *RenterClient) QueryRentals(_m *Renter) *RentalQuery {
 			sqlgraph.From(renter.Table, renter.FieldID, id),
 			sqlgraph.To(rental.Table, rental.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, renter.RentalsTable, renter.RentalsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCompany queries the company edge of a Renter.
+func (c *RenterClient) QueryCompany(_m *Renter) *CompanyQuery {
+	query := (&CompanyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(renter.Table, renter.FieldID, id),
+			sqlgraph.To(company.Table, company.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, renter.CompanyTable, renter.CompanyColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryIndividual queries the individual edge of a Renter.
+func (c *RenterClient) QueryIndividual(_m *Renter) *IndividualQuery {
+	query := (&IndividualClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(renter.Table, renter.FieldID, id),
+			sqlgraph.To(individual.Table, individual.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, renter.IndividualTable, renter.IndividualColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

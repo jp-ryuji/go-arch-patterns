@@ -30,6 +30,20 @@ func (_u *IndividualUpdate) Where(ps ...predicate.Individual) *IndividualUpdate 
 	return _u
 }
 
+// SetRenterID sets the "renter_id" field.
+func (_u *IndividualUpdate) SetRenterID(v string) *IndividualUpdate {
+	_u.mutation.SetRenterID(v)
+	return _u
+}
+
+// SetNillableRenterID sets the "renter_id" field if the given value is not nil.
+func (_u *IndividualUpdate) SetNillableRenterID(v *string) *IndividualUpdate {
+	if v != nil {
+		_u.SetRenterID(*v)
+	}
+	return _u
+}
+
 // SetTenantID sets the "tenant_id" field.
 func (_u *IndividualUpdate) SetTenantID(v string) *IndividualUpdate {
 	_u.mutation.SetTenantID(v)
@@ -163,19 +177,9 @@ func (_u *IndividualUpdate) SetTenant(v *Tenant) *IndividualUpdate {
 	return _u.SetTenantID(v.ID)
 }
 
-// AddRenterIDs adds the "renters" edge to the Renter entity by IDs.
-func (_u *IndividualUpdate) AddRenterIDs(ids ...string) *IndividualUpdate {
-	_u.mutation.AddRenterIDs(ids...)
-	return _u
-}
-
-// AddRenters adds the "renters" edges to the Renter entity.
-func (_u *IndividualUpdate) AddRenters(v ...*Renter) *IndividualUpdate {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddRenterIDs(ids...)
+// SetRenter sets the "renter" edge to the Renter entity.
+func (_u *IndividualUpdate) SetRenter(v *Renter) *IndividualUpdate {
+	return _u.SetRenterID(v.ID)
 }
 
 // Mutation returns the IndividualMutation object of the builder.
@@ -189,25 +193,10 @@ func (_u *IndividualUpdate) ClearTenant() *IndividualUpdate {
 	return _u
 }
 
-// ClearRenters clears all "renters" edges to the Renter entity.
-func (_u *IndividualUpdate) ClearRenters() *IndividualUpdate {
-	_u.mutation.ClearRenters()
+// ClearRenter clears the "renter" edge to the Renter entity.
+func (_u *IndividualUpdate) ClearRenter() *IndividualUpdate {
+	_u.mutation.ClearRenter()
 	return _u
-}
-
-// RemoveRenterIDs removes the "renters" edge to Renter entities by IDs.
-func (_u *IndividualUpdate) RemoveRenterIDs(ids ...string) *IndividualUpdate {
-	_u.mutation.RemoveRenterIDs(ids...)
-	return _u
-}
-
-// RemoveRenters removes "renters" edges to Renter entities.
-func (_u *IndividualUpdate) RemoveRenters(v ...*Renter) *IndividualUpdate {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveRenterIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -239,6 +228,11 @@ func (_u *IndividualUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *IndividualUpdate) check() error {
+	if v, ok := _u.mutation.RenterID(); ok {
+		if err := individual.RenterIDValidator(v); err != nil {
+			return &ValidationError{Name: "renter_id", err: fmt.Errorf(`entgen: validator failed for field "Individual.renter_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.TenantID(); ok {
 		if err := individual.TenantIDValidator(v); err != nil {
 			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`entgen: validator failed for field "Individual.tenant_id": %w`, err)}
@@ -261,6 +255,9 @@ func (_u *IndividualUpdate) check() error {
 	}
 	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
 		return errors.New(`entgen: clearing a required unique edge "Individual.tenant"`)
+	}
+	if _u.mutation.RenterCleared() && len(_u.mutation.RenterIDs()) > 0 {
+		return errors.New(`entgen: clearing a required unique edge "Individual.renter"`)
 	}
 	return nil
 }
@@ -339,12 +336,12 @@ func (_u *IndividualUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.RentersCleared() {
+	if _u.mutation.RenterCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   individual.RentersTable,
-			Columns: []string{individual.RentersColumn},
+			Table:   individual.RenterTable,
+			Columns: []string{individual.RenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(renter.FieldID, field.TypeString),
@@ -352,28 +349,12 @@ func (_u *IndividualUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedRentersIDs(); len(nodes) > 0 && !_u.mutation.RentersCleared() {
+	if nodes := _u.mutation.RenterIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   individual.RentersTable,
-			Columns: []string{individual.RentersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(renter.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RentersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   individual.RentersTable,
-			Columns: []string{individual.RentersColumn},
+			Table:   individual.RenterTable,
+			Columns: []string{individual.RenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(renter.FieldID, field.TypeString),
@@ -402,6 +383,20 @@ type IndividualUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *IndividualMutation
+}
+
+// SetRenterID sets the "renter_id" field.
+func (_u *IndividualUpdateOne) SetRenterID(v string) *IndividualUpdateOne {
+	_u.mutation.SetRenterID(v)
+	return _u
+}
+
+// SetNillableRenterID sets the "renter_id" field if the given value is not nil.
+func (_u *IndividualUpdateOne) SetNillableRenterID(v *string) *IndividualUpdateOne {
+	if v != nil {
+		_u.SetRenterID(*v)
+	}
+	return _u
 }
 
 // SetTenantID sets the "tenant_id" field.
@@ -537,19 +532,9 @@ func (_u *IndividualUpdateOne) SetTenant(v *Tenant) *IndividualUpdateOne {
 	return _u.SetTenantID(v.ID)
 }
 
-// AddRenterIDs adds the "renters" edge to the Renter entity by IDs.
-func (_u *IndividualUpdateOne) AddRenterIDs(ids ...string) *IndividualUpdateOne {
-	_u.mutation.AddRenterIDs(ids...)
-	return _u
-}
-
-// AddRenters adds the "renters" edges to the Renter entity.
-func (_u *IndividualUpdateOne) AddRenters(v ...*Renter) *IndividualUpdateOne {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddRenterIDs(ids...)
+// SetRenter sets the "renter" edge to the Renter entity.
+func (_u *IndividualUpdateOne) SetRenter(v *Renter) *IndividualUpdateOne {
+	return _u.SetRenterID(v.ID)
 }
 
 // Mutation returns the IndividualMutation object of the builder.
@@ -563,25 +548,10 @@ func (_u *IndividualUpdateOne) ClearTenant() *IndividualUpdateOne {
 	return _u
 }
 
-// ClearRenters clears all "renters" edges to the Renter entity.
-func (_u *IndividualUpdateOne) ClearRenters() *IndividualUpdateOne {
-	_u.mutation.ClearRenters()
+// ClearRenter clears the "renter" edge to the Renter entity.
+func (_u *IndividualUpdateOne) ClearRenter() *IndividualUpdateOne {
+	_u.mutation.ClearRenter()
 	return _u
-}
-
-// RemoveRenterIDs removes the "renters" edge to Renter entities by IDs.
-func (_u *IndividualUpdateOne) RemoveRenterIDs(ids ...string) *IndividualUpdateOne {
-	_u.mutation.RemoveRenterIDs(ids...)
-	return _u
-}
-
-// RemoveRenters removes "renters" edges to Renter entities.
-func (_u *IndividualUpdateOne) RemoveRenters(v ...*Renter) *IndividualUpdateOne {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveRenterIDs(ids...)
 }
 
 // Where appends a list predicates to the IndividualUpdate builder.
@@ -626,6 +596,11 @@ func (_u *IndividualUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *IndividualUpdateOne) check() error {
+	if v, ok := _u.mutation.RenterID(); ok {
+		if err := individual.RenterIDValidator(v); err != nil {
+			return &ValidationError{Name: "renter_id", err: fmt.Errorf(`entgen: validator failed for field "Individual.renter_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.TenantID(); ok {
 		if err := individual.TenantIDValidator(v); err != nil {
 			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`entgen: validator failed for field "Individual.tenant_id": %w`, err)}
@@ -648,6 +623,9 @@ func (_u *IndividualUpdateOne) check() error {
 	}
 	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
 		return errors.New(`entgen: clearing a required unique edge "Individual.tenant"`)
+	}
+	if _u.mutation.RenterCleared() && len(_u.mutation.RenterIDs()) > 0 {
+		return errors.New(`entgen: clearing a required unique edge "Individual.renter"`)
 	}
 	return nil
 }
@@ -743,12 +721,12 @@ func (_u *IndividualUpdateOne) sqlSave(ctx context.Context) (_node *Individual, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.RentersCleared() {
+	if _u.mutation.RenterCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   individual.RentersTable,
-			Columns: []string{individual.RentersColumn},
+			Table:   individual.RenterTable,
+			Columns: []string{individual.RenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(renter.FieldID, field.TypeString),
@@ -756,28 +734,12 @@ func (_u *IndividualUpdateOne) sqlSave(ctx context.Context) (_node *Individual, 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedRentersIDs(); len(nodes) > 0 && !_u.mutation.RentersCleared() {
+	if nodes := _u.mutation.RenterIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   individual.RentersTable,
-			Columns: []string{individual.RentersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(renter.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RentersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   individual.RentersTable,
-			Columns: []string{individual.RentersColumn},
+			Table:   individual.RenterTable,
+			Columns: []string{individual.RenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(renter.FieldID, field.TypeString),

@@ -7,7 +7,7 @@ import (
 	"github.com/jp-ryuji/go-sample/internal/domain/model/factory"
 )
 
-// TestRenterCreation ensures that we can create renters with different entity types
+// TestRenterCreation ensures that we can create renters
 func TestRenterCreation(t *testing.T) {
 	t.Parallel()
 
@@ -21,20 +21,20 @@ func TestRenterCreation(t *testing.T) {
 	}
 
 	// Test company renter
-	companyRenter := model.NewRenter("tenant-123", company.ID, model.CompanyRenter, company.CreatedAt)
-	if companyRenter.RenterEntityID != company.ID {
-		t.Error("Company RenterEntityID mismatch")
+	companyRenter := model.NewRenter("tenant-123", model.CompanyRenter, company.CreatedAt)
+	if companyRenter.TenantID != "tenant-123" {
+		t.Error("Company Renter TenantID mismatch")
 	}
-	if companyRenter.RenterEntityType != model.CompanyRenter {
-		t.Error("Company RenterEntityType mismatch")
+	if companyRenter.Type != model.CompanyRenter {
+		t.Error("Company Renter Type mismatch")
 	}
 
 	// Test individual renter
-	individualRenter := model.NewRenter("tenant-123", individual.ID, model.IndividualRenter, individual.CreatedAt)
-	if individualRenter.RenterEntityID != individual.ID {
-		t.Error("Individual RenterEntityID mismatch")
+	individualRenter := model.NewRenter("tenant-123", model.IndividualRenter, individual.CreatedAt)
+	if individualRenter.TenantID != "tenant-123" {
+		t.Error("Individual Renter TenantID mismatch")
 	}
-	if individualRenter.RenterEntityType != model.IndividualRenter {
-		t.Error("Individual RenterEntityType mismatch")
+	if individualRenter.Type != model.IndividualRenter {
+		t.Error("Individual Renter Type mismatch")
 	}
 }
