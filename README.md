@@ -13,16 +13,6 @@ This repository demonstrates the following software engineering concepts:
   - *Usage*: See [Individual entity](internal/domain/model/individual.go) using the Email value object
 - **Class Table Inheritance**: See [Renter model](internal/domain/model/renter.go) as the base class with [Company](internal/domain/model/company.go) and [Individual](internal/domain/model/individual.go) as specialized subclasses
 
-## Disclaimer
-
-This repository is intended for educational and demonstration purposes. It is not recommended for production use without significant modifications.
-
-1. **Database Schema Management**: The project uses Ent's auto migration feature to manage database schema changes for convenience. Proper migration strategies should be implemented for production environments. For more details on how database schema updates are handled, see [Database Schema Updates](docs/database_schema_updates.md).
-
-2. **Database Security**: SSL mode is disabled for database access (see [internal/infrastructure/postgres/migrate/main.go](internal/infrastructure/postgres/migrate/main.go)). This configuration is insecure and should be enabled in production environments.
-
-3. **Configuration Management**: Environment variable handling is implemented in a basic way in [internal/infrastructure/postgres/client.go](internal/infrastructure/postgres/client.go). For production use, consider implementing a more robust configuration management solution such as [Viper](https://github.com/spf13/viper) or similar libraries to handle configuration files, defaults, and validation in a more structured manner.
-
 ## Documentation
 
 Find specific documentation in the [docs/](docs/) folder:
@@ -33,3 +23,13 @@ Find specific documentation in the [docs/](docs/) folder:
 - [Go Development Guide](docs/golang.md)
 - [Database Schema Updates](docs/database_schema_updates.md)
 - [Ent ORM Setup](docs/ent.md)
+
+## Disclaimer
+
+This repository is intended for educational and demonstration purposes. It is not recommended for production use without significant modifications.
+
+1. **Database Schema Management**: The project uses Ent's auto migration feature to manage database schema changes for convenience. Proper migration strategies should be implemented for production environments. For more details on how database schema updates are handled, see [Database Schema Updates](docs/database_schema_updates.md).
+
+2. **Database Security**: SSL mode is disabled for database access (see [internal/infrastructure/postgres/migrate/main.go](internal/infrastructure/postgres/migrate/main.go)). This configuration is insecure and should be enabled in production environments.
+
+3. **Configuration Management**: Environment variable handling is implemented in a basic way in [internal/infrastructure/postgres/client.go](internal/infrastructure/postgres/client.go). For production use, consider implementing a more robust configuration management solution such as [Viper](https://github.com/spf13/viper) or similar libraries to handle configuration files, defaults, and validation in a more structured manner.
