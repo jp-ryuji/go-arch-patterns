@@ -22,8 +22,7 @@ type Individual struct {
 }
 
 // IndividualLoadOptions specifies which associations to load
-type IndividualLoadOptions struct {
-}
+type IndividualLoadOptions struct{}
 
 // ToDomain converts Individual to domain model with specified associations
 func (i *Individual) ToDomain(opts ...IndividualLoadOptions) (*model.Individual, error) {

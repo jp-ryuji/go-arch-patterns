@@ -19,8 +19,7 @@ type Company struct {
 }
 
 // CompanyLoadOptions specifies which associations to load
-type CompanyLoadOptions struct {
-}
+type CompanyLoadOptions struct{}
 
 // ToDomain converts Company to domain model with specified associations
 func (c *Company) ToDomain(opts ...CompanyLoadOptions) *model.Company {

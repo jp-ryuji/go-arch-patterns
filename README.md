@@ -28,7 +28,6 @@ This repository is intended for educational and demonstration purposes. It is no
 Find specific documentation in the [docs/](docs/) folder:
 
 - [Software Architecture](docs/software_architecture.md)
-- [Database Schema](docs/database_schema.md)
 - [Entity Relationship Diagram](docs/er-diagram.md)
 - [Installation Guide](docs/installation_guide.md)
 - [Go Development Guide](docs/golang.md)
