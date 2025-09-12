@@ -19,6 +19,10 @@ erDiagram
     options ||--o{ rental_options : has
     rentals ||--o{ rental_options : has
 
+    tenants {
+        string code
+    }
+
     companies {
         string id
         string name
