@@ -8,60 +8,58 @@ Key characteristics of this system:
 - **Class Table Inheritance**: Renter is implemented using Class Table Inheritance pattern where Company and Individual are specialized types of Renter
 - **Many-to-Many Association**: Rental and Option entities are connected through the RentalOption entity, with a composite unique index applied to RentalID and OptionID to ensure that the same option cannot be attached to a rental more than once
 
-> **Note**: For simplicity, common columns such as `ID`, `CreatedAt`, and `UpdatedAt` have been omitted from the diagram below.
-> **Note**: The explicit associations with the Tenant entity have been removed, though in the actual implementation all entities are associated with a Tenant in a multi-tenant architecture.
+> **Note**: For simplicity, common columns such as `ID`, `CreatedAt`, and `UpdatedAt` have been omitted from the diagram below. Additionally, the explicit associations with the Tenant entity have been removed, though in the actual implementation all entities are associated with a Tenant in a multi-tenant architecture.
 
 ```mermaid
 erDiagram
-    Company ||--o{ Renter : "can be"
-    Individual ||--o{ Renter : "can be"
-    Car ||--o{ Rental : has
-    Renter ||--o{ Rental : has
-    Option ||--o{ RentalOption : has
-    Rental ||--o{ RentalOption : has
+    companies ||--o{ renters : "can be"
+    individuals ||--o{ renters : "can be"
+    cars ||--o{ rentals : has
+    renters ||--o{ rentals : has
+    options ||--o{ rental_options : has
+    rentals ||--o{ rental_options : has
 
-    Tenant {
-        string Code
+    companies {
+        string id
+        string name
+        string company_size
     }
 
-    Car {
-        string Model
+    individuals {
+        string id
+        string email
+        string first_name
+        string last_name
     }
 
-    Company {
-        string ID
-        string RenterID "FK"
-        string Name
-        string CompanySize
+    renters {
+        string id
+        string type
     }
 
-    Individual {
-        string ID
-        string RenterID "FK"
-        string Email
-        string FirstName
-        string LastName
+    cars {
+        string id
+        string model
     }
 
-    Renter {
-        string ID
+    rentals {
+        string id
+        string car_id "FK"
+        string renter_id "FK"
+        time starts_at
+        time ends_at
     }
 
-    Rental {
-        string CarID "FK"
-        string RenterID "FK"
-        time StartsAt
-        time EndsAt
+    options {
+        string id
+        string name
     }
 
-    Option {
-        string Name
-    }
-
-    RentalOption {
-        string RentalID
-        string OptionID
-        int Count
+    rental_options {
+        string id
+        string rental_id
+        string option_id
+        int count
     }
 ```
 
@@ -95,6 +93,7 @@ erDiagram
     renters {
         string id PK
         string tenant_id FK
+        string type
         timestamp created_at
         timestamp updated_at
         timestamp deleted_at
