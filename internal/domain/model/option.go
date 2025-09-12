@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 )
 
 // Options is a slice of Option
@@ -30,7 +30,7 @@ type OptionRefs struct {
 func NewOption(tenantID, name string) *Option {
 	now := time.Now()
 	return &Option{
-		ID:        uuid.New().String(),
+		ID:        ulid.Make().String(),
 		TenantID:  tenantID,
 		Name:      name,
 		CreatedAt: now,

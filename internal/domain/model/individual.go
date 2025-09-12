@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/aarondl/null/v9"
-	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 
 	"github.com/jp-ryuji/go-sample/internal/domain/model/value"
 )
@@ -33,7 +33,7 @@ type IndividualRefs struct{}
 // NewIndividual creates a new Individual
 func NewIndividual(renterID, tenantID string, email value.Email, firstName, lastName null.String, createdAt time.Time) *Individual {
 	return &Individual{
-		ID:        uuid.New().String(),
+		ID:        ulid.Make().String(),
 		RenterID:  renterID,
 		TenantID:  tenantID,
 		Email:     email,

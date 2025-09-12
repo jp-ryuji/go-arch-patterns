@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 )
 
 // RentalOptions is a slice of RentalOption
@@ -33,7 +33,7 @@ type RentalOptionRefs struct {
 func NewRentalOption(tenantID, rentalID, optionID string, count int) *RentalOption {
 	now := time.Now()
 	return &RentalOption{
-		ID:        uuid.New().String(),
+		ID:        ulid.Make().String(),
 		TenantID:  tenantID,
 		RentalID:  rentalID,
 		OptionID:  optionID,
