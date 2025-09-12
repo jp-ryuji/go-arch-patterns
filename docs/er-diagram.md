@@ -24,30 +24,25 @@ erDiagram
     }
 
     companies {
-        string id
         string name
         string company_size
     }
 
     individuals {
-        string id
         string email
         string first_name
         string last_name
     }
 
     renters {
-        string id
         string type
     }
 
     cars {
-        string id
         string model
     }
 
     rentals {
-        string id
         string car_id "FK"
         string renter_id "FK"
         time starts_at
@@ -55,12 +50,10 @@ erDiagram
     }
 
     options {
-        string id
         string name
     }
 
     rental_options {
-        string id
         string rental_id
         string option_id
         int count
