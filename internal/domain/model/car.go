@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 )
 
 // Cars is a slice of Car
@@ -30,7 +30,7 @@ type CarRefs struct {
 // NewCar creates a new Car
 func NewCar(tenantID, model string, createdAt time.Time) *Car {
 	return &Car{
-		ID:        uuid.New().String(),
+		ID:        ulid.Make().String(),
 		TenantID:  tenantID,
 		Model:     model,
 		CreatedAt: createdAt,

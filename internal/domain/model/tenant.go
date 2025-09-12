@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 )
 
 // Tenants is a slice of Tenant
@@ -28,7 +28,7 @@ type TenantRefs struct {
 // NewTenant creates a new Tenant
 func NewTenant(code string, createdAt time.Time) *Tenant {
 	return &Tenant{
-		ID:        uuid.New().String(),
+		ID:        ulid.Make().String(),
 		Code:      code,
 		CreatedAt: createdAt,
 		UpdatedAt: createdAt,

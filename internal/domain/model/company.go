@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 )
 
 // Companies is a slice of Company
@@ -29,7 +29,7 @@ type CompanyRefs struct{}
 // NewCompany creates a new Company
 func NewCompany(renterID, tenantID, name string, companySize CompanySize, createdAt time.Time) *Company {
 	return &Company{
-		ID:          uuid.New().String(),
+		ID:          ulid.Make().String(),
 		RenterID:    renterID,
 		TenantID:    tenantID,
 		Name:        name,

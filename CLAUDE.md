@@ -13,7 +13,7 @@ This document provides essential context for AI models interacting with this pro
 * **Frameworks & Runtimes:** Standard Go runtime. No major web frameworks are currently in use.
 * **Databases:** The infrastructure layer is not yet implemented, but the directory structure (`internal/infrastructure/database`) suggests that a database, Postgres, will be used.
 * **Key Libraries/Dependencies:**
-  * `github.com/google/uuid`: For generating universally unique identifiers.
+  * `github.com/oklog/ulid/v2`: For generating universally unique lexicographically sortable identifiers.
 * **Package Manager(s):** Go Modules (`go mod`).
 
 ## 3. Architectural Patterns
