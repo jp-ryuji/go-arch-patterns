@@ -28,8 +28,7 @@ type Individual struct {
 }
 
 // IndividualRefs holds references to related entities
-type IndividualRefs struct {
-}
+type IndividualRefs struct{}
 
 // NewIndividual creates a new Individual
 func NewIndividual(renterID, tenantID string, email value.Email, firstName, lastName null.String, createdAt time.Time) *Individual {

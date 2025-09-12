@@ -24,8 +24,7 @@ type Company struct {
 }
 
 // CompanyRefs holds references to related entities
-type CompanyRefs struct {
-}
+type CompanyRefs struct{}
 
 // NewCompany creates a new Company
 func NewCompany(renterID, tenantID, name string, companySize CompanySize, createdAt time.Time) *Company {
