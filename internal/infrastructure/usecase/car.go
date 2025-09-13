@@ -3,8 +3,8 @@ package usecase
 import (
 	"context"
 
-	"github.com/jp-ryuji/go-ddd/internal/domain/model"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/usecase/input"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/usecase/input"
 )
 
 // CarUsecase defines the interface for car-related business logic

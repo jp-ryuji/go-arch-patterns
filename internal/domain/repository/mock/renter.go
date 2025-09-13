@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	model "github.com/jp-ryuji/go-ddd/internal/domain/model"
+	model "github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
 	gomock "go.uber.org/mock/gomock"
 )
 

@@ -3,8 +3,8 @@ package model_test
 import (
 	"testing"
 
-	"github.com/jp-ryuji/go-ddd/internal/domain/model"
-	"github.com/jp-ryuji/go-ddd/internal/domain/model/factory"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model/factory"
 )
 
 // TestRenterCreation ensures that we can create renters

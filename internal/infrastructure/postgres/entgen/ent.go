@@ -12,14 +12,14 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/car"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/caroption"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/company"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/individual"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/rental"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/rentaloption"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/renter"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/tenant"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/car"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/caroption"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/company"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/individual"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/rental"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/rentaloption"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/renter"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/tenant"
 )
 
 // ent aliases to avoid import conflicts in user's code.

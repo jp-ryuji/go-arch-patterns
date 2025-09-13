@@ -1,4 +1,4 @@
-# go-ddd
+# go-arch-patterns
 
 This repository showcases the Ports and Adapters architectural pattern (also known as Hexagonal Architecture) and Domain-Driven Design (DDD) methodology, with a focus on fundamental concepts such as value objects. For more details about the software architecture, see [Software Architecture](docs/software_architecture.md).
 

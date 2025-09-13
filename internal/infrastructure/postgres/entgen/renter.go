@@ -9,10 +9,10 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/company"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/individual"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/renter"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/tenant"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/company"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/individual"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/renter"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/tenant"
 )
 
 // Renter is the model entity for the Renter schema.

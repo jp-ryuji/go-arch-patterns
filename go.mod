@@ -1,4 +1,4 @@
-module github.com/jp-ryuji/go-ddd
+module github.com/jp-ryuji/go-arch-patterns
 
 go 1.25.0
 

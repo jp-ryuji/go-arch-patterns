@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 )

@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/predicate"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/tenant"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/predicate"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/tenant"
 )
 
 // TenantDelete is the builder for deleting a Tenant entity.

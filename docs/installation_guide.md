@@ -3,8 +3,8 @@
 ## Clone the repository
 
 ```bash
-git clone https://github.com/jp-ryuji/go-ddd.git
-cd go-ddd
+git clone https://github.com/jp-ryuji/go-arch-patterns.git
+cd go-arch-patterns
 ```
 
 ## Set up environment variables with direnv
@@ -97,7 +97,7 @@ docker compose down
 You can access the PostgreSQL database using the following command:
 
 ```bash
-PGPASSWORD=$POSTGRES_PASSWORD docker exec -it go-ddd-postgres-1 psql -U $POSTGRES_USERNAME -d $POSTGRES_DBNAME
+PGPASSWORD=$POSTGRES_PASSWORD docker exec -it go-arch-patterns-postgres-1 psql -U $POSTGRES_USERNAME -d $POSTGRES_DBNAME
 ```
 
 This command uses the environment variables loaded by direnv to connect to the database.

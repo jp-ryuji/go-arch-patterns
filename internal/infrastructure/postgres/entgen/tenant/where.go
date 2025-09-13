@@ -7,7 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/predicate"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/predicate"
 )
 
 // ID filters vertices based on their ID field.
