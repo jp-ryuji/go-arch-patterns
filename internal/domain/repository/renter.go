@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/jp-ryuji/go-sample/internal/domain/model"
+	"github.com/jp-ryuji/go-ddd/internal/domain/model"
 )
 
 //go:generate go run go.uber.org/mock/mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock_repository

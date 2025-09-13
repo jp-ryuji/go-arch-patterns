@@ -3,7 +3,7 @@ package dbmodel
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-sample/internal/domain/model"
+	"github.com/jp-ryuji/go-ddd/internal/domain/model"
 )
 
 // RentalOption represents the database model for RentalOption

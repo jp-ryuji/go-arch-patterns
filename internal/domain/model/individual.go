@@ -6,7 +6,7 @@ import (
 	"github.com/aarondl/null/v9"
 	"github.com/oklog/ulid/v2"
 
-	"github.com/jp-ryuji/go-sample/internal/domain/model/value"
+	"github.com/jp-ryuji/go-ddd/internal/domain/model/value"
 )
 
 // Individuals is a slice of Individual

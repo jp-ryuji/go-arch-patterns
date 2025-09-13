@@ -10,11 +10,11 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/company"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/individual"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/rental"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/renter"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/tenant"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/company"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/individual"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/rental"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/renter"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/tenant"
 )
 
 // RenterCreate is the builder for creating a Renter entity.

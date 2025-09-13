@@ -6,8 +6,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/jp-ryuji/go-sample/internal/domain/model"
-	"github.com/jp-ryuji/go-sample/internal/domain/model/factory"
+	"github.com/jp-ryuji/go-ddd/internal/domain/model"
+	"github.com/jp-ryuji/go-ddd/internal/domain/model/factory"
 	"github.com/stretchr/testify/require"
 )
 

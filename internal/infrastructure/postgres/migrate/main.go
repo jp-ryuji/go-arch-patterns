@@ -6,7 +6,7 @@ import (
 	"os"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres"
 )
 
 func main() {
