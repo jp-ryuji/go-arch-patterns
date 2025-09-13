@@ -11,12 +11,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/car"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/predicate"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/rental"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/rentaloption"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/renter"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/tenant"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/car"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/predicate"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/rental"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/rentaloption"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/renter"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/tenant"
 )
 
 // RentalUpdate is the builder for updating Rental entities.

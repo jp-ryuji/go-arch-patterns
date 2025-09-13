@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jp-ryuji/go-sample/internal/domain/model"
-	"github.com/jp-ryuji/go-sample/internal/domain/repository"
-	companyrepo "github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/repository"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/repository/testutil"
+	"github.com/jp-ryuji/go-ddd/internal/domain/model"
+	"github.com/jp-ryuji/go-ddd/internal/domain/repository"
+	companyrepo "github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/repository"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/repository/testutil"
 	"github.com/stretchr/testify/require"
 )
 

@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/tenant"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/tenant"
 )
 
 // Tenant is the model entity for the Tenant schema.

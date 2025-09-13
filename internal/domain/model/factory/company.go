@@ -3,8 +3,8 @@ package factory
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-sample/internal/domain/model"
-	"github.com/jp-ryuji/go-sample/internal/pkg/id"
+	"github.com/jp-ryuji/go-ddd/internal/domain/model"
+	"github.com/jp-ryuji/go-ddd/internal/pkg/id"
 )
 
 // NewCompany creates a new Company for testing purposes

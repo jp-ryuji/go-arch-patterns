@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/predicate"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen/renter"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/predicate"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/renter"
 )
 
 // RenterDelete is the builder for deleting a Renter entity.

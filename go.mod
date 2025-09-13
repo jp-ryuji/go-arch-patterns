@@ -1,4 +1,4 @@
-module github.com/jp-ryuji/go-sample
+module github.com/jp-ryuji/go-ddd
 
 go 1.25.0
 

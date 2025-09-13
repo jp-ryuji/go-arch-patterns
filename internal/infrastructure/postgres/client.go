@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/jp-ryuji/go-sample/internal/infrastructure/postgres/entgen"
+	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen"
 )
 
 // Connection pool settings with defaults
