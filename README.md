@@ -1,17 +1,28 @@
 # go-arch-patterns
 
-This repository showcases the Ports and Adapters architectural pattern (also known as Hexagonal Architecture) and Domain-Driven Design (DDD) methodology, with a focus on fundamental concepts such as value objects. For more details about the software architecture, see [Software Architecture](docs/software_architecture.md).
+This repository demonstrates various architectural patterns and design principles for building scalable backend systems in Go. The codebase showcases architectural patterns, database design techniques, and SaaS-specific implementations through a practical car rental platform example.
 
-The system represents a SaaS platform for car rental companies. For more details about the system, see [Entity Relationship Diagram](docs/er-diagram.md).
+For more details about the architecture, see [Software Architecture](docs/software_architecture.md).
+For the data model and relationships, see [Entity Relationship Diagram](docs/er-diagram.md).
 
 ## Key Implementation Examples
 
 This repository demonstrates the following software engineering concepts:
 
+### Domain-Driven Design & Architecture
+
 - **Value Object**:
   - *Definition*: See [Email value object](internal/domain/model/value/email.go) with [tests](internal/domain/model/value/email_test.go)
   - *Usage*: See [Individual entity](internal/domain/model/individual.go) using the Email value object
+
+### Database Design Patterns
+
 - **Class Table Inheritance**: See [Renter model](internal/domain/model/renter.go) as the base class with [Company](internal/domain/model/company.go) and [Individual](internal/domain/model/individual.go) as specialized subclasses
+
+### SaaS & Microservices Patterns *(Coming Soon)*
+
+- **PostgreSQL Row-Level Security**: Multi-tenant data isolation
+- **Outbox Pattern**: Reliable event publishing for distributed systems
 
 ## Documentation
 
