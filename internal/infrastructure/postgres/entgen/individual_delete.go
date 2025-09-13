@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/individual"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/predicate"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/individual"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/predicate"
 )
 
 // IndividualDelete is the builder for deleting a Individual entity.

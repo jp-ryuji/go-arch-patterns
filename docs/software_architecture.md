@@ -50,7 +50,7 @@ Structure:
 
 ## Go `internal` Directory
 
-The `internal` directory is a special directory in Go that restricts access to its contents. Only code within the same module (in this case, `go-ddd`) can import packages from `internal` directories. This prevents other projects from importing and depending on our internal implementation details, which helps maintain a clean public API and allows us to change internal implementations without breaking external dependencies.
+The `internal` directory is a special directory in Go that restricts access to its contents. Only code within the same module (in this case, `go-arch-patterns`) can import packages from `internal` directories. This prevents other projects from importing and depending on our internal implementation details, which helps maintain a clean public API and allows us to change internal implementations without breaking external dependencies.
 
 In this project, all core business logic, domain models, use cases, and infrastructure implementations are placed under the `internal` directory to enforce this encapsulation and prevent accidental exposure of internal details as part of the public API.
 

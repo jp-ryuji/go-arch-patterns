@@ -5,12 +5,12 @@ package enttest
 import (
 	"context"
 
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	// required by schema hooks.
-	_ "github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/runtime"
+	_ "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/migrate"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/migrate"
 )
 
 type (

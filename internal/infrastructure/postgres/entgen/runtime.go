@@ -3,15 +3,15 @@
 package entgen
 
 import (
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/ent/schema"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/car"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/caroption"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/company"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/individual"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/rental"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/rentaloption"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/renter"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/tenant"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/ent/schema"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/car"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/caroption"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/company"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/individual"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/rental"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/rentaloption"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/renter"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/tenant"
 )
 
 // The init function reads all schema descriptors with runtime code

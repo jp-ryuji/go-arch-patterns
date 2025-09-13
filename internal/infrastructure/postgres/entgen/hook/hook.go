@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 )
 
 // The CarFunc type is an adapter to allow the use of ordinary

@@ -3,11 +3,11 @@ package repository
 import (
 	"context"
 
-	"github.com/jp-ryuji/go-ddd/internal/domain/model"
-	"github.com/jp-ryuji/go-ddd/internal/domain/repository"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/dbmodel"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen"
-	tenant "github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/entgen/tenant"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/dbmodel"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
+	tenant "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/tenant"
 )
 
 type tenantRepository struct {

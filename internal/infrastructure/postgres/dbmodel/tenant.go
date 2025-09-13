@@ -3,7 +3,7 @@ package dbmodel
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-ddd/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
 )
 
 // Tenant represents the database model for Tenant

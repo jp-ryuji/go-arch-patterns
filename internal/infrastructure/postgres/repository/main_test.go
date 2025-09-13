@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/postgres/repository/testutil"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/repository/testutil"
 )
 
 func TestMain(m *testing.M) {

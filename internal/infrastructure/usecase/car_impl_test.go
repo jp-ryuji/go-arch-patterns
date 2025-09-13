@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jp-ryuji/go-ddd/internal/domain/model"
-	mock_repository "github.com/jp-ryuji/go-ddd/internal/domain/repository/mock"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/usecase"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/usecase/input"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	mock_repository "github.com/jp-ryuji/go-arch-patterns/internal/domain/repository/mock"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/usecase"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/usecase/input"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )

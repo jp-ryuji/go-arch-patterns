@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"github.com/aarondl/null/v9"
-	"github.com/jp-ryuji/go-ddd/internal/domain/model"
-	"github.com/jp-ryuji/go-ddd/internal/domain/model/value"
-	"github.com/jp-ryuji/go-ddd/internal/pkg/id"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model/value"
+	"github.com/jp-ryuji/go-arch-patterns/internal/pkg/id"
 )
 
 // NewIndividual creates a new Individual for testing purposes

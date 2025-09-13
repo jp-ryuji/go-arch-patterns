@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/jp-ryuji/go-ddd/internal/domain/model"
-	"github.com/jp-ryuji/go-ddd/internal/domain/repository"
-	"github.com/jp-ryuji/go-ddd/internal/infrastructure/usecase/input"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/usecase/input"
 )
 
 // carUsecase implements CarUsecase interface
