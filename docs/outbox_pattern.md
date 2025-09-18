@@ -50,6 +50,37 @@ The actual processing of outbox messages to send them to OpenSearch is not imple
 
 The implementation ensures atomicity between the main entity creation and outbox message creation by using database transactions. Both operations happen within the same transaction, so either both succeed or both fail.
 
+## Concurrency Control
+
+The implementation uses `SELECT ... FOR UPDATE SKIP LOCKED` for efficient concurrency control when processing outbox messages. This approach:
+
+1. **Prevents Race Conditions**: Uses database-level locking to ensure only one processor can claim a message
+2. **Improves Performance**: Eliminates the need for separate SELECT and UPDATE operations
+3. **Handles Failures Gracefully**: Automatically skips locked messages that are being processed by other instances
+4. **Ensures FIFO Processing**: Messages are processed in first-in-first-out order
+
+The implementation uses Ent's query builder with the `ForUpdate` method and `SkipLocked` option:
+
+```go
+pendingMessages, err := r.client.Outbox.Query().
+    Where(outbox.Status("pending")).
+    Limit(limit).
+    Order(entgen.Asc(outbox.FieldCreatedAt)).
+    ForUpdate(
+        sql.WithLockAction(sql.SkipLocked),
+    ).
+    All(ctx)
+```
+
+This is equivalent to the following SQL query:
+```sql
+SELECT * FROM outbox 
+WHERE status = 'pending' 
+ORDER BY created_at ASC 
+LIMIT $1 
+FOR UPDATE SKIP LOCKED
+```
+
 ## Schema Evolution
 
 The outbox schema is designed to support schema evolution:
