@@ -7,19 +7,22 @@ import (
 
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
 	mock_repository "github.com/jp-ryuji/go-arch-patterns/internal/domain/repository/mock"
-	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/usecase"
-	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/usecase/input"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
+	"github.com/jp-ryuji/go-arch-patterns/internal/usecase"
+	"github.com/jp-ryuji/go-arch-patterns/internal/usecase/input"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
 
 // setupTest creates a new mock controller and car usecase for testing
-func setupTest(t *testing.T) (*gomock.Controller, *mock_repository.MockCarRepository, usecase.CarUsecase) {
+func setupTest(t *testing.T) (*gomock.Controller, *mock_repository.MockCarRepository, *mock_repository.MockOutboxRepository, *mock_repository.MockTransactionManager, usecase.CarUsecase) {
 	t.Helper()
 	ctrl := gomock.NewController(t)
 	mockCarRepo := mock_repository.NewMockCarRepository(ctrl)
-	carUsecase := usecase.NewCarUsecase(mockCarRepo)
-	return ctrl, mockCarRepo, carUsecase
+	mockOutboxRepo := mock_repository.NewMockOutboxRepository(ctrl)
+	mockTxManager := mock_repository.NewMockTransactionManager(ctrl)
+	carUsecase := usecase.NewCarUsecase(mockCarRepo, mockOutboxRepo, mockTxManager)
+	return ctrl, mockCarRepo, mockOutboxRepo, mockTxManager, carUsecase
 }
 
 // TestCarUsecase_Register_Success tests the successful registration of a car
@@ -27,7 +30,7 @@ func TestCarUsecase_Register_Success(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, mockOutboxRepo, mockTxManager, carUsecase := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
@@ -37,10 +40,17 @@ func TestCarUsecase_Register_Success(t *testing.T) {
 		Model:    "Toyota Prius",
 	}
 
+	// Create a mock transaction
+	mockTx := &entgen.Tx{}
+
+	// Set up expectations for transaction management
+	mockTxManager.EXPECT().BeginTx(ctx).Return(mockTx, nil)
+	mockTxManager.EXPECT().CommitTx(ctx, mockTx).Return(nil)
+
 	// Set up expectations for registering a car
 	var createdCar *model.Car
-	mockCarRepo.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(
-		func(ctx context.Context, car *model.Car) error {
+	mockCarRepo.EXPECT().CreateInTx(ctx, mockTx, gomock.Any()).DoAndReturn(
+		func(ctx context.Context, tx *entgen.Tx, car *model.Car) error {
 			// Capture the car that was created for later verification
 			createdCar = car
 
@@ -53,6 +63,9 @@ func TestCarUsecase_Register_Success(t *testing.T) {
 			return nil
 		},
 	)
+
+	// Set up expectations for outbox message creation
+	mockOutboxRepo.EXPECT().CreateInTx(ctx, mockTx, gomock.Any()).Return(nil)
 
 	// Execute - Register a new car using the usecase
 	registeredCar, err := carUsecase.Register(ctx, registerInput)
@@ -75,7 +88,7 @@ func TestCarUsecase_Register_RepositoryError(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, mockTxManager, carUsecase := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
@@ -85,14 +98,21 @@ func TestCarUsecase_Register_RepositoryError(t *testing.T) {
 		Model:    "Toyota Prius",
 	}
 
+	// Create a mock transaction
+	mockTx := &entgen.Tx{}
+
+	// Set up expectations for transaction management
+	mockTxManager.EXPECT().BeginTx(ctx).Return(mockTx, nil)
+	mockTxManager.EXPECT().RollbackTx(ctx, mockTx).Return(nil)
+
 	// Set up expectations for repository error
 	expectedError := assert.AnError
-	mockCarRepo.EXPECT().Create(ctx, gomock.Any()).Return(expectedError)
+	mockCarRepo.EXPECT().CreateInTx(ctx, mockTx, gomock.Any()).Return(expectedError)
 
 	// Execute - Try to register a car when repository fails
 	registeredCar, err := carUsecase.Register(ctx, registerInput)
 	assert.Error(t, err)
-	assert.Equal(t, expectedError, err)
+	assert.Contains(t, err.Error(), expectedError.Error())
 	assert.Nil(t, registeredCar)
 }
 
@@ -101,7 +121,7 @@ func TestCarUsecase_GetByID_Success(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, _, carUsecase := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
@@ -134,7 +154,7 @@ func TestCarUsecase_GetByID_NotFound(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, _, carUsecase := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
@@ -160,7 +180,7 @@ func TestCarUsecase_GetByIDWithTenant_Success(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, _, carUsecase := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
@@ -201,7 +221,7 @@ func TestCarUsecase_GetByIDWithTenant_NotFound(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, _, carUsecase := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
@@ -258,7 +278,7 @@ func TestCarUsecase_Register_Validation(t *testing.T) {
 			t.Parallel()
 
 			// Setup
-			ctrl, _, carUsecase := setupTest(t)
+			ctrl, _, _, _, carUsecase := setupTest(t)
 			defer ctrl.Finish()
 
 			// Test data
@@ -296,7 +316,7 @@ func TestCarUsecase_GetByID_Validation(t *testing.T) {
 			t.Parallel()
 
 			// Setup
-			ctrl, _, carUsecase := setupTest(t)
+			ctrl, _, _, _, carUsecase := setupTest(t)
 			defer ctrl.Finish()
 
 			// Test data

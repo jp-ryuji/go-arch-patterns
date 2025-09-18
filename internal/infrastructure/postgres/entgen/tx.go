@@ -20,6 +20,8 @@ type Tx struct {
 	Company *CompanyClient
 	// Individual is the client for interacting with the Individual builders.
 	Individual *IndividualClient
+	// Outbox is the client for interacting with the Outbox builders.
+	Outbox *OutboxClient
 	// Rental is the client for interacting with the Rental builders.
 	Rental *RentalClient
 	// RentalOption is the client for interacting with the RentalOption builders.
@@ -163,6 +165,7 @@ func (tx *Tx) init() {
 	tx.CarOption = NewCarOptionClient(tx.config)
 	tx.Company = NewCompanyClient(tx.config)
 	tx.Individual = NewIndividualClient(tx.config)
+	tx.Outbox = NewOutboxClient(tx.config)
 	tx.Rental = NewRentalClient(tx.config)
 	tx.RentalOption = NewRentalOptionClient(tx.config)
 	tx.Renter = NewRenterClient(tx.config)

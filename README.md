@@ -19,10 +19,13 @@ This repository demonstrates the following software engineering concepts:
 
 - **Class Table Inheritance**: See [Renter model](internal/domain/model/renter.go) as the base class with [Company](internal/domain/model/company.go) and [Individual](internal/domain/model/individual.go) as specialized subclasses
 
-### SaaS & Microservices Patterns *(Coming Soon)*
+### Microservices Patterns
 
-- **PostgreSQL Row-Level Security**: Multi-tenant data isolation
-- **Outbox Pattern**: Reliable event publishing for distributed systems
+- **Outbox Pattern**: Reliable event publishing for distributed systems. See [implementation](docs/outbox_pattern.md) and [usecase](internal/usecase/car_impl.go)
+
+### SaaS Patterns
+
+- **PostgreSQL Row-Level Security**: Multi-tenant data isolation *(Coming Soon)*
 
 ## Documentation
 
@@ -34,6 +37,7 @@ Find specific documentation in the [docs/](docs/) folder:
 - [Go Development Guide](docs/golang.md)
 - [Database Schema Updates](docs/database_schema_updates.md)
 - [Ent ORM Setup](docs/ent.md)
+- [Outbox Pattern Implementation](docs/outbox_pattern.md)
 
 ## Disclaimer
 

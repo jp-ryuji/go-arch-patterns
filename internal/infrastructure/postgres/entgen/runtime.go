@@ -8,6 +8,7 @@ import (
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/caroption"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/company"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/individual"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/outbox"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/rental"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/rentaloption"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/renter"
@@ -291,6 +292,94 @@ func init() {
 	// individual.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	individual.IDValidator = func() func(string) error {
 		validators := individualDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	outboxFields := schema.Outbox{}.Fields()
+	_ = outboxFields
+	// outboxDescAggregateType is the schema descriptor for aggregate_type field.
+	outboxDescAggregateType := outboxFields[1].Descriptor()
+	// outbox.AggregateTypeValidator is a validator for the "aggregate_type" field. It is called by the builders before save.
+	outbox.AggregateTypeValidator = func() func(string) error {
+		validators := outboxDescAggregateType.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(aggregate_type string) error {
+			for _, fn := range fns {
+				if err := fn(aggregate_type); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// outboxDescAggregateID is the schema descriptor for aggregate_id field.
+	outboxDescAggregateID := outboxFields[2].Descriptor()
+	// outbox.AggregateIDValidator is a validator for the "aggregate_id" field. It is called by the builders before save.
+	outbox.AggregateIDValidator = func() func(string) error {
+		validators := outboxDescAggregateID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(aggregate_id string) error {
+			for _, fn := range fns {
+				if err := fn(aggregate_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// outboxDescEventType is the schema descriptor for event_type field.
+	outboxDescEventType := outboxFields[3].Descriptor()
+	// outbox.EventTypeValidator is a validator for the "event_type" field. It is called by the builders before save.
+	outbox.EventTypeValidator = func() func(string) error {
+		validators := outboxDescEventType.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(event_type string) error {
+			for _, fn := range fns {
+				if err := fn(event_type); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// outboxDescStatus is the schema descriptor for status field.
+	outboxDescStatus := outboxFields[7].Descriptor()
+	// outbox.DefaultStatus holds the default value on creation for the status field.
+	outbox.DefaultStatus = outboxDescStatus.Default.(string)
+	// outbox.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	outbox.StatusValidator = outboxDescStatus.Validators[0].(func(string) error)
+	// outboxDescErrorMessage is the schema descriptor for error_message field.
+	outboxDescErrorMessage := outboxFields[8].Descriptor()
+	// outbox.ErrorMessageValidator is a validator for the "error_message" field. It is called by the builders before save.
+	outbox.ErrorMessageValidator = outboxDescErrorMessage.Validators[0].(func(string) error)
+	// outboxDescVersion is the schema descriptor for version field.
+	outboxDescVersion := outboxFields[9].Descriptor()
+	// outbox.DefaultVersion holds the default value on creation for the version field.
+	outbox.DefaultVersion = outboxDescVersion.Default.(int64)
+	// outboxDescID is the schema descriptor for id field.
+	outboxDescID := outboxFields[0].Descriptor()
+	// outbox.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	outbox.IDValidator = func() func(string) error {
+		validators := outboxDescID.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),

@@ -14,7 +14,7 @@ import (
 	reflect "reflect"
 
 	model "github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
-	input "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/usecase/input"
+	input "github.com/jp-ryuji/go-arch-patterns/internal/usecase/input"
 	gomock "go.uber.org/mock/gomock"
 )
 

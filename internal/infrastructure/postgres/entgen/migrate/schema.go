@@ -180,6 +180,54 @@ var (
 			},
 		},
 	}
+	// OutboxesColumns holds the columns for the "outboxes" table.
+	OutboxesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 36},
+		{Name: "aggregate_type", Type: field.TypeString, Size: 255},
+		{Name: "aggregate_id", Type: field.TypeString, Size: 36},
+		{Name: "event_type", Type: field.TypeString, Size: 255},
+		{Name: "payload", Type: field.TypeJSON, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true},
+		{Name: "processed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "status", Type: field.TypeString, Size: 50, Default: "pending"},
+		{Name: "error_message", Type: field.TypeString, Nullable: true, Size: 1000},
+		{Name: "version", Type: field.TypeInt64, Default: 1},
+		{Name: "locked_at", Type: field.TypeTime, Nullable: true},
+		{Name: "locked_by", Type: field.TypeString, Nullable: true},
+	}
+	// OutboxesTable holds the schema information for the "outboxes" table.
+	OutboxesTable = &schema.Table{
+		Name:       "outboxes",
+		Columns:    OutboxesColumns,
+		PrimaryKey: []*schema.Column{OutboxesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "outbox_status",
+				Unique:  false,
+				Columns: []*schema.Column{OutboxesColumns[7]},
+			},
+			{
+				Name:    "outbox_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{OutboxesColumns[5]},
+			},
+			{
+				Name:    "outbox_processed_at",
+				Unique:  false,
+				Columns: []*schema.Column{OutboxesColumns[6]},
+			},
+			{
+				Name:    "outbox_version",
+				Unique:  false,
+				Columns: []*schema.Column{OutboxesColumns[9]},
+			},
+			{
+				Name:    "outbox_locked_at_locked_by",
+				Unique:  false,
+				Columns: []*schema.Column{OutboxesColumns[10], OutboxesColumns[11]},
+			},
+		},
+	}
 	// RentalsColumns holds the columns for the "rentals" table.
 	RentalsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Size: 36},
@@ -375,6 +423,7 @@ var (
 		CarOptionsTable,
 		CompaniesTable,
 		IndividualsTable,
+		OutboxesTable,
 		RentalsTable,
 		RentalOptionsTable,
 		RentersTable,
