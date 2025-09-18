@@ -68,7 +68,7 @@ func (uc *carUsecase) Register(ctx context.Context, input input.RegisterCarInput
 		return nil, fmt.Errorf("failed to create car in database: %w", err)
 	}
 
-	// Step 2: Create outbox message for OpenSearch within transaction
+	// Step 2: Create outbox message for external systems within transaction
 	outbox := &entgen.Outbox{
 		ID:            id.New(),
 		AggregateType: "car",
