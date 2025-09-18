@@ -46,46 +46,6 @@ This approach ensures that either both the car data and the outbox message are s
 
 The implementation ensures atomicity between the main entity creation and outbox message creation by using database transactions. Both operations happen within the same transaction, so either both succeed or both fail.
 
-## Concurrency Control
-
-The implementation uses `SELECT ... FOR UPDATE SKIP LOCKED` for efficient concurrency control when processing outbox messages. This approach:
-
-1. **Prevents Race Conditions**: Uses database-level locking to ensure only one processor can claim a message
-2. **Improves Performance**: Eliminates the need for separate SELECT and UPDATE operations
-3. **Handles Failures Gracefully**: Automatically skips locked messages that are being processed by other instances
-4. **Ensures FIFO Processing**: Messages are processed in first-in-first-out order
-
-The implementation uses Ent's query builder with the `ForUpdate` method and `SkipLocked` option, which requires enabling the `sql/lock` feature flag during Ent code generation:
-
-```go
-pendingMessages, err := r.client.Outbox.Query().
-    Where(outbox.Status("pending")).
-    Limit(limit).
-    Order(entgen.Asc(outbox.FieldCreatedAt)).
-    ForUpdate(
-        sql.WithLockAction(sql.SkipLocked),
-    ).
-    All(ctx)
-```
-
-This generates SQL equivalent to:
-
-```sql
-SELECT * FROM outbox 
-WHERE status = 'pending' 
-ORDER BY created_at ASC 
-LIMIT $1 
-FOR UPDATE SKIP LOCKED
-```
-
-To enable this functionality, the Ent code generation includes the `sql/lock` feature flag:
-
-```go
-//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate --target ../entgen --feature sql/lock ./schema
-```
-
-The `sql/lock` feature flag is sufficient for this implementation. The `sql/execquery` feature flag is not required but may be included for future enhancements that require direct SQL execution.
-
 ## Schema Evolution
 
 The outbox schema is designed to support schema evolution:
