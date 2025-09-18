@@ -87,7 +87,6 @@ func SetupTestEnvironment() error {
 
 		DBClient = postgres.NewClient(databaseUrl)
 
-		// Just return nil since we don't need to create the uuid extension here
 		return nil
 	}); err != nil {
 		log.Printf("Failed to connect to database: %v", err)

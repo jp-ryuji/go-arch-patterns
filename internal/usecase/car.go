@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
-	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/usecase/input"
+	"github.com/jp-ryuji/go-arch-patterns/internal/usecase/input"
 )
 
 // CarUsecase defines the interface for car-related business logic

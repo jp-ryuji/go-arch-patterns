@@ -18,6 +18,9 @@ type Company func(*sql.Selector)
 // Individual is the predicate function for individual builders.
 type Individual func(*sql.Selector)
 
+// Outbox is the predicate function for outbox builders.
+type Outbox func(*sql.Selector)
+
 // Rental is the predicate function for rental builders.
 type Rental func(*sql.Selector)
 

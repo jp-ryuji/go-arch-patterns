@@ -34,6 +34,17 @@ func (r *carRepository) Create(ctx context.Context, car *model.Car) error {
 	return err
 }
 
+// CreateInTx inserts a new car into the database within a transaction
+func (r *carRepository) CreateInTx(ctx context.Context, tx *entgen.Tx, car *model.Car) error {
+	_, err := tx.Car.
+		Create().
+		SetID(car.ID).
+		SetTenantID(car.TenantID).
+		SetModel(car.Model).
+		Save(ctx)
+	return err
+}
+
 // GetByID retrieves a car by its ID
 func (r *carRepository) GetByID(ctx context.Context, id string) (*model.Car, error) {
 	carDB, err := r.client.Car.
@@ -103,6 +114,20 @@ func (r *carRepository) Update(ctx context.Context, car *model.Car) error {
 	return err
 }
 
+// UpdateInTx updates an existing car within a transaction
+func (r *carRepository) UpdateInTx(ctx context.Context, tx *entgen.Tx, car *model.Car) error {
+	// Update the UpdatedAt field to the current time
+	car.UpdatedAt = time.Now()
+
+	_, err := tx.Car.
+		UpdateOneID(car.ID).
+		SetTenantID(car.TenantID).
+		SetModel(car.Model).
+		SetUpdatedAt(car.UpdatedAt).
+		Save(ctx)
+	return err
+}
+
 // Delete removes a car by its ID
 func (r *carRepository) Delete(ctx context.Context, id string) error {
 	err := r.client.Car.
@@ -121,4 +146,29 @@ func (r *carRepository) Delete(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+// DeleteInTx removes a car by its ID within a transaction
+func (r *carRepository) DeleteInTx(ctx context.Context, tx *entgen.Tx, id string) error {
+	err := tx.Car.
+		DeleteOneID(id).
+		Exec(ctx)
+		// Make the delete operation idempotent by ignoring "not found" errors
+		// If the record doesn't exist, DeleteOneID.Exec() will return an error
+		// We want Delete to be idempotent, so we ignore "not found" errors
+	if err != nil {
+		// Check if it's a "not found" error by checking the error message
+		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "no rows in result set") {
+			// Ignore "not found" errors to make the operation idempotent
+			return nil
+		}
+		return err
+	}
+
+	return nil
+}
+
+// Tx returns the underlying Ent client's transaction capabilities
+func (r *carRepository) Tx() *entgen.Client {
+	return r.client
 }

@@ -57,6 +57,18 @@ func (f IndividualFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.V
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.IndividualMutation", m)
 }
 
+// The OutboxFunc type is an adapter to allow the use of ordinary
+// function as Outbox mutator.
+type OutboxFunc func(context.Context, *entgen.OutboxMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OutboxFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	if mv, ok := m.(*entgen.OutboxMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.OutboxMutation", m)
+}
+
 // The RentalFunc type is an adapter to allow the use of ordinary
 // function as Rental mutator.
 type RentalFunc func(context.Context, *entgen.RentalMutation) (entgen.Value, error)

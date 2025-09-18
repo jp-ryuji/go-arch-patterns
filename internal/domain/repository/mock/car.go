@@ -14,6 +14,7 @@ import (
 	reflect "reflect"
 
 	model "github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	entgen "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -55,6 +56,20 @@ func (mr *MockCarRepositoryMockRecorder) Create(ctx, car any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCarRepository)(nil).Create), ctx, car)
 }
 
+// CreateInTx mocks base method.
+func (m *MockCarRepository) CreateInTx(ctx context.Context, tx *entgen.Tx, car *model.Car) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateInTx", ctx, tx, car)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateInTx indicates an expected call of CreateInTx.
+func (mr *MockCarRepositoryMockRecorder) CreateInTx(ctx, tx, car any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateInTx", reflect.TypeOf((*MockCarRepository)(nil).CreateInTx), ctx, tx, car)
+}
+
 // Delete mocks base method.
 func (m *MockCarRepository) Delete(ctx context.Context, id string) error {
 	m.ctrl.T.Helper()
@@ -67,6 +82,20 @@ func (m *MockCarRepository) Delete(ctx context.Context, id string) error {
 func (mr *MockCarRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCarRepository)(nil).Delete), ctx, id)
+}
+
+// DeleteInTx mocks base method.
+func (m *MockCarRepository) DeleteInTx(ctx context.Context, tx *entgen.Tx, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteInTx", ctx, tx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteInTx indicates an expected call of DeleteInTx.
+func (mr *MockCarRepositoryMockRecorder) DeleteInTx(ctx, tx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteInTx", reflect.TypeOf((*MockCarRepository)(nil).DeleteInTx), ctx, tx, id)
 }
 
 // GetByID mocks base method.
@@ -111,4 +140,18 @@ func (m *MockCarRepository) Update(ctx context.Context, car *model.Car) error {
 func (mr *MockCarRepositoryMockRecorder) Update(ctx, car any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockCarRepository)(nil).Update), ctx, car)
+}
+
+// UpdateInTx mocks base method.
+func (m *MockCarRepository) UpdateInTx(ctx context.Context, tx *entgen.Tx, car *model.Car) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateInTx", ctx, tx, car)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateInTx indicates an expected call of UpdateInTx.
+func (mr *MockCarRepositoryMockRecorder) UpdateInTx(ctx, tx, car any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateInTx", reflect.TypeOf((*MockCarRepository)(nil).UpdateInTx), ctx, tx, car)
 }

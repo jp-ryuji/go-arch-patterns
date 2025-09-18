@@ -15,6 +15,7 @@ import (
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/caroption"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/company"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/individual"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/outbox"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/predicate"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/rental"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/rentaloption"
@@ -35,6 +36,7 @@ const (
 	TypeCarOption    = "CarOption"
 	TypeCompany      = "Company"
 	TypeIndividual   = "Individual"
+	TypeOutbox       = "Outbox"
 	TypeRental       = "Rental"
 	TypeRentalOption = "RentalOption"
 	TypeRenter       = "Renter"
@@ -3257,6 +3259,1031 @@ func (m *IndividualMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Individual edge %s", name)
+}
+
+// OutboxMutation represents an operation that mutates the Outbox nodes in the graph.
+type OutboxMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *string
+	aggregate_type *string
+	aggregate_id   *string
+	event_type     *string
+	payload        *map[string]interface{}
+	created_at     *time.Time
+	processed_at   *time.Time
+	status         *string
+	error_message  *string
+	version        *int64
+	addversion     *int64
+	locked_at      *time.Time
+	locked_by      *string
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*Outbox, error)
+	predicates     []predicate.Outbox
+}
+
+var _ ent.Mutation = (*OutboxMutation)(nil)
+
+// outboxOption allows management of the mutation configuration using functional options.
+type outboxOption func(*OutboxMutation)
+
+// newOutboxMutation creates new mutation for the Outbox entity.
+func newOutboxMutation(c config, op Op, opts ...outboxOption) *OutboxMutation {
+	m := &OutboxMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeOutbox,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withOutboxID sets the ID field of the mutation.
+func withOutboxID(id string) outboxOption {
+	return func(m *OutboxMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Outbox
+		)
+		m.oldValue = func(ctx context.Context) (*Outbox, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Outbox.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withOutbox sets the old Outbox of the mutation.
+func withOutbox(node *Outbox) outboxOption {
+	return func(m *OutboxMutation) {
+		m.oldValue = func(context.Context) (*Outbox, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m OutboxMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m OutboxMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("entgen: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Outbox entities.
+func (m *OutboxMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *OutboxMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *OutboxMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Outbox.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetAggregateType sets the "aggregate_type" field.
+func (m *OutboxMutation) SetAggregateType(s string) {
+	m.aggregate_type = &s
+}
+
+// AggregateType returns the value of the "aggregate_type" field in the mutation.
+func (m *OutboxMutation) AggregateType() (r string, exists bool) {
+	v := m.aggregate_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAggregateType returns the old "aggregate_type" field's value of the Outbox entity.
+// If the Outbox object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxMutation) OldAggregateType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAggregateType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAggregateType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAggregateType: %w", err)
+	}
+	return oldValue.AggregateType, nil
+}
+
+// ResetAggregateType resets all changes to the "aggregate_type" field.
+func (m *OutboxMutation) ResetAggregateType() {
+	m.aggregate_type = nil
+}
+
+// SetAggregateID sets the "aggregate_id" field.
+func (m *OutboxMutation) SetAggregateID(s string) {
+	m.aggregate_id = &s
+}
+
+// AggregateID returns the value of the "aggregate_id" field in the mutation.
+func (m *OutboxMutation) AggregateID() (r string, exists bool) {
+	v := m.aggregate_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAggregateID returns the old "aggregate_id" field's value of the Outbox entity.
+// If the Outbox object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxMutation) OldAggregateID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAggregateID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAggregateID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAggregateID: %w", err)
+	}
+	return oldValue.AggregateID, nil
+}
+
+// ResetAggregateID resets all changes to the "aggregate_id" field.
+func (m *OutboxMutation) ResetAggregateID() {
+	m.aggregate_id = nil
+}
+
+// SetEventType sets the "event_type" field.
+func (m *OutboxMutation) SetEventType(s string) {
+	m.event_type = &s
+}
+
+// EventType returns the value of the "event_type" field in the mutation.
+func (m *OutboxMutation) EventType() (r string, exists bool) {
+	v := m.event_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEventType returns the old "event_type" field's value of the Outbox entity.
+// If the Outbox object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxMutation) OldEventType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEventType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEventType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEventType: %w", err)
+	}
+	return oldValue.EventType, nil
+}
+
+// ResetEventType resets all changes to the "event_type" field.
+func (m *OutboxMutation) ResetEventType() {
+	m.event_type = nil
+}
+
+// SetPayload sets the "payload" field.
+func (m *OutboxMutation) SetPayload(value map[string]interface{}) {
+	m.payload = &value
+}
+
+// Payload returns the value of the "payload" field in the mutation.
+func (m *OutboxMutation) Payload() (r map[string]interface{}, exists bool) {
+	v := m.payload
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPayload returns the old "payload" field's value of the Outbox entity.
+// If the Outbox object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxMutation) OldPayload(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPayload is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPayload requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPayload: %w", err)
+	}
+	return oldValue.Payload, nil
+}
+
+// ClearPayload clears the value of the "payload" field.
+func (m *OutboxMutation) ClearPayload() {
+	m.payload = nil
+	m.clearedFields[outbox.FieldPayload] = struct{}{}
+}
+
+// PayloadCleared returns if the "payload" field was cleared in this mutation.
+func (m *OutboxMutation) PayloadCleared() bool {
+	_, ok := m.clearedFields[outbox.FieldPayload]
+	return ok
+}
+
+// ResetPayload resets all changes to the "payload" field.
+func (m *OutboxMutation) ResetPayload() {
+	m.payload = nil
+	delete(m.clearedFields, outbox.FieldPayload)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *OutboxMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *OutboxMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Outbox entity.
+// If the Outbox object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ClearCreatedAt clears the value of the "created_at" field.
+func (m *OutboxMutation) ClearCreatedAt() {
+	m.created_at = nil
+	m.clearedFields[outbox.FieldCreatedAt] = struct{}{}
+}
+
+// CreatedAtCleared returns if the "created_at" field was cleared in this mutation.
+func (m *OutboxMutation) CreatedAtCleared() bool {
+	_, ok := m.clearedFields[outbox.FieldCreatedAt]
+	return ok
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *OutboxMutation) ResetCreatedAt() {
+	m.created_at = nil
+	delete(m.clearedFields, outbox.FieldCreatedAt)
+}
+
+// SetProcessedAt sets the "processed_at" field.
+func (m *OutboxMutation) SetProcessedAt(t time.Time) {
+	m.processed_at = &t
+}
+
+// ProcessedAt returns the value of the "processed_at" field in the mutation.
+func (m *OutboxMutation) ProcessedAt() (r time.Time, exists bool) {
+	v := m.processed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProcessedAt returns the old "processed_at" field's value of the Outbox entity.
+// If the Outbox object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxMutation) OldProcessedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProcessedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProcessedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProcessedAt: %w", err)
+	}
+	return oldValue.ProcessedAt, nil
+}
+
+// ClearProcessedAt clears the value of the "processed_at" field.
+func (m *OutboxMutation) ClearProcessedAt() {
+	m.processed_at = nil
+	m.clearedFields[outbox.FieldProcessedAt] = struct{}{}
+}
+
+// ProcessedAtCleared returns if the "processed_at" field was cleared in this mutation.
+func (m *OutboxMutation) ProcessedAtCleared() bool {
+	_, ok := m.clearedFields[outbox.FieldProcessedAt]
+	return ok
+}
+
+// ResetProcessedAt resets all changes to the "processed_at" field.
+func (m *OutboxMutation) ResetProcessedAt() {
+	m.processed_at = nil
+	delete(m.clearedFields, outbox.FieldProcessedAt)
+}
+
+// SetStatus sets the "status" field.
+func (m *OutboxMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *OutboxMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the Outbox entity.
+// If the Outbox object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *OutboxMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetErrorMessage sets the "error_message" field.
+func (m *OutboxMutation) SetErrorMessage(s string) {
+	m.error_message = &s
+}
+
+// ErrorMessage returns the value of the "error_message" field in the mutation.
+func (m *OutboxMutation) ErrorMessage() (r string, exists bool) {
+	v := m.error_message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorMessage returns the old "error_message" field's value of the Outbox entity.
+// If the Outbox object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxMutation) OldErrorMessage(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorMessage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorMessage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorMessage: %w", err)
+	}
+	return oldValue.ErrorMessage, nil
+}
+
+// ClearErrorMessage clears the value of the "error_message" field.
+func (m *OutboxMutation) ClearErrorMessage() {
+	m.error_message = nil
+	m.clearedFields[outbox.FieldErrorMessage] = struct{}{}
+}
+
+// ErrorMessageCleared returns if the "error_message" field was cleared in this mutation.
+func (m *OutboxMutation) ErrorMessageCleared() bool {
+	_, ok := m.clearedFields[outbox.FieldErrorMessage]
+	return ok
+}
+
+// ResetErrorMessage resets all changes to the "error_message" field.
+func (m *OutboxMutation) ResetErrorMessage() {
+	m.error_message = nil
+	delete(m.clearedFields, outbox.FieldErrorMessage)
+}
+
+// SetVersion sets the "version" field.
+func (m *OutboxMutation) SetVersion(i int64) {
+	m.version = &i
+	m.addversion = nil
+}
+
+// Version returns the value of the "version" field in the mutation.
+func (m *OutboxMutation) Version() (r int64, exists bool) {
+	v := m.version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVersion returns the old "version" field's value of the Outbox entity.
+// If the Outbox object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxMutation) OldVersion(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVersion: %w", err)
+	}
+	return oldValue.Version, nil
+}
+
+// AddVersion adds i to the "version" field.
+func (m *OutboxMutation) AddVersion(i int64) {
+	if m.addversion != nil {
+		*m.addversion += i
+	} else {
+		m.addversion = &i
+	}
+}
+
+// AddedVersion returns the value that was added to the "version" field in this mutation.
+func (m *OutboxMutation) AddedVersion() (r int64, exists bool) {
+	v := m.addversion
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVersion resets all changes to the "version" field.
+func (m *OutboxMutation) ResetVersion() {
+	m.version = nil
+	m.addversion = nil
+}
+
+// SetLockedAt sets the "locked_at" field.
+func (m *OutboxMutation) SetLockedAt(t time.Time) {
+	m.locked_at = &t
+}
+
+// LockedAt returns the value of the "locked_at" field in the mutation.
+func (m *OutboxMutation) LockedAt() (r time.Time, exists bool) {
+	v := m.locked_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLockedAt returns the old "locked_at" field's value of the Outbox entity.
+// If the Outbox object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxMutation) OldLockedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLockedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLockedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLockedAt: %w", err)
+	}
+	return oldValue.LockedAt, nil
+}
+
+// ClearLockedAt clears the value of the "locked_at" field.
+func (m *OutboxMutation) ClearLockedAt() {
+	m.locked_at = nil
+	m.clearedFields[outbox.FieldLockedAt] = struct{}{}
+}
+
+// LockedAtCleared returns if the "locked_at" field was cleared in this mutation.
+func (m *OutboxMutation) LockedAtCleared() bool {
+	_, ok := m.clearedFields[outbox.FieldLockedAt]
+	return ok
+}
+
+// ResetLockedAt resets all changes to the "locked_at" field.
+func (m *OutboxMutation) ResetLockedAt() {
+	m.locked_at = nil
+	delete(m.clearedFields, outbox.FieldLockedAt)
+}
+
+// SetLockedBy sets the "locked_by" field.
+func (m *OutboxMutation) SetLockedBy(s string) {
+	m.locked_by = &s
+}
+
+// LockedBy returns the value of the "locked_by" field in the mutation.
+func (m *OutboxMutation) LockedBy() (r string, exists bool) {
+	v := m.locked_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLockedBy returns the old "locked_by" field's value of the Outbox entity.
+// If the Outbox object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxMutation) OldLockedBy(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLockedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLockedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLockedBy: %w", err)
+	}
+	return oldValue.LockedBy, nil
+}
+
+// ClearLockedBy clears the value of the "locked_by" field.
+func (m *OutboxMutation) ClearLockedBy() {
+	m.locked_by = nil
+	m.clearedFields[outbox.FieldLockedBy] = struct{}{}
+}
+
+// LockedByCleared returns if the "locked_by" field was cleared in this mutation.
+func (m *OutboxMutation) LockedByCleared() bool {
+	_, ok := m.clearedFields[outbox.FieldLockedBy]
+	return ok
+}
+
+// ResetLockedBy resets all changes to the "locked_by" field.
+func (m *OutboxMutation) ResetLockedBy() {
+	m.locked_by = nil
+	delete(m.clearedFields, outbox.FieldLockedBy)
+}
+
+// Where appends a list predicates to the OutboxMutation builder.
+func (m *OutboxMutation) Where(ps ...predicate.Outbox) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the OutboxMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *OutboxMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Outbox, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *OutboxMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *OutboxMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Outbox).
+func (m *OutboxMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *OutboxMutation) Fields() []string {
+	fields := make([]string, 0, 11)
+	if m.aggregate_type != nil {
+		fields = append(fields, outbox.FieldAggregateType)
+	}
+	if m.aggregate_id != nil {
+		fields = append(fields, outbox.FieldAggregateID)
+	}
+	if m.event_type != nil {
+		fields = append(fields, outbox.FieldEventType)
+	}
+	if m.payload != nil {
+		fields = append(fields, outbox.FieldPayload)
+	}
+	if m.created_at != nil {
+		fields = append(fields, outbox.FieldCreatedAt)
+	}
+	if m.processed_at != nil {
+		fields = append(fields, outbox.FieldProcessedAt)
+	}
+	if m.status != nil {
+		fields = append(fields, outbox.FieldStatus)
+	}
+	if m.error_message != nil {
+		fields = append(fields, outbox.FieldErrorMessage)
+	}
+	if m.version != nil {
+		fields = append(fields, outbox.FieldVersion)
+	}
+	if m.locked_at != nil {
+		fields = append(fields, outbox.FieldLockedAt)
+	}
+	if m.locked_by != nil {
+		fields = append(fields, outbox.FieldLockedBy)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *OutboxMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case outbox.FieldAggregateType:
+		return m.AggregateType()
+	case outbox.FieldAggregateID:
+		return m.AggregateID()
+	case outbox.FieldEventType:
+		return m.EventType()
+	case outbox.FieldPayload:
+		return m.Payload()
+	case outbox.FieldCreatedAt:
+		return m.CreatedAt()
+	case outbox.FieldProcessedAt:
+		return m.ProcessedAt()
+	case outbox.FieldStatus:
+		return m.Status()
+	case outbox.FieldErrorMessage:
+		return m.ErrorMessage()
+	case outbox.FieldVersion:
+		return m.Version()
+	case outbox.FieldLockedAt:
+		return m.LockedAt()
+	case outbox.FieldLockedBy:
+		return m.LockedBy()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *OutboxMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case outbox.FieldAggregateType:
+		return m.OldAggregateType(ctx)
+	case outbox.FieldAggregateID:
+		return m.OldAggregateID(ctx)
+	case outbox.FieldEventType:
+		return m.OldEventType(ctx)
+	case outbox.FieldPayload:
+		return m.OldPayload(ctx)
+	case outbox.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case outbox.FieldProcessedAt:
+		return m.OldProcessedAt(ctx)
+	case outbox.FieldStatus:
+		return m.OldStatus(ctx)
+	case outbox.FieldErrorMessage:
+		return m.OldErrorMessage(ctx)
+	case outbox.FieldVersion:
+		return m.OldVersion(ctx)
+	case outbox.FieldLockedAt:
+		return m.OldLockedAt(ctx)
+	case outbox.FieldLockedBy:
+		return m.OldLockedBy(ctx)
+	}
+	return nil, fmt.Errorf("unknown Outbox field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *OutboxMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case outbox.FieldAggregateType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAggregateType(v)
+		return nil
+	case outbox.FieldAggregateID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAggregateID(v)
+		return nil
+	case outbox.FieldEventType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEventType(v)
+		return nil
+	case outbox.FieldPayload:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPayload(v)
+		return nil
+	case outbox.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case outbox.FieldProcessedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProcessedAt(v)
+		return nil
+	case outbox.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case outbox.FieldErrorMessage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorMessage(v)
+		return nil
+	case outbox.FieldVersion:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVersion(v)
+		return nil
+	case outbox.FieldLockedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLockedAt(v)
+		return nil
+	case outbox.FieldLockedBy:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLockedBy(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Outbox field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *OutboxMutation) AddedFields() []string {
+	var fields []string
+	if m.addversion != nil {
+		fields = append(fields, outbox.FieldVersion)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *OutboxMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case outbox.FieldVersion:
+		return m.AddedVersion()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *OutboxMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case outbox.FieldVersion:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVersion(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Outbox numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *OutboxMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(outbox.FieldPayload) {
+		fields = append(fields, outbox.FieldPayload)
+	}
+	if m.FieldCleared(outbox.FieldCreatedAt) {
+		fields = append(fields, outbox.FieldCreatedAt)
+	}
+	if m.FieldCleared(outbox.FieldProcessedAt) {
+		fields = append(fields, outbox.FieldProcessedAt)
+	}
+	if m.FieldCleared(outbox.FieldErrorMessage) {
+		fields = append(fields, outbox.FieldErrorMessage)
+	}
+	if m.FieldCleared(outbox.FieldLockedAt) {
+		fields = append(fields, outbox.FieldLockedAt)
+	}
+	if m.FieldCleared(outbox.FieldLockedBy) {
+		fields = append(fields, outbox.FieldLockedBy)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *OutboxMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *OutboxMutation) ClearField(name string) error {
+	switch name {
+	case outbox.FieldPayload:
+		m.ClearPayload()
+		return nil
+	case outbox.FieldCreatedAt:
+		m.ClearCreatedAt()
+		return nil
+	case outbox.FieldProcessedAt:
+		m.ClearProcessedAt()
+		return nil
+	case outbox.FieldErrorMessage:
+		m.ClearErrorMessage()
+		return nil
+	case outbox.FieldLockedAt:
+		m.ClearLockedAt()
+		return nil
+	case outbox.FieldLockedBy:
+		m.ClearLockedBy()
+		return nil
+	}
+	return fmt.Errorf("unknown Outbox nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *OutboxMutation) ResetField(name string) error {
+	switch name {
+	case outbox.FieldAggregateType:
+		m.ResetAggregateType()
+		return nil
+	case outbox.FieldAggregateID:
+		m.ResetAggregateID()
+		return nil
+	case outbox.FieldEventType:
+		m.ResetEventType()
+		return nil
+	case outbox.FieldPayload:
+		m.ResetPayload()
+		return nil
+	case outbox.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case outbox.FieldProcessedAt:
+		m.ResetProcessedAt()
+		return nil
+	case outbox.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case outbox.FieldErrorMessage:
+		m.ResetErrorMessage()
+		return nil
+	case outbox.FieldVersion:
+		m.ResetVersion()
+		return nil
+	case outbox.FieldLockedAt:
+		m.ResetLockedAt()
+		return nil
+	case outbox.FieldLockedBy:
+		m.ResetLockedBy()
+		return nil
+	}
+	return fmt.Errorf("unknown Outbox field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *OutboxMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *OutboxMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *OutboxMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *OutboxMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *OutboxMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *OutboxMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *OutboxMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Outbox unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *OutboxMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Outbox edge %s", name)
 }
 
 // RentalMutation represents an operation that mutates the Rental nodes in the graph.

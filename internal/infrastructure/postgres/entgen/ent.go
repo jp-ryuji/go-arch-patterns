@@ -16,6 +16,7 @@ import (
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/caroption"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/company"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/individual"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/outbox"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/rental"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/rentaloption"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/renter"
@@ -84,6 +85,7 @@ func checkColumn(t, c string) error {
 			caroption.Table:    caroption.ValidColumn,
 			company.Table:      company.ValidColumn,
 			individual.Table:   individual.ValidColumn,
+			outbox.Table:       outbox.ValidColumn,
 			rental.Table:       rental.ValidColumn,
 			rentaloption.Table: rentaloption.ValidColumn,
 			renter.Table:       renter.ValidColumn,
