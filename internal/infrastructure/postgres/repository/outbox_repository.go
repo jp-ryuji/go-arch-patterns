@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"entgo.io/ent/dialect/sql"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/outbox"
@@ -60,18 +59,13 @@ func (r *outboxRepository) GetPending(ctx context.Context, limit int) ([]*entgen
 		All(ctx)
 }
 
-// GetPendingWithLock retrieves pending outbox messages with locking for concurrency control
-// Uses SELECT ... FOR UPDATE SKIP LOCKED for efficient concurrency control
+// GetPendingWithLock retrieves pending outbox messages with locking
 func (r *outboxRepository) GetPendingWithLock(ctx context.Context, limit int, processorID string) ([]*entgen.Outbox, error) {
-	// Use SELECT ... FOR UPDATE SKIP LOCKED for efficient concurrency control
-	// This ensures that only one processor can claim a message at a time
 	pendingMessages, err := r.client.Outbox.Query().
 		Where(outbox.Status("pending")).
 		Limit(limit).
 		Order(entgen.Asc(outbox.FieldCreatedAt)).
-		ForUpdate(
-			sql.WithLockAction(sql.SkipLocked),
-		).
+		ForUpdate().
 		All(ctx)
 	if err != nil {
 		return nil, err
