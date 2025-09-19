@@ -25,15 +25,15 @@ In our implementation, we coordinate between:
    - `internal/infrastructure/postgres/repository/transaction_manager.go` - Transaction manager implementation
 
 3. **Application Layer**:
-   - `internal/usecase/car_impl.go` - Car usecase implementation with outbox pattern
-   - `internal/usecase/car.go` - Car usecase interface
+   - `internal/application/service/car_impl.go` - Car service implementation with outbox pattern
+   - `internal/application/service/car.go` - Car service interface
 
 4. **Tests**:
-   - `internal/usecase/car_impl_test.go` - Unit tests for car usecase with transactional outbox
+   - `internal/application/service/test/car_impl_test.go` - Unit tests for car service with transactional outbox
 
 ### Outbox Flow
 
-The outbox pattern is implemented in the car usecase:
+The outbox pattern is implemented in the car service:
 
 1. When a car is registered, a database transaction is started
 2. The car data is saved to PostgreSQL within the transaction

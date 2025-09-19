@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	companyrepo "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/repository"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/repository/testutil"
@@ -16,7 +16,7 @@ import (
 )
 
 // testCompanySetup is a helper function that provides common test setup for company tests
-func testCompanySetup(t *testing.T, tenantCode string) (repository.CompanyRepository, repository.RenterRepository, context.Context, *model.Tenant) {
+func testCompanySetup(t *testing.T, tenantCode string) (repository.CompanyRepository, repository.RenterRepository, context.Context, *entity.Tenant) {
 	t.Helper()
 
 	// Skip this test if not running integration tests
@@ -35,12 +35,12 @@ func TestCompanyRepository_Create(t *testing.T) {
 	repo, renterRepo, ctx, tenant := testCompanySetup(t, "test-tenant-company-create")
 
 	// Create a renter first
-	renter := model.NewRenter(tenant.ID, model.CompanyRenter, time.Now())
+	renter := entity.NewRenter(tenant.ID, entity.CompanyRenter, time.Now())
 	err := renterRepo.Create(ctx, renter)
 	require.NoError(t, err)
 
 	// Create a company
-	company := model.NewCompany(renter.ID, tenant.ID, "Test Company", model.CompanySizeMedium, time.Now())
+	company := entity.NewCompany(renter.ID, tenant.ID, "Test Company", entity.CompanySizeMedium, time.Now())
 	err = repo.Create(ctx, company)
 	require.NoError(t, err)
 
@@ -58,12 +58,12 @@ func TestCompanyRepository_GetByID(t *testing.T) {
 	repo, renterRepo, ctx, tenant := testCompanySetup(t, "test-tenant-company-get")
 
 	// Create a renter first
-	renter := model.NewRenter(tenant.ID, model.CompanyRenter, time.Now())
+	renter := entity.NewRenter(tenant.ID, entity.CompanyRenter, time.Now())
 	err := renterRepo.Create(ctx, renter)
 	require.NoError(t, err)
 
 	// Create a company
-	company := model.NewCompany(renter.ID, tenant.ID, "Another Test Company", model.CompanySizeLarge, time.Now())
+	company := entity.NewCompany(renter.ID, tenant.ID, "Another Test Company", entity.CompanySizeLarge, time.Now())
 	err = repo.Create(ctx, company)
 	require.NoError(t, err)
 
@@ -90,19 +90,19 @@ func TestCompanyRepository_Update(t *testing.T) {
 	repo, renterRepo, ctx, tenant := testCompanySetup(t, "test-tenant-company-update")
 
 	// Create a renter first
-	renter := model.NewRenter(tenant.ID, model.CompanyRenter, time.Now())
+	renter := entity.NewRenter(tenant.ID, entity.CompanyRenter, time.Now())
 	err := renterRepo.Create(ctx, renter)
 	require.NoError(t, err)
 
 	// Create a company
-	company := model.NewCompany(renter.ID, tenant.ID, "Original Company", model.CompanySizeSmall, time.Now())
+	company := entity.NewCompany(renter.ID, tenant.ID, "Original Company", entity.CompanySizeSmall, time.Now())
 	err = repo.Create(ctx, company)
 	require.NoError(t, err)
 
 	// Update the company
 	originalUpdatedAt := company.UpdatedAt
 	company.Name = "Updated Company"
-	company.CompanySize = model.CompanySizeLarge
+	company.CompanySize = entity.CompanySizeLarge
 	company.UpdatedAt = time.Now()
 	err = repo.Update(ctx, company)
 	require.NoError(t, err)
@@ -111,7 +111,7 @@ func TestCompanyRepository_Update(t *testing.T) {
 	updatedCompany, err := repo.GetByID(ctx, company.RenterID)
 	require.NoError(t, err)
 	require.Equal(t, "Updated Company", updatedCompany.Name)
-	require.Equal(t, model.CompanySizeLarge, updatedCompany.CompanySize)
+	require.Equal(t, entity.CompanySizeLarge, updatedCompany.CompanySize)
 	require.True(t, updatedCompany.UpdatedAt.After(originalUpdatedAt))
 }
 
@@ -120,12 +120,12 @@ func TestCompanyRepository_Delete(t *testing.T) {
 	repo, renterRepo, ctx, tenant := testCompanySetup(t, "test-tenant-company-delete")
 
 	// Create a renter first
-	renter := model.NewRenter(tenant.ID, model.CompanyRenter, time.Now())
+	renter := entity.NewRenter(tenant.ID, entity.CompanyRenter, time.Now())
 	err := renterRepo.Create(ctx, renter)
 	require.NoError(t, err)
 
 	// Create a company
-	company := model.NewCompany(renter.ID, tenant.ID, "Company to Delete", model.CompanySizeSmall, time.Now())
+	company := entity.NewCompany(renter.ID, tenant.ID, "Company to Delete", entity.CompanySizeSmall, time.Now())
 	err = repo.Create(ctx, company)
 	require.NoError(t, err)
 

@@ -1,4 +1,4 @@
-package model
+package entity
 
 import (
 	"time"
@@ -6,7 +6,7 @@ import (
 	"github.com/aarondl/null/v9"
 	"github.com/oklog/ulid/v2"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model/value"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/value"
 )
 
 // Individuals is a slice of Individual

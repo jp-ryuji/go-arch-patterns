@@ -3,7 +3,7 @@ package dbmodel
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 )
 
 // Car represents the database model for Car
@@ -26,8 +26,8 @@ type CarLoadOptions struct {
 }
 
 // ToDomain converts Car to domain model with specified associations
-func (c *Car) ToDomain(opts ...CarLoadOptions) *model.Car {
-	car := &model.Car{
+func (c *Car) ToDomain(opts ...CarLoadOptions) *entity.Car {
+	car := &entity.Car{
 		ID:        c.ID,
 		TenantID:  c.TenantID,
 		Model:     c.Model,
@@ -45,7 +45,7 @@ func (c *Car) ToDomain(opts ...CarLoadOptions) *model.Car {
 
 	// Only create Refs if tenant needs to be loaded and is available, or rentals need to be loaded and are available
 	if (option.WithTenant && c.Tenant.ID != "") || (option.WithRentals && len(c.Rentals) > 0) {
-		car.Refs = &model.CarRefs{}
+		car.Refs = &entity.CarRefs{}
 
 		// Load tenant if requested and available
 		if option.WithTenant && c.Tenant.ID != "" {
@@ -54,7 +54,7 @@ func (c *Car) ToDomain(opts ...CarLoadOptions) *model.Car {
 
 		// Load rentals if requested and available
 		if option.WithRentals && len(c.Rentals) > 0 {
-			rentals := make(model.Rentals, len(c.Rentals))
+			rentals := make(entity.Rentals, len(c.Rentals))
 			for i, rental := range c.Rentals {
 				rentals[i] = rental.ToDomain()
 			}
@@ -65,8 +65,8 @@ func (c *Car) ToDomain(opts ...CarLoadOptions) *model.Car {
 	return car
 }
 
-// FromDomain converts domain model to Car
-func FromDomainCar(car *model.Car) *Car {
+// FromDomainCar converts domain model to Car
+func FromDomainCar(car *entity.Car) *Car {
 	return &Car{
 		ID:        car.ID,
 		TenantID:  car.TenantID,

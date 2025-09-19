@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/aarondl/null/v9"
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model/value"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/value"
 )
 
 // Individual represents the database model for Individual
@@ -25,7 +25,7 @@ type Individual struct {
 type IndividualLoadOptions struct{}
 
 // ToDomain converts Individual to domain model with specified associations
-func (i *Individual) ToDomain(opts ...IndividualLoadOptions) (*model.Individual, error) {
+func (i *Individual) ToDomain(opts ...IndividualLoadOptions) (*entity.Individual, error) {
 	emailVO, err := value.NewEmail(i.Email)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (i *Individual) ToDomain(opts ...IndividualLoadOptions) (*model.Individual,
 		lastName = null.StringFrom(i.LastName)
 	}
 
-	individual := &model.Individual{
+	individual := &entity.Individual{
 		ID:        i.ID,
 		RenterID:  i.RenterID,
 		TenantID:  i.TenantID,
@@ -57,13 +57,13 @@ func (i *Individual) ToDomain(opts ...IndividualLoadOptions) (*model.Individual,
 	}
 
 	// Create Refs if any associations need to be loaded
-	individual.Refs = &model.IndividualRefs{}
+	individual.Refs = &entity.IndividualRefs{}
 
 	return individual, nil
 }
 
-// FromDomain converts domain model to Individual
-func FromDomainIndividual(individual *model.Individual) *Individual {
+// FromDomainIndividual converts domain model to Individual
+func FromDomainIndividual(individual *entity.Individual) *Individual {
 	firstName := ""
 	if individual.FirstName.Valid {
 		firstName = individual.FirstName.String

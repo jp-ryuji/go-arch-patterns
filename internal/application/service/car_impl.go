@@ -1,31 +1,31 @@
-package usecase
+package service
 
 import (
 	"context"
 	"fmt"
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/application/dto"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	"github.com/jp-ryuji/go-arch-patterns/internal/pkg/id"
-	"github.com/jp-ryuji/go-arch-patterns/internal/usecase/input"
 )
 
-// carUsecase implements CarUsecase interface
-type carUsecase struct {
+// carService implements CarService interface
+type carService struct {
 	carRepo    repository.CarRepository
 	outboxRepo repository.OutboxRepository
 	txManager  repository.TransactionManager
 }
 
-// NewCarUsecase creates a new car usecase
-func NewCarUsecase(
+// NewCarService creates a new car service
+func NewCarService(
 	carRepo repository.CarRepository,
 	outboxRepo repository.OutboxRepository,
 	txManager repository.TransactionManager,
-) CarUsecase {
-	return &carUsecase{
+) CarService {
+	return &carService{
 		carRepo:    carRepo,
 		outboxRepo: outboxRepo,
 		txManager:  txManager,
@@ -33,17 +33,17 @@ func NewCarUsecase(
 }
 
 // Register registers a new car using the outbox pattern with transactional guarantees
-func (uc *carUsecase) Register(ctx context.Context, input input.RegisterCarInput) (*model.Car, error) {
+func (s *carService) Register(ctx context.Context, input dto.RegisterCarInput) (*entity.Car, error) {
 	// Validate input
 	if err := Validate(input); err != nil {
 		return nil, err
 	}
 
 	now := time.Now()
-	car := model.NewCar(input.TenantID, input.Model, now)
+	car := entity.NewCar(input.TenantID, input.Model, now)
 
 	// Start a transaction
-	tx, err := uc.txManager.BeginTx(ctx)
+	tx, err := s.txManager.BeginTx(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start transaction: %w", err)
 	}
@@ -51,7 +51,7 @@ func (uc *carUsecase) Register(ctx context.Context, input input.RegisterCarInput
 	// Ensure rollback in case of error
 	defer func() {
 		if r := recover(); r != nil {
-			if err := uc.txManager.RollbackTx(ctx, tx); err != nil {
+			if err := s.txManager.RollbackTx(ctx, tx); err != nil {
 				// Log the error but continue with the panic
 				// In a production system, you might want to use a proper logger
 				fmt.Printf("Failed to rollback transaction: %v\n", err)
@@ -61,8 +61,8 @@ func (uc *carUsecase) Register(ctx context.Context, input input.RegisterCarInput
 	}()
 
 	// Step 1: Save to PostgreSQL within transaction
-	if err := uc.carRepo.CreateInTx(ctx, tx, car); err != nil {
-		if rollbackErr := uc.txManager.RollbackTx(ctx, tx); rollbackErr != nil {
+	if err := s.carRepo.CreateInTx(ctx, tx, car); err != nil {
+		if rollbackErr := s.txManager.RollbackTx(ctx, tx); rollbackErr != nil {
 			return nil, fmt.Errorf("failed to create car in database: %w; also failed to rollback transaction: %v", err, rollbackErr)
 		}
 		return nil, fmt.Errorf("failed to create car in database: %w", err)
@@ -85,15 +85,15 @@ func (uc *carUsecase) Register(ctx context.Context, input input.RegisterCarInput
 		Status:    "pending",
 	}
 
-	if err := uc.outboxRepo.CreateInTx(ctx, tx, outbox); err != nil {
-		if rollbackErr := uc.txManager.RollbackTx(ctx, tx); rollbackErr != nil {
+	if err := s.outboxRepo.CreateInTx(ctx, tx, outbox); err != nil {
+		if rollbackErr := s.txManager.RollbackTx(ctx, tx); rollbackErr != nil {
 			return nil, fmt.Errorf("failed to create outbox message: %w; also failed to rollback transaction: %v", err, rollbackErr)
 		}
 		return nil, fmt.Errorf("failed to create outbox message: %w", err)
 	}
 
 	// Commit the transaction
-	if err := uc.txManager.CommitTx(ctx, tx); err != nil {
+	if err := s.txManager.CommitTx(ctx, tx); err != nil {
 		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
@@ -101,21 +101,21 @@ func (uc *carUsecase) Register(ctx context.Context, input input.RegisterCarInput
 }
 
 // GetByID retrieves a car by its ID
-func (uc *carUsecase) GetByID(ctx context.Context, input input.GetCarByIDInput) (*model.Car, error) {
+func (s *carService) GetByID(ctx context.Context, input dto.GetCarByIDInput) (*entity.Car, error) {
 	// Validate input
 	if err := Validate(input); err != nil {
 		return nil, err
 	}
 
-	return uc.carRepo.GetByID(ctx, input.ID)
+	return s.carRepo.GetByID(ctx, input.ID)
 }
 
 // GetByIDWithTenant retrieves a car by its ID along with its tenant information
-func (uc *carUsecase) GetByIDWithTenant(ctx context.Context, input input.GetCarByIDInput) (*model.Car, error) {
+func (s *carService) GetByIDWithTenant(ctx context.Context, input dto.GetCarByIDInput) (*entity.Car, error) {
 	// Validate input
 	if err := Validate(input); err != nil {
 		return nil, err
 	}
 
-	return uc.carRepo.GetByIDWithTenant(ctx, input.ID)
+	return s.carRepo.GetByIDWithTenant(ctx, input.ID)
 }

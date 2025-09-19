@@ -1,51 +1,72 @@
 # Software Architecture
 
-This project follows the Ports and Adapters Architecture (also known as Hexagonal Architecture). This pattern, along with Onion Architecture and Clean Architecture, share common principles of separation of concerns and dependency inversion, though each has its own emphasis:
-
-- **Ports and Adapters** emphasizes defining interfaces (ports) at the system boundaries and implementing adapters for external systems
-- **Onion Architecture** focuses on layers with dependencies pointing inward toward the domain core
-- **Clean Architecture** emphasizes dependency rules where inner layers should not depend on outer layers
-
-All these patterns promote loose coupling between the application core and external systems.
+This project follows a Domain-Driven Design (DDD) approach with an Onion Architecture structure. This pattern emphasizes separation of concerns and dependency inversion, with dependencies pointing inward toward the domain core.
 
 In this architecture:
 
 - The **core domain** (business logic) resides at the center and is independent of external systems
-- **Ports** are interfaces defined in the core that allow communication with external systems
-- **Adapters** are implementations of those ports that connect to external systems (databases, HTTP APIs, etc.)
+- **Domain entities** represent the core business objects with identity
+- **Value objects** are immutable objects that describe aspects of the domain
+- **Repository interfaces** define the contracts for data access (ports)
+- **Application services** orchestrate use cases and business flows
+- **DTOs** (Data Transfer Objects) carry data between processes
+- **Adapters** come in two types:
+  - **Secondary/Driven Adapters**: Implementations of repository interfaces that connect to external systems (databases, message queues, etc.)
+  - **Primary/Driving Adapters**: Interface adapters that expose application functionality to external clients (gRPC services, HTTP handlers, etc.)
 
 Structure:
 
 ```plaintext
 ├── cmd
-│   └── app
-│       └── main.go
+│   └── app
+│       └── main.go
+├── api                          # Protocol Buffers definitions
+│   ├── proto
+│   │   ├── car
+│   │   │   └── v1
+│   │   │       ├── car.proto
+│   │   │       └── car_service.proto
+│   │   └── common
+│   │       └── v1
+│   │           └── common.proto
+│   └── generated                # All generated code
+│       └── car
+│           └── v1
+│               ├── car.pb.go
+│               ├── car_grpc.pb.go
+│               └── car.pb.gw.go
 ├── docker
 ├── docs
-├── internal
-│   ├── domain
-│   │   ├── model          # domain model
-│   │   │   ├── value      # value object
-│   │   │   └── factory    # factory methods used in test
-│   │   ├── repository     # repository interface (port)
-│   │   └── service        # domain service
-│   ├── infrastructure
-│   │   ├── cmd
-│   │   │   ├── internal
-│   │   │   └── root.go
-│   │   ├── http           # HTTP adapter implementation
-│   │   ├── postgres       # PostgreSQL adapter implementation
-│   │   │   ├── dbmodel    # (ORM specific models with database annotations and relationships)
-│   │   │   ├── repository # (Implement the repository interfaces using ORM)
-│   │   │   └── entgen     # (Generated type-safe query code using Ent)
-│   │   ├── redis          # Redis adapter implementation
-│   │   └── s3             # S3 adapter implementation
-│   ├── pkg                # library
-│   └── usecase            # application service
-├── schema
-│   ├── openapi
-│   └── proto
-└── seed-data
+└── internal
+    ├── domain                   # Core Domain Layer (innermost)
+    │   ├── entity               # Domain entities with identity
+    │   ├── value                # Value objects (immutable)
+    │   ├── service              # Domain services (business logic)
+    │   └── repository           # Repository interfaces (ports)
+    ├── application              # Application Layer
+    │   ├── service              # Application services (orchestration)
+    │   └── dto                  # Data transfer objects
+    ├── infrastructure           # Infrastructure Layer (outermost)
+    │   ├── postgres             # PostgreSQL adapter
+    │   │   ├── dbmodel          # ORM/database models
+    │   │   └── entgen           # (Generated type-safe query code using Ent)
+    │   │   ├── repository       # Repository implementations
+    │   │   └── migration
+    │   ├── redis                # Redis adapter
+    │   ├── messaging            # Message queue adapters (if needed)
+    │   └── config               # Configuration
+    ├── interface                # Interface Adapters
+    │   ├── grpc                 # gRPC service implementations
+    │   │   ├── car
+    │   │   │   └── v1
+    │   │   │       └── service.go    # carServiceServer implementation
+    │   │   ├── server.go             # gRPC server setup
+    │   │   └── interceptor           # gRPC interceptors
+    │   └── http                      # HTTP Gateway setup
+    │       ├── server.go             # HTTP server + gRPC-Gateway
+    │       ├── middleware.go         # HTTP middleware
+    │       └── handler.go            # Custom HTTP handlers (if any)
+    └── pkg                      # Shared utilities/libraries
 ```
 
 ## Go `internal` Directory
@@ -54,7 +75,7 @@ The `internal` directory is a special directory in Go that restricts access to i
 
 In this project, all core business logic, domain models, use cases, and infrastructure implementations are placed under the `internal` directory to enforce this encapsulation and prevent accidental exposure of internal details as part of the public API.
 
-Note: For most web applications, especially those with clear architectural boundaries like this one, the root `internal` directory is optional. The separation of concerns is already evident through the domain, usecase, and infrastructure packages. The `internal` directory provides an additional layer of enforcement but isn't strictly necessary when the boundaries are well-defined through naming conventions and architecture.
+Note: For most web applications, especially those with clear architectural boundaries like this one, the root `internal` directory is optional. The separation of concerns is already evident through the domain, application, and infrastructure packages. The `internal` directory provides an additional layer of enforcement but isn't strictly necessary when the boundaries are well-defined through naming conventions and architecture.
 
 ## Libraries Used
 

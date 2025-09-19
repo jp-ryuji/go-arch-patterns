@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	model "github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	entity "github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -42,7 +42,7 @@ func (m *MockRenterRepository) EXPECT() *MockRenterRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockRenterRepository) Create(ctx context.Context, renter *model.Renter) error {
+func (m *MockRenterRepository) Create(ctx context.Context, renter *entity.Renter) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, renter)
 	ret0, _ := ret[0].(error)
@@ -70,10 +70,10 @@ func (mr *MockRenterRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
 }
 
 // GetByID mocks base method.
-func (m *MockRenterRepository) GetByID(ctx context.Context, id string) (*model.Renter, error) {
+func (m *MockRenterRepository) GetByID(ctx context.Context, id string) (*entity.Renter, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByID", ctx, id)
-	ret0, _ := ret[0].(*model.Renter)
+	ret0, _ := ret[0].(*entity.Renter)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -85,7 +85,7 @@ func (mr *MockRenterRepositoryMockRecorder) GetByID(ctx, id any) *gomock.Call {
 }
 
 // Update mocks base method.
-func (m *MockRenterRepository) Update(ctx context.Context, renter *model.Renter) error {
+func (m *MockRenterRepository) Update(ctx context.Context, renter *entity.Renter) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", ctx, renter)
 	ret0, _ := ret[0].(error)

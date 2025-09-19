@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	model "github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	entity "github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -42,7 +42,7 @@ func (m *MockTenantRepository) EXPECT() *MockTenantRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockTenantRepository) Create(ctx context.Context, tenant *model.Tenant) error {
+func (m *MockTenantRepository) Create(ctx context.Context, tenant *entity.Tenant) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, tenant)
 	ret0, _ := ret[0].(error)
@@ -70,10 +70,10 @@ func (mr *MockTenantRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
 }
 
 // GetByID mocks base method.
-func (m *MockTenantRepository) GetByID(ctx context.Context, id string) (*model.Tenant, error) {
+func (m *MockTenantRepository) GetByID(ctx context.Context, id string) (*entity.Tenant, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByID", ctx, id)
-	ret0, _ := ret[0].(*model.Tenant)
+	ret0, _ := ret[0].(*entity.Tenant)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -85,10 +85,10 @@ func (mr *MockTenantRepositoryMockRecorder) GetByID(ctx, id any) *gomock.Call {
 }
 
 // GetByIDWithCars mocks base method.
-func (m *MockTenantRepository) GetByIDWithCars(ctx context.Context, id string) (*model.Tenant, error) {
+func (m *MockTenantRepository) GetByIDWithCars(ctx context.Context, id string) (*entity.Tenant, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByIDWithCars", ctx, id)
-	ret0, _ := ret[0].(*model.Tenant)
+	ret0, _ := ret[0].(*entity.Tenant)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -100,7 +100,7 @@ func (mr *MockTenantRepositoryMockRecorder) GetByIDWithCars(ctx, id any) *gomock
 }
 
 // Update mocks base method.
-func (m *MockTenantRepository) Update(ctx context.Context, tenant *model.Tenant) error {
+func (m *MockTenantRepository) Update(ctx context.Context, tenant *entity.Tenant) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", ctx, tenant)
 	ret0, _ := ret[0].(error)

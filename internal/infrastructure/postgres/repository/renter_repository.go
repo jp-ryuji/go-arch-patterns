@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/dbmodel"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
@@ -24,7 +24,7 @@ func NewRenterRepository(client *entgen.Client) repository.RenterRepository {
 }
 
 // Create inserts a new renter into the database
-func (r *renterRepository) Create(ctx context.Context, renter *model.Renter) error {
+func (r *renterRepository) Create(ctx context.Context, renter *entity.Renter) error {
 	_, err := r.client.Renter.
 		Create().
 		SetID(renter.ID).
@@ -37,7 +37,7 @@ func (r *renterRepository) Create(ctx context.Context, renter *model.Renter) err
 }
 
 // GetByID retrieves a renter by its ID
-func (r *renterRepository) GetByID(ctx context.Context, id string) (*model.Renter, error) {
+func (r *renterRepository) GetByID(ctx context.Context, id string) (*entity.Renter, error) {
 	renterDB, err := r.client.Renter.
 		Query().
 		Where(renter.ID(id)).
@@ -58,7 +58,7 @@ func (r *renterRepository) GetByID(ctx context.Context, id string) (*model.Rente
 }
 
 // Update updates an existing renter
-func (r *renterRepository) Update(ctx context.Context, renter *model.Renter) error {
+func (r *renterRepository) Update(ctx context.Context, renter *entity.Renter) error {
 	// Update the UpdatedAt field to the current time
 	renter.UpdatedAt = time.Now()
 

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/dbmodel"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
@@ -24,7 +24,7 @@ func NewCarRepository(client *entgen.Client) repository.CarRepository {
 }
 
 // Create inserts a new car into the database
-func (r *carRepository) Create(ctx context.Context, car *model.Car) error {
+func (r *carRepository) Create(ctx context.Context, car *entity.Car) error {
 	_, err := r.client.Car.
 		Create().
 		SetID(car.ID).
@@ -35,7 +35,7 @@ func (r *carRepository) Create(ctx context.Context, car *model.Car) error {
 }
 
 // CreateInTx inserts a new car into the database within a transaction
-func (r *carRepository) CreateInTx(ctx context.Context, tx *entgen.Tx, car *model.Car) error {
+func (r *carRepository) CreateInTx(ctx context.Context, tx *entgen.Tx, car *entity.Car) error {
 	_, err := tx.Car.
 		Create().
 		SetID(car.ID).
@@ -46,7 +46,7 @@ func (r *carRepository) CreateInTx(ctx context.Context, tx *entgen.Tx, car *mode
 }
 
 // GetByID retrieves a car by its ID
-func (r *carRepository) GetByID(ctx context.Context, id string) (*model.Car, error) {
+func (r *carRepository) GetByID(ctx context.Context, id string) (*entity.Car, error) {
 	carDB, err := r.client.Car.
 		Query().
 		Where(car.ID(id)).
@@ -67,7 +67,7 @@ func (r *carRepository) GetByID(ctx context.Context, id string) (*model.Car, err
 }
 
 // GetByIDWithTenant retrieves a car by its ID along with its tenant information
-func (r *carRepository) GetByIDWithTenant(ctx context.Context, id string) (*model.Car, error) {
+func (r *carRepository) GetByIDWithTenant(ctx context.Context, id string) (*entity.Car, error) {
 	carDB, err := r.client.Car.
 		Query().
 		Where(car.ID(id)).
@@ -101,7 +101,7 @@ func (r *carRepository) GetByIDWithTenant(ctx context.Context, id string) (*mode
 }
 
 // Update updates an existing car
-func (r *carRepository) Update(ctx context.Context, car *model.Car) error {
+func (r *carRepository) Update(ctx context.Context, car *entity.Car) error {
 	// Update the UpdatedAt field to the current time
 	car.UpdatedAt = time.Now()
 
@@ -115,7 +115,7 @@ func (r *carRepository) Update(ctx context.Context, car *model.Car) error {
 }
 
 // UpdateInTx updates an existing car within a transaction
-func (r *carRepository) UpdateInTx(ctx context.Context, tx *entgen.Tx, car *model.Car) error {
+func (r *carRepository) UpdateInTx(ctx context.Context, tx *entgen.Tx, car *entity.Car) error {
 	// Update the UpdatedAt field to the current time
 	car.UpdatedAt = time.Now()
 

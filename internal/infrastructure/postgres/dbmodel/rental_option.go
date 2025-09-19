@@ -3,7 +3,7 @@ package dbmodel
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 )
 
 // RentalOption represents the database model for RentalOption
@@ -28,8 +28,8 @@ type RentalOptionLoadOptions struct {
 }
 
 // ToDomain converts RentalOption to domain model with specified associations
-func (ro *RentalOption) ToDomain(opts ...RentalOptionLoadOptions) *model.RentalOption {
-	rentalOption := &model.RentalOption{
+func (ro *RentalOption) ToDomain(opts ...RentalOptionLoadOptions) *entity.RentalOption {
+	rentalOption := &entity.RentalOption{
 		ID:        ro.ID,
 		TenantID:  ro.TenantID,
 		RentalID:  ro.RentalID,
@@ -49,7 +49,7 @@ func (ro *RentalOption) ToDomain(opts ...RentalOptionLoadOptions) *model.RentalO
 
 	// Create Refs if any associations need to be loaded
 	if option.WithRental || option.WithOption {
-		rentalOption.Refs = &model.RentalOptionRefs{}
+		rentalOption.Refs = &entity.RentalOptionRefs{}
 
 		// Load rental if requested and available
 		if option.WithRental && ro.Rental.ID != "" {
@@ -65,8 +65,8 @@ func (ro *RentalOption) ToDomain(opts ...RentalOptionLoadOptions) *model.RentalO
 	return rentalOption
 }
 
-// FromDomain converts domain model to RentalOption
-func FromDomainRentalOption(rentalOption *model.RentalOption) *RentalOption {
+// FromDomainRentalOption converts domain model to RentalOption
+func FromDomainRentalOption(rentalOption *entity.RentalOption) *RentalOption {
 	return &RentalOption{
 		ID:        rentalOption.ID,
 		TenantID:  rentalOption.TenantID,

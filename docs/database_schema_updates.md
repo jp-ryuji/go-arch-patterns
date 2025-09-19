@@ -1,6 +1,6 @@
 # Database Schema Updates
 
-This project uses Ent's migration feature to manage database schema changes. When you modify domain models or add new entities, you need to update the corresponding Ent schema definitions and run migrations.
+This project uses Ent's migration feature to manage database schema changes. When you modify domain entities or add new entities, you need to update the corresponding Ent schema definitions and run migrations.
 
 This project also uses [Ent](https://entgo.io/) to generate type-safe database query code. After making changes to the database schema, you should regenerate the type-safe query code.
 
@@ -13,7 +13,7 @@ For a complete view of the current database schema, see:
 
 ## Process for Updating Database Schema
 
-1. **Update Domain Models**: Modify the structs in `internal/domain/model/` to reflect your changes.
+1. **Update Domain Entities**: Modify the structs in `internal/domain/entity/` to reflect your changes.
 
 2. **Update Ent Schema Definitions**: Update the corresponding schema definitions in `internal/infrastructure/postgres/ent/schema/` to match your domain model changes. Ensure you:
    - Maintain the Ent schema definitions for table structure

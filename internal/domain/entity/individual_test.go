@@ -1,11 +1,11 @@
-package model
+package entity
 
 import (
 	"testing"
 	"time"
 
 	"github.com/aarondl/null/v9"
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model/value"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/value"
 	"github.com/stretchr/testify/require"
 )
 

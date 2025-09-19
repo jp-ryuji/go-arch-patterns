@@ -3,7 +3,7 @@ package dbmodel
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 )
 
 // Renter represents the database model for Renter
@@ -24,11 +24,11 @@ type RenterLoadOptions struct {
 }
 
 // ToDomain converts Renter to domain model with specified associations
-func (r *Renter) ToDomain(opts ...RenterLoadOptions) *model.Renter {
-	renter := &model.Renter{
+func (r *Renter) ToDomain(opts ...RenterLoadOptions) *entity.Renter {
+	renter := &entity.Renter{
 		ID:        r.ID,
 		TenantID:  r.TenantID,
-		Type:      model.RenterType(r.Type),
+		Type:      entity.RenterType(r.Type),
 		CreatedAt: r.CreatedAt,
 		UpdatedAt: r.UpdatedAt,
 		Refs:      nil,
@@ -43,11 +43,11 @@ func (r *Renter) ToDomain(opts ...RenterLoadOptions) *model.Renter {
 
 	// Create Refs if any associations need to be loaded
 	if option.WithRentals {
-		renter.Refs = &model.RenterRefs{}
+		renter.Refs = &entity.RenterRefs{}
 
 		// Load rentals if requested and available
 		if option.WithRentals && len(r.Rentals) > 0 {
-			rentals := make(model.Rentals, len(r.Rentals))
+			rentals := make(entity.Rentals, len(r.Rentals))
 			for i, rental := range r.Rentals {
 				rentals[i] = rental.ToDomain()
 			}
@@ -58,8 +58,8 @@ func (r *Renter) ToDomain(opts ...RenterLoadOptions) *model.Renter {
 	return renter
 }
 
-// FromDomain converts domain model to Renter
-func FromDomainRenter(renter *model.Renter) *Renter {
+// FromDomainRenter converts domain model to Renter
+func FromDomainRenter(renter *entity.Renter) *Renter {
 	return &Renter{
 		ID:        renter.ID,
 		TenantID:  renter.TenantID,

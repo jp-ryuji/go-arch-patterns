@@ -1,10 +1,10 @@
-package model_test
+package entity_test
 
 import (
 	"testing"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model/factory"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity/factory"
 )
 
 // TestRenterCreation ensures that we can create renters
@@ -21,20 +21,20 @@ func TestRenterCreation(t *testing.T) {
 	}
 
 	// Test company renter
-	companyRenter := model.NewRenter("tenant-123", model.CompanyRenter, company.CreatedAt)
+	companyRenter := entity.NewRenter("tenant-123", entity.CompanyRenter, company.CreatedAt)
 	if companyRenter.TenantID != "tenant-123" {
 		t.Error("Company Renter TenantID mismatch")
 	}
-	if companyRenter.Type != model.CompanyRenter {
+	if companyRenter.Type != entity.CompanyRenter {
 		t.Error("Company Renter Type mismatch")
 	}
 
 	// Test individual renter
-	individualRenter := model.NewRenter("tenant-123", model.IndividualRenter, individual.CreatedAt)
+	individualRenter := entity.NewRenter("tenant-123", entity.IndividualRenter, individual.CreatedAt)
 	if individualRenter.TenantID != "tenant-123" {
 		t.Error("Individual Renter TenantID mismatch")
 	}
-	if individualRenter.Type != model.IndividualRenter {
+	if individualRenter.Type != entity.IndividualRenter {
 		t.Error("Individual Renter Type mismatch")
 	}
 }

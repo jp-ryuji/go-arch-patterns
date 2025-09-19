@@ -3,7 +3,7 @@ package dbmodel
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 )
 
 // Rental represents the database model for Rental
@@ -33,8 +33,8 @@ type RentalLoadOptions struct {
 }
 
 // ToDomain converts Rental to domain model with specified associations
-func (r *Rental) ToDomain(opts ...RentalLoadOptions) *model.Rental {
-	rental := &model.Rental{
+func (r *Rental) ToDomain(opts ...RentalLoadOptions) *entity.Rental {
+	rental := &entity.Rental{
 		ID:        r.ID,
 		TenantID:  r.TenantID,
 		CarID:     r.CarID,
@@ -55,7 +55,7 @@ func (r *Rental) ToDomain(opts ...RentalLoadOptions) *model.Rental {
 
 	// Only create Refs if at least one association needs to be loaded
 	if option.WithTenant || option.WithCar || option.WithRenter || option.WithRentalOptions {
-		rental.Refs = &model.RentalRefs{}
+		rental.Refs = &entity.RentalRefs{}
 
 		if option.WithTenant && r.Tenant.ID != "" {
 			tenant := r.Tenant.ToDomain()
@@ -77,7 +77,7 @@ func (r *Rental) ToDomain(opts ...RentalLoadOptions) *model.Rental {
 		}
 
 		if option.WithRentalOptions && len(r.RentalOptions) > 0 {
-			rentalOptions := make(model.RentalOptions, len(r.RentalOptions))
+			rentalOptions := make(entity.RentalOptions, len(r.RentalOptions))
 			for i, rentalOption := range r.RentalOptions {
 				rentalOptions[i] = rentalOption.ToDomain()
 			}
@@ -88,8 +88,8 @@ func (r *Rental) ToDomain(opts ...RentalLoadOptions) *model.Rental {
 	return rental
 }
 
-// FromDomain converts domain model to Rental
-func FromDomainRental(rental *model.Rental) *Rental {
+// FromDomainRental converts domain model to Rental
+func FromDomainRental(rental *entity.Rental) *Rental {
 	return &Rental{
 		ID:        rental.ID,
 		TenantID:  rental.TenantID,
