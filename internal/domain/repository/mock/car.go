@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	model "github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	entity "github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	entgen "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -43,7 +43,7 @@ func (m *MockCarRepository) EXPECT() *MockCarRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockCarRepository) Create(ctx context.Context, car *model.Car) error {
+func (m *MockCarRepository) Create(ctx context.Context, car *entity.Car) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, car)
 	ret0, _ := ret[0].(error)
@@ -57,7 +57,7 @@ func (mr *MockCarRepositoryMockRecorder) Create(ctx, car any) *gomock.Call {
 }
 
 // CreateInTx mocks base method.
-func (m *MockCarRepository) CreateInTx(ctx context.Context, tx *entgen.Tx, car *model.Car) error {
+func (m *MockCarRepository) CreateInTx(ctx context.Context, tx *entgen.Tx, car *entity.Car) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateInTx", ctx, tx, car)
 	ret0, _ := ret[0].(error)
@@ -99,10 +99,10 @@ func (mr *MockCarRepositoryMockRecorder) DeleteInTx(ctx, tx, id any) *gomock.Cal
 }
 
 // GetByID mocks base method.
-func (m *MockCarRepository) GetByID(ctx context.Context, id string) (*model.Car, error) {
+func (m *MockCarRepository) GetByID(ctx context.Context, id string) (*entity.Car, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByID", ctx, id)
-	ret0, _ := ret[0].(*model.Car)
+	ret0, _ := ret[0].(*entity.Car)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -114,10 +114,10 @@ func (mr *MockCarRepositoryMockRecorder) GetByID(ctx, id any) *gomock.Call {
 }
 
 // GetByIDWithTenant mocks base method.
-func (m *MockCarRepository) GetByIDWithTenant(ctx context.Context, id string) (*model.Car, error) {
+func (m *MockCarRepository) GetByIDWithTenant(ctx context.Context, id string) (*entity.Car, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByIDWithTenant", ctx, id)
-	ret0, _ := ret[0].(*model.Car)
+	ret0, _ := ret[0].(*entity.Car)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -129,7 +129,7 @@ func (mr *MockCarRepositoryMockRecorder) GetByIDWithTenant(ctx, id any) *gomock.
 }
 
 // Update mocks base method.
-func (m *MockCarRepository) Update(ctx context.Context, car *model.Car) error {
+func (m *MockCarRepository) Update(ctx context.Context, car *entity.Car) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", ctx, car)
 	ret0, _ := ret[0].(error)
@@ -143,7 +143,7 @@ func (mr *MockCarRepositoryMockRecorder) Update(ctx, car any) *gomock.Call {
 }
 
 // UpdateInTx mocks base method.
-func (m *MockCarRepository) UpdateInTx(ctx context.Context, tx *entgen.Tx, car *model.Car) error {
+func (m *MockCarRepository) UpdateInTx(ctx context.Context, tx *entgen.Tx, car *entity.Car) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateInTx", ctx, tx, car)
 	ret0, _ := ret[0].(error)

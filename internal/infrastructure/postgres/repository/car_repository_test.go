@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	carrepo "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/repository"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/repository/testutil"
@@ -16,7 +16,7 @@ import (
 )
 
 // testSetup is a helper function that provides common test setup
-func testSetup(t *testing.T, tenantCode string) (repository.CarRepository, context.Context, *model.Tenant) {
+func testSetup(t *testing.T, tenantCode string) (repository.CarRepository, context.Context, *entity.Tenant) {
 	t.Helper()
 
 	// Skip this test if not running integration tests
@@ -34,7 +34,7 @@ func TestCarRepository_Create(t *testing.T) {
 	repo, ctx, tenant := testSetup(t, "test-tenant-create")
 
 	// Create a car
-	car := model.NewCar(tenant.ID, "HARRIER", time.Now())
+	car := entity.NewCar(tenant.ID, "HARRIER", time.Now())
 	err := repo.Create(ctx, car)
 	require.NoError(t, err)
 
@@ -51,7 +51,7 @@ func TestCarRepository_GetByID(t *testing.T) {
 	repo, ctx, tenant := testSetup(t, "test-tenant-get")
 
 	// Create a car
-	car := model.NewCar(tenant.ID, "RAV4", time.Now())
+	car := entity.NewCar(tenant.ID, "RAV4", time.Now())
 	err := repo.Create(ctx, car)
 	require.NoError(t, err)
 
@@ -68,7 +68,7 @@ func TestCarRepository_GetByIDWithTenant(t *testing.T) {
 	repo, ctx, tenant := testSetup(t, "test-tenant-get-with-tenant")
 
 	// Create a car
-	car := model.NewCar(tenant.ID, "Prius", time.Now())
+	car := entity.NewCar(tenant.ID, "Prius", time.Now())
 	err := repo.Create(ctx, car)
 	require.NoError(t, err)
 
@@ -98,7 +98,7 @@ func TestCarRepository_Update(t *testing.T) {
 	repo, ctx, tenant := testSetup(t, "test-tenant-update")
 
 	// Create a car
-	car := model.NewCar(tenant.ID, "HR-V", time.Now())
+	car := entity.NewCar(tenant.ID, "HR-V", time.Now())
 	err := repo.Create(ctx, car)
 	require.NoError(t, err)
 
@@ -121,7 +121,7 @@ func TestCarRepository_Delete(t *testing.T) {
 	repo, ctx, tenant := testSetup(t, "test-tenant-delete")
 
 	// Create a car
-	car := model.NewCar(tenant.ID, "Tesla Model Y", time.Now())
+	car := entity.NewCar(tenant.ID, "Tesla Model Y", time.Now())
 	err := repo.Create(ctx, car)
 	require.NoError(t, err)
 

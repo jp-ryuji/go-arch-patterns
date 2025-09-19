@@ -1,41 +1,41 @@
-package usecase_test
+package service_test
 
 import (
 	"context"
 	"testing"
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/application/dto"
+	"github.com/jp-ryuji/go-arch-patterns/internal/application/service"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	mock_repository "github.com/jp-ryuji/go-arch-patterns/internal/domain/repository/mock"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
-	"github.com/jp-ryuji/go-arch-patterns/internal/usecase"
-	"github.com/jp-ryuji/go-arch-patterns/internal/usecase/input"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
 
-// setupTest creates a new mock controller and car usecase for testing
-func setupTest(t *testing.T) (*gomock.Controller, *mock_repository.MockCarRepository, *mock_repository.MockOutboxRepository, *mock_repository.MockTransactionManager, usecase.CarUsecase) {
+// setupTest creates a new mock controller and car service for testing
+func setupTest(t *testing.T) (*gomock.Controller, *mock_repository.MockCarRepository, *mock_repository.MockOutboxRepository, *mock_repository.MockTransactionManager, service.CarService) {
 	t.Helper()
 	ctrl := gomock.NewController(t)
 	mockCarRepo := mock_repository.NewMockCarRepository(ctrl)
 	mockOutboxRepo := mock_repository.NewMockOutboxRepository(ctrl)
 	mockTxManager := mock_repository.NewMockTransactionManager(ctrl)
-	carUsecase := usecase.NewCarUsecase(mockCarRepo, mockOutboxRepo, mockTxManager)
-	return ctrl, mockCarRepo, mockOutboxRepo, mockTxManager, carUsecase
+	carService := service.NewCarService(mockCarRepo, mockOutboxRepo, mockTxManager)
+	return ctrl, mockCarRepo, mockOutboxRepo, mockTxManager, carService
 }
 
-// TestCarUsecase_Register_Success tests the successful registration of a car
-func TestCarUsecase_Register_Success(t *testing.T) {
+// TestCarService_Register_Success tests the successful registration of a car
+func TestCarService_Register_Success(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, mockOutboxRepo, mockTxManager, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, mockOutboxRepo, mockTxManager, carService := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
 	ctx := context.Background()
-	registerInput := input.RegisterCarInput{
+	registerInput := dto.RegisterCarInput{
 		TenantID: "tenant-123",
 		Model:    "Toyota Prius",
 	}
@@ -48,9 +48,9 @@ func TestCarUsecase_Register_Success(t *testing.T) {
 	mockTxManager.EXPECT().CommitTx(ctx, mockTx).Return(nil)
 
 	// Set up expectations for registering a car
-	var createdCar *model.Car
+	var createdCar *entity.Car
 	mockCarRepo.EXPECT().CreateInTx(ctx, mockTx, gomock.Any()).DoAndReturn(
-		func(ctx context.Context, tx *entgen.Tx, car *model.Car) error {
+		func(ctx context.Context, tx *entgen.Tx, car *entity.Car) error {
 			// Capture the car that was created for later verification
 			createdCar = car
 
@@ -67,8 +67,8 @@ func TestCarUsecase_Register_Success(t *testing.T) {
 	// Set up expectations for outbox message creation
 	mockOutboxRepo.EXPECT().CreateInTx(ctx, mockTx, gomock.Any()).Return(nil)
 
-	// Execute - Register a new car using the usecase
-	registeredCar, err := carUsecase.Register(ctx, registerInput)
+	// Execute - Register a new car using the service
+	registeredCar, err := carService.Register(ctx, registerInput)
 	assert.NoError(t, err)
 	assert.NotNil(t, registeredCar)
 
@@ -83,17 +83,17 @@ func TestCarUsecase_Register_Success(t *testing.T) {
 	assert.Equal(t, registeredCar, createdCar)
 }
 
-// TestCarUsecase_Register_RepositoryError tests registration when repository returns an error
-func TestCarUsecase_Register_RepositoryError(t *testing.T) {
+// TestCarService_Register_RepositoryError tests registration when repository returns an error
+func TestCarService_Register_RepositoryError(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, _, mockTxManager, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, mockTxManager, carService := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
 	ctx := context.Background()
-	registerInput := input.RegisterCarInput{
+	registerInput := dto.RegisterCarInput{
 		TenantID: "tenant-123",
 		Model:    "Toyota Prius",
 	}
@@ -110,36 +110,36 @@ func TestCarUsecase_Register_RepositoryError(t *testing.T) {
 	mockCarRepo.EXPECT().CreateInTx(ctx, mockTx, gomock.Any()).Return(expectedError)
 
 	// Execute - Try to register a car when repository fails
-	registeredCar, err := carUsecase.Register(ctx, registerInput)
+	registeredCar, err := carService.Register(ctx, registerInput)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), expectedError.Error())
 	assert.Nil(t, registeredCar)
 }
 
-// TestCarUsecase_GetByID_Success tests successful retrieval of a car by ID
-func TestCarUsecase_GetByID_Success(t *testing.T) {
+// TestCarService_GetByID_Success tests successful retrieval of a car by ID
+func TestCarService_GetByID_Success(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, _, _, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, _, carService := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
 	ctx := context.Background()
 	carID := "car-123"
-	getInput := input.GetCarByIDInput{
+	getInput := dto.GetCarByIDInput{
 		ID: carID,
 	}
 
 	// Create expected car using the factory method (similar to car_test.go)
 	now := time.Now()
-	expectedCar := model.NewCar("tenant-123", "Toyota Prius", now)
+	expectedCar := entity.NewCar("tenant-123", "Toyota Prius", now)
 
 	// Set up expectations for retrieving the car
 	mockCarRepo.EXPECT().GetByID(ctx, carID).Return(expectedCar, nil)
 
-	// Execute - Retrieve the car using the usecase
-	retrievedCar, err := carUsecase.GetByID(ctx, getInput)
+	// Execute - Retrieve the car using the service
+	retrievedCar, err := carService.GetByID(ctx, getInput)
 	assert.NoError(t, err)
 	assert.NotNil(t, retrievedCar)
 
@@ -149,18 +149,18 @@ func TestCarUsecase_GetByID_Success(t *testing.T) {
 	assert.Equal(t, expectedCar.Model, retrievedCar.Model)
 }
 
-// TestCarUsecase_GetByID_NotFound tests retrieval when car doesn't exist
-func TestCarUsecase_GetByID_NotFound(t *testing.T) {
+// TestCarService_GetByID_NotFound tests retrieval when car doesn't exist
+func TestCarService_GetByID_NotFound(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, _, _, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, _, carService := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
 	ctx := context.Background()
 	carID := "non-existent-car"
-	getInput := input.GetCarByIDInput{
+	getInput := dto.GetCarByIDInput{
 		ID: carID,
 	}
 
@@ -169,40 +169,40 @@ func TestCarUsecase_GetByID_NotFound(t *testing.T) {
 	mockCarRepo.EXPECT().GetByID(ctx, carID).Return(nil, expectedError)
 
 	// Execute - Try to retrieve a non-existent car
-	retrievedCar, err := carUsecase.GetByID(ctx, getInput)
+	retrievedCar, err := carService.GetByID(ctx, getInput)
 	assert.Error(t, err)
 	assert.Equal(t, expectedError, err)
 	assert.Nil(t, retrievedCar)
 }
 
-// TestCarUsecase_GetByIDWithTenant_Success tests successful retrieval of a car with tenant by ID
-func TestCarUsecase_GetByIDWithTenant_Success(t *testing.T) {
+// TestCarService_GetByIDWithTenant_Success tests successful retrieval of a car with tenant by ID
+func TestCarService_GetByIDWithTenant_Success(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, _, _, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, _, carService := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
 	ctx := context.Background()
 	carID := "car-123"
-	getInput := input.GetCarByIDInput{
+	getInput := dto.GetCarByIDInput{
 		ID: carID,
 	}
 
 	// Create expected car with tenant using the factory method
 	now := time.Now()
-	expectedCar := model.NewCar("tenant-123", "Toyota Prius", now)
-	expectedTenant := model.NewTenant("tenant-code", now)
-	expectedCar.Refs = &model.CarRefs{
+	expectedCar := entity.NewCar("tenant-123", "Toyota Prius", now)
+	expectedTenant := entity.NewTenant("tenant-code", now)
+	expectedCar.Refs = &entity.CarRefs{
 		Tenant: expectedTenant,
 	}
 
 	// Set up expectations for retrieving the car with tenant
 	mockCarRepo.EXPECT().GetByIDWithTenant(ctx, carID).Return(expectedCar, nil)
 
-	// Execute - Retrieve the car with tenant using the usecase
-	retrievedCar, err := carUsecase.GetByIDWithTenant(ctx, getInput)
+	// Execute - Retrieve the car with tenant using the service
+	retrievedCar, err := carService.GetByIDWithTenant(ctx, getInput)
 	assert.NoError(t, err)
 	assert.NotNil(t, retrievedCar)
 
@@ -216,18 +216,18 @@ func TestCarUsecase_GetByIDWithTenant_Success(t *testing.T) {
 	assert.Equal(t, expectedTenant.Code, retrievedCar.Refs.Tenant.Code)
 }
 
-// TestCarUsecase_GetByIDWithTenant_NotFound tests retrieval when car with tenant doesn't exist
-func TestCarUsecase_GetByIDWithTenant_NotFound(t *testing.T) {
+// TestCarService_GetByIDWithTenant_NotFound tests retrieval when car with tenant doesn't exist
+func TestCarService_GetByIDWithTenant_NotFound(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	ctrl, mockCarRepo, _, _, carUsecase := setupTest(t)
+	ctrl, mockCarRepo, _, _, carService := setupTest(t)
 	defer ctrl.Finish()
 
 	// Test data
 	ctx := context.Background()
 	carID := "non-existent-car"
-	getInput := input.GetCarByIDInput{
+	getInput := dto.GetCarByIDInput{
 		ID: carID,
 	}
 
@@ -236,36 +236,36 @@ func TestCarUsecase_GetByIDWithTenant_NotFound(t *testing.T) {
 	mockCarRepo.EXPECT().GetByIDWithTenant(ctx, carID).Return(nil, expectedError)
 
 	// Execute - Try to retrieve a non-existent car with tenant
-	retrievedCar, err := carUsecase.GetByIDWithTenant(ctx, getInput)
+	retrievedCar, err := carService.GetByIDWithTenant(ctx, getInput)
 	assert.Error(t, err)
 	assert.Equal(t, expectedError, err)
 	assert.Nil(t, retrievedCar)
 }
 
-// TestCarUsecase_Register_Validation tests validation failures for Register
-func TestCarUsecase_Register_Validation(t *testing.T) {
+// TestCarService_Register_Validation tests validation failures for Register
+func TestCarService_Register_Validation(t *testing.T) {
 	t.Parallel()
 
 	tests := map[string]struct {
-		input   input.RegisterCarInput
+		input   dto.RegisterCarInput
 		wantErr string
 	}{
 		"empty tenant ID": {
-			input: input.RegisterCarInput{
+			input: dto.RegisterCarInput{
 				TenantID: "", // Missing required field
 				Model:    "Toyota Prius",
 			},
 			wantErr: "validation failed",
 		},
 		"empty model": {
-			input: input.RegisterCarInput{
+			input: dto.RegisterCarInput{
 				TenantID: "tenant-123",
 				Model:    "", // Missing required field
 			},
 			wantErr: "validation failed",
 		},
 		"both fields empty": {
-			input: input.RegisterCarInput{
+			input: dto.RegisterCarInput{
 				TenantID: "", // Missing required field
 				Model:    "", // Missing required field
 			},
@@ -278,14 +278,14 @@ func TestCarUsecase_Register_Validation(t *testing.T) {
 			t.Parallel()
 
 			// Setup
-			ctrl, _, _, _, carUsecase := setupTest(t)
+			ctrl, _, _, _, carService := setupTest(t)
 			defer ctrl.Finish()
 
 			// Test data
 			ctx := context.Background()
 
 			// Execute - Try to register a car with invalid input
-			registeredCar, err := carUsecase.Register(ctx, tt.input)
+			registeredCar, err := carService.Register(ctx, tt.input)
 
 			// Assert
 			assert.Error(t, err)
@@ -295,16 +295,16 @@ func TestCarUsecase_Register_Validation(t *testing.T) {
 	}
 }
 
-// TestCarUsecase_GetByID_Validation tests validation failures for GetByID
-func TestCarUsecase_GetByID_Validation(t *testing.T) {
+// TestCarService_GetByID_Validation tests validation failures for GetByID
+func TestCarService_GetByID_Validation(t *testing.T) {
 	t.Parallel()
 
 	tests := map[string]struct {
-		input   input.GetCarByIDInput
+		input   dto.GetCarByIDInput
 		wantErr string
 	}{
 		"empty ID": {
-			input: input.GetCarByIDInput{
+			input: dto.GetCarByIDInput{
 				ID: "", // Missing required field
 			},
 			wantErr: "validation failed",
@@ -316,14 +316,14 @@ func TestCarUsecase_GetByID_Validation(t *testing.T) {
 			t.Parallel()
 
 			// Setup
-			ctrl, _, _, _, carUsecase := setupTest(t)
+			ctrl, _, _, _, carService := setupTest(t)
 			defer ctrl.Finish()
 
 			// Test data
 			ctx := context.Background()
 
 			// Execute - Try to retrieve a car with invalid input
-			retrievedCar, err := carUsecase.GetByID(ctx, tt.input)
+			retrievedCar, err := carService.GetByID(ctx, tt.input)
 
 			// Assert
 			assert.Error(t, err)

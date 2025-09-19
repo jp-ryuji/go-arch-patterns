@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/dbmodel"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
@@ -20,7 +20,7 @@ func NewTenantRepository(client *entgen.Client) repository.TenantRepository {
 }
 
 // Create inserts a new tenant into the database
-func (r *tenantRepository) Create(ctx context.Context, tenant *model.Tenant) error {
+func (r *tenantRepository) Create(ctx context.Context, tenant *entity.Tenant) error {
 	_, err := r.client.Tenant.
 		Create().
 		SetID(tenant.ID).
@@ -30,7 +30,7 @@ func (r *tenantRepository) Create(ctx context.Context, tenant *model.Tenant) err
 }
 
 // GetByID retrieves a tenant by its ID
-func (r *tenantRepository) GetByID(ctx context.Context, id string) (*model.Tenant, error) {
+func (r *tenantRepository) GetByID(ctx context.Context, id string) (*entity.Tenant, error) {
 	tenantDB, err := r.client.Tenant.
 		Query().
 		Where(tenant.ID(id)).
@@ -50,7 +50,7 @@ func (r *tenantRepository) GetByID(ctx context.Context, id string) (*model.Tenan
 }
 
 // GetByIDWithCars retrieves a tenant by its ID along with its associated cars
-func (r *tenantRepository) GetByIDWithCars(ctx context.Context, id string) (*model.Tenant, error) {
+func (r *tenantRepository) GetByIDWithCars(ctx context.Context, id string) (*entity.Tenant, error) {
 	tenantDB, err := r.client.Tenant.
 		Query().
 		Where(tenant.ID(id)).
@@ -87,7 +87,7 @@ func (r *tenantRepository) GetByIDWithCars(ctx context.Context, id string) (*mod
 }
 
 // Update updates an existing tenant
-func (r *tenantRepository) Update(ctx context.Context, tenant *model.Tenant) error {
+func (r *tenantRepository) Update(ctx context.Context, tenant *entity.Tenant) error {
 	_, err := r.client.Tenant.
 		UpdateOneID(tenant.ID).
 		SetCode(tenant.Code).

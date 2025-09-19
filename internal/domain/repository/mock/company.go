@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	model "github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	entity "github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -42,7 +42,7 @@ func (m *MockCompanyRepository) EXPECT() *MockCompanyRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockCompanyRepository) Create(ctx context.Context, company *model.Company) error {
+func (m *MockCompanyRepository) Create(ctx context.Context, company *entity.Company) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, company)
 	ret0, _ := ret[0].(error)
@@ -70,10 +70,10 @@ func (mr *MockCompanyRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
 }
 
 // GetByID mocks base method.
-func (m *MockCompanyRepository) GetByID(ctx context.Context, id string) (*model.Company, error) {
+func (m *MockCompanyRepository) GetByID(ctx context.Context, id string) (*entity.Company, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByID", ctx, id)
-	ret0, _ := ret[0].(*model.Company)
+	ret0, _ := ret[0].(*entity.Company)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -85,7 +85,7 @@ func (mr *MockCompanyRepositoryMockRecorder) GetByID(ctx, id any) *gomock.Call {
 }
 
 // Update mocks base method.
-func (m *MockCompanyRepository) Update(ctx context.Context, company *model.Company) error {
+func (m *MockCompanyRepository) Update(ctx context.Context, company *entity.Company) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", ctx, company)
 	ret0, _ := ret[0].(error)

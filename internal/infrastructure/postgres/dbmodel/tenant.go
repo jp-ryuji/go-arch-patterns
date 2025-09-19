@@ -3,7 +3,7 @@ package dbmodel
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 )
 
 // Tenant represents the database model for Tenant
@@ -23,8 +23,8 @@ type TenantLoadOptions struct {
 }
 
 // ToDomain converts Tenant to domain model with specified associations
-func (t *Tenant) ToDomain(opts ...TenantLoadOptions) *model.Tenant {
-	tenant := &model.Tenant{
+func (t *Tenant) ToDomain(opts ...TenantLoadOptions) *entity.Tenant {
+	tenant := &entity.Tenant{
 		ID:        t.ID,
 		Code:      t.Code,
 		CreatedAt: t.CreatedAt,
@@ -41,12 +41,12 @@ func (t *Tenant) ToDomain(opts ...TenantLoadOptions) *model.Tenant {
 
 	// Only create Refs if cars need to be loaded
 	if option.WithCars && len(t.Cars) > 0 {
-		cars := make(model.Cars, len(t.Cars))
+		cars := make(entity.Cars, len(t.Cars))
 		for i, car := range t.Cars {
 			cars[i] = car.ToDomain()
 		}
 
-		tenant.Refs = &model.TenantRefs{
+		tenant.Refs = &entity.TenantRefs{
 			Cars: cars,
 		}
 	}
@@ -54,8 +54,8 @@ func (t *Tenant) ToDomain(opts ...TenantLoadOptions) *model.Tenant {
 	return tenant
 }
 
-// FromDomain converts domain model to Tenant
-func FromDomainTenant(tenant *model.Tenant) *Tenant {
+// FromDomainTenant converts domain model to Tenant
+func FromDomainTenant(tenant *entity.Tenant) *Tenant {
 	return &Tenant{
 		ID:        tenant.ID,
 		Code:      tenant.Code,

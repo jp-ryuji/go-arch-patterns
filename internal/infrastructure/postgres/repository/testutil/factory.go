@@ -6,13 +6,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model/factory"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity/factory"
 	"github.com/stretchr/testify/require"
 )
 
 // CreateTestTenant creates a tenant for testing and saves it to the database.
-func CreateTestTenant(t *testing.T, code string) *model.Tenant {
+func CreateTestTenant(t *testing.T, code string) *entity.Tenant {
 	t.Helper()
 
 	tenant := factory.NewTenantWithCode(code)
@@ -27,14 +27,14 @@ func CreateTestTenant(t *testing.T, code string) *model.Tenant {
 	require.NoError(t, err)
 
 	// Convert back to domain model
-	return &model.Tenant{
+	return &entity.Tenant{
 		ID:   tenantDB.ID,
 		Code: tenantDB.Code,
 	}
 }
 
 // CreateRandomTestTenant creates a tenant with a random code for testing and saves it to the database.
-func CreateRandomTestTenant(t *testing.T) *model.Tenant {
+func CreateRandomTestTenant(t *testing.T) *entity.Tenant {
 	t.Helper()
 
 	tenant := factory.NewTenant()
@@ -49,7 +49,7 @@ func CreateRandomTestTenant(t *testing.T) *model.Tenant {
 	require.NoError(t, err)
 
 	// Convert back to domain model
-	return &model.Tenant{
+	return &entity.Tenant{
 		ID:   tenantDB.ID,
 		Code: tenantDB.Code,
 	}

@@ -58,8 +58,6 @@ go test -tags=integration ./internal/... -v
 
 This project uses [Dockertest](https://github.com/ory/dockertest) for integration testing with a PostgreSQL database. The integration tests are tagged with `//go:build integration` and are only run when the `-tags=integration` flag is provided.
 
-When adding new database models, they must be registered in the `allModels` slice in `internal/infrastructure/postgres/repository/testutil/testutil.go` to ensure they are migrated during test setup.
-
 ### Mocking
 
 This project uses [gomock](https://github.com/uber-go/mock) for mocking dependencies in tests.

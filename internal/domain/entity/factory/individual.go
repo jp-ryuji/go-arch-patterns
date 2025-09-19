@@ -4,24 +4,24 @@ import (
 	"time"
 
 	"github.com/aarondl/null/v9"
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model/value"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/value"
 	"github.com/jp-ryuji/go-arch-patterns/internal/pkg/id"
 )
 
 // NewIndividual creates a new Individual for testing purposes
-func NewIndividual() (*model.Individual, error) {
+func NewIndividual() (*entity.Individual, error) {
 	email, err := value.NewEmail("test@example.com")
 	if err != nil {
 		return nil, err
 	}
 
-	renter := model.NewRenter(
+	renter := entity.NewRenter(
 		id.New(),
-		model.IndividualRenter,
+		entity.IndividualRenter,
 		time.Now(),
 	)
-	return model.NewIndividual(
+	return entity.NewIndividual(
 		renter.ID,
 		id.New(),
 		*email,

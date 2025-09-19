@@ -3,7 +3,7 @@ package dbmodel
 import (
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 )
 
 // Option represents the database model for Option
@@ -24,8 +24,8 @@ type OptionLoadOptions struct {
 }
 
 // ToDomain converts Option to domain model with specified associations
-func (o *Option) ToDomain(opts ...OptionLoadOptions) *model.Option {
-	option := &model.Option{
+func (o *Option) ToDomain(opts ...OptionLoadOptions) *entity.Option {
+	option := &entity.Option{
 		ID:        o.ID,
 		TenantID:  o.TenantID,
 		Name:      o.Name,
@@ -43,12 +43,12 @@ func (o *Option) ToDomain(opts ...OptionLoadOptions) *model.Option {
 
 	// Only create Refs if rental options need to be loaded
 	if opt.WithRentalOptions && len(o.RentalOptions) > 0 {
-		rentalOptions := make(model.RentalOptions, len(o.RentalOptions))
+		rentalOptions := make(entity.RentalOptions, len(o.RentalOptions))
 		for i, rentalOption := range o.RentalOptions {
 			rentalOptions[i] = rentalOption.ToDomain()
 		}
 
-		option.Refs = &model.OptionRefs{
+		option.Refs = &entity.OptionRefs{
 			RentalOptions: rentalOptions,
 		}
 	}
@@ -56,8 +56,8 @@ func (o *Option) ToDomain(opts ...OptionLoadOptions) *model.Option {
 	return option
 }
 
-// FromDomain converts domain model to Option
-func FromDomainOption(option *model.Option) *Option {
+// FromDomainOption converts domain model to Option
+func FromDomainOption(option *entity.Option) *Option {
 	return &Option{
 		ID:        option.ID,
 		TenantID:  option.TenantID,

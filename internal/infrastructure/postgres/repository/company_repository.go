@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/model"
+	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/dbmodel"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
@@ -24,7 +24,7 @@ func NewCompanyRepository(client *entgen.Client) repository.CompanyRepository {
 }
 
 // Create inserts a new company into the database
-func (r *companyRepository) Create(ctx context.Context, company *model.Company) error {
+func (r *companyRepository) Create(ctx context.Context, company *entity.Company) error {
 	_, err := r.client.Company.
 		Create().
 		SetID(company.ID).
@@ -37,7 +37,7 @@ func (r *companyRepository) Create(ctx context.Context, company *model.Company) 
 }
 
 // GetByID retrieves a company by its ID
-func (r *companyRepository) GetByID(ctx context.Context, id string) (*model.Company, error) {
+func (r *companyRepository) GetByID(ctx context.Context, id string) (*entity.Company, error) {
 	companyDB, err := r.client.Company.
 		Query().
 		Where(company.RenterIDEQ(id)).
@@ -60,7 +60,7 @@ func (r *companyRepository) GetByID(ctx context.Context, id string) (*model.Comp
 }
 
 // Update updates an existing company
-func (r *companyRepository) Update(ctx context.Context, comp *model.Company) error {
+func (r *companyRepository) Update(ctx context.Context, comp *entity.Company) error {
 	// Update the UpdatedAt field to the current time
 	comp.UpdatedAt = time.Now()
 
