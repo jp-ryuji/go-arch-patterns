@@ -31,12 +31,8 @@ In this architecture:
 │   └── generated                # All generated code
 │       ├── car
 │       │   └── v1
-│       │       ├── car.pb.go
-│       │       ├── car_grpc.pb.go
-│       │       └── car.pb.gw.go
 │       └── common
 │           └── v1
-│               └── common.pb.go
 ├── docker
 ├── docs
 └── internal
