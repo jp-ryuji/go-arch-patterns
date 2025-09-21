@@ -30,11 +30,14 @@ Structure:
 │   │       └── v1
 │   │           └── common.proto
 │   └── generated                # All generated code
-│       └── car
+│       ├── car
+│       │   └── v1
+│       │       ├── car.pb.go
+│       │       ├── car_grpc.pb.go
+│       │       └── car.pb.gw.go
+│       └── common
 │           └── v1
-│               ├── car.pb.go
-│               ├── car_grpc.pb.go
-│               └── car.pb.gw.go
+│               └── common.pb.go
 ├── docker
 ├── docs
 └── internal
@@ -48,8 +51,8 @@ Structure:
     │   └── dto                  # Data transfer objects
     ├── infrastructure           # Infrastructure Layer (outermost)
     │   ├── postgres             # PostgreSQL adapter
-    │   │   ├── dbmodel          # ORM/database models
-    │   │   └── entgen           # (Generated type-safe query code using Ent)
+    │   │   ├── ent              # Ent schema design
+    │   │   ├── entgen           # (Generated type-safe query code using Ent)
     │   │   ├── repository       # Repository implementations
     │   │   └── migration
     │   ├── redis                # Redis adapter
