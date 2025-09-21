@@ -110,6 +110,7 @@ The API is defined using Protocol Buffers in the following files:
 This project uses buf to manage Protocol Buffer dependencies. External dependencies are declared in `buf.yaml` and locked in `buf.lock` to ensure reproducible builds.
 
 To update dependencies:
+
 ```bash
 buf mod update
 ```
@@ -154,9 +155,11 @@ To generate code from Protocol Buffer definitions, follow these steps:
 
 3. **Update dependencies (if needed)**:
    If you've added or updated external dependencies in `buf.yaml`, run:
+
    ```bash
    buf mod update
    ```
+
    This will update `buf.lock` with the latest versions of dependencies.
 
 4. **Generate Go code**:
@@ -209,21 +212,25 @@ To view and verify API endpoint information:
 Before testing the API endpoints, ensure that:
 
 1. The database and other services are running:
+
    ```bash
    make dev
    ```
 
 2. The database migrations have been applied:
+
    ```bash
    make migrate
    ```
 
 3. The database has been seeded with sample data:
+
    ```bash
    make seed
    ```
 
 4. The application server is running:
+
    ```bash
    go run cmd/app/main.go
    ```
