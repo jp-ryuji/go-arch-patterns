@@ -166,7 +166,7 @@ To generate code from Protocol Buffer definitions, follow these steps:
    Run the following command to generate Go code from the Protocol Buffer definitions:
 
    ```bash
-   make gen.proto
+   make gen.buf
    ```
 
 5. **Generated files**:

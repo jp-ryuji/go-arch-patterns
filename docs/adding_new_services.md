@@ -119,7 +119,7 @@ This will check your `.proto` files for any linting issues according to the [Buf
 After defining your service, generate the Go code:
 
 ```bash
-make gen.proto
+make gen.buf
 ```
 
 This will generate the necessary Go files in `api/generated/rental/v1/`.

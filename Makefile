@@ -72,8 +72,8 @@ gen.mocks:
 gen.ent:
 	cd internal/infrastructure/postgres/ent && go generate ./...
 
-.PHONY: gen.proto
-gen.proto:
+.PHONY: gen.buf
+gen.buf:
 	@rm -rf ./api/generated
 	@go tool buf generate
 	@mv api/generated/api/proto/* api/generated/ 2>/dev/null || true
@@ -88,7 +88,7 @@ format:
 
 define format
 	@go fmt ./internal/...
-	@go tool goimports -w ./internal/...
+	@go tool goimports -w ./internal
 	@go tool gofumpt -l -w .
 	@go mod tidy
 endef
