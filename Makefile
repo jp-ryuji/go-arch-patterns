@@ -71,7 +71,6 @@ gen.mocks:
 .PHONY: gen.ent
 gen.ent:
 	cd internal/infrastructure/postgres/ent && go generate ./...
-	$(call format)
 
 .PHONY: gen.proto
 gen.proto:
@@ -88,8 +87,8 @@ format:
 	$(call format)
 
 define format
-	@go fmt ./...
-	@go tool goimports -w ./...
+	@go fmt ./internal/...
+	@go tool goimports -w ./internal/...
 	@go tool gofumpt -l -w .
 	@go mod tidy
 endef
