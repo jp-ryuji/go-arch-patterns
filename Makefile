@@ -12,6 +12,11 @@ lint.go.fix:
 	@golangci-lint run --fix
 	$(call format)
 
+.PHONY: lint.proto
+lint.proto:
+	@go tool buf lint
+	$(call format)
+
 .PHONY: test
 test:
 	@go test ./internal/...
@@ -28,6 +33,16 @@ gen.mocks:
 .PHONY: gen.ent
 gen.ent:
 	cd internal/infrastructure/postgres/ent && go generate ./...
+	$(call format)
+
+.PHONY: gen.proto
+gen.proto:
+	@rm -rf ./api/generated
+	@go tool buf generate
+	@mv api/generated/api/proto/* api/generated/ 2>/dev/null || true
+	@rm -rf api/generated/api
+	@find api/generated -type f ! -name '*.pb.go' ! -name '*.pb.gw.go' -delete 2>/dev/null || true
+	@find api/generated -type d -empty -delete 2>/dev/null || true
 	$(call format)
 
 .PHONY: format

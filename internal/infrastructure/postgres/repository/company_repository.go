@@ -7,7 +7,6 @@ import (
 
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
-	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/dbmodel"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	company "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/company"
 )
@@ -46,17 +45,18 @@ func (r *companyRepository) GetByID(ctx context.Context, id string) (*entity.Com
 		return nil, err
 	}
 
-	// Convert Ent model to dbmodel and then to domain model
-	dbModel := &dbmodel.Company{
+	// Direct conversion from Ent model to domain entity
+	companySize := entity.NewCompanySize(companyDB.CompanySize)
+
+	return &entity.Company{
 		ID:          companyDB.ID,
 		RenterID:    companyDB.RenterID,
 		TenantID:    companyDB.TenantID,
 		Name:        companyDB.Name,
-		CompanySize: companyDB.CompanySize,
+		CompanySize: companySize,
 		CreatedAt:   companyDB.CreatedAt,
 		UpdatedAt:   companyDB.UpdatedAt,
-	}
-	return dbModel.ToDomain(), nil
+	}, nil
 }
 
 // Update updates an existing company

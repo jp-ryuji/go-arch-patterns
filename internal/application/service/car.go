@@ -14,4 +14,5 @@ type CarService interface {
 	Register(ctx context.Context, input dto.RegisterCarInput) (*entity.Car, error)
 	GetByID(ctx context.Context, input dto.GetCarByIDInput) (*entity.Car, error)
 	GetByIDWithTenant(ctx context.Context, input dto.GetCarByIDInput) (*entity.Car, error)
+	List(ctx context.Context, input dto.ListCarsInput) (*entity.Cars, error)
 }

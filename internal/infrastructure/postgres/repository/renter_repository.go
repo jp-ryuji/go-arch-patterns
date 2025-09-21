@@ -7,7 +7,6 @@ import (
 
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
-	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/dbmodel"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	renter "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/renter"
 )
@@ -46,15 +45,24 @@ func (r *renterRepository) GetByID(ctx context.Context, id string) (*entity.Rent
 		return nil, err
 	}
 
-	// Convert Ent model to dbmodel and then to domain model
-	dbModel := &dbmodel.Renter{
+	// Direct conversion from Ent model to domain entity
+	var renterType entity.RenterType
+	switch renterDB.Type {
+	case "company":
+		renterType = entity.CompanyRenter
+	case "individual":
+		renterType = entity.IndividualRenter
+	default:
+		renterType = ""
+	}
+
+	return &entity.Renter{
 		ID:        renterDB.ID,
 		TenantID:  renterDB.TenantID,
-		Type:      renterDB.Type,
+		Type:      renterType,
 		CreatedAt: renterDB.CreatedAt,
 		UpdatedAt: renterDB.UpdatedAt,
-	}
-	return dbModel.ToDomain(), nil
+	}, nil
 }
 
 // Update updates an existing renter

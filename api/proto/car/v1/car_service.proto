@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package car.v1;
+
+import "api/proto/car/v1/car.proto";
+
+option go_package = "github.com/jp-ryuji/go-arch-patterns/api/generated/car/v1;carv1";
+
+// CarService provides operations for managing cars
+service CarService {
+  // CreateCar creates a new car
+  rpc CreateCar(CreateCarRequest) returns (CreateCarResponse) {}
+
+  // GetCar retrieves a car by ID
+  rpc GetCar(GetCarRequest) returns (GetCarResponse) {}
+
+  // ListCars retrieves a list of cars
+  rpc ListCars(ListCarsRequest) returns (ListCarsResponse) {}
+}
+
+// CreateCarRequest is the request for creating a car
+message CreateCarRequest {
+  string tenant_id = 1;
+  string model = 2;
+}
+
+// CreateCarResponse is the response for creating a car
+message CreateCarResponse {
+  Car car = 1;
+}
+
+// GetCarRequest is the request for retrieving a car
+message GetCarRequest {
+  string id = 1;
+}
+
+// GetCarResponse is the response for retrieving a car
+message GetCarResponse {
+  Car car = 1;
+}
+
+// ListCarsRequest is the request for listing cars
+message ListCarsRequest {
+  string tenant_id = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+}
+
+// ListCarsResponse is the response for listing cars
+message ListCarsResponse {
+  repeated Car cars = 1;
+  string next_page_token = 2;
+}

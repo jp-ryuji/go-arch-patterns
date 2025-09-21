@@ -1,0 +1,90 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api/proto/car/v1/car_service.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "CarService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {},
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1Car": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "tenantId": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "Car represents a car entity"
+    },
+    "v1CreateCarResponse": {
+      "type": "object",
+      "properties": {
+        "car": {
+          "$ref": "#/definitions/v1Car"
+        }
+      },
+      "title": "CreateCarResponse is the response for creating a car"
+    },
+    "v1GetCarResponse": {
+      "type": "object",
+      "properties": {
+        "car": {
+          "$ref": "#/definitions/v1Car"
+        }
+      },
+      "title": "GetCarResponse is the response for retrieving a car"
+    }
+  }
+}

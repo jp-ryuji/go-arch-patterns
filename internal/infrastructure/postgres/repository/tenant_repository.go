@@ -5,7 +5,6 @@ import (
 
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
-	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/dbmodel"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	tenant "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/tenant"
 )
@@ -39,14 +38,13 @@ func (r *tenantRepository) GetByID(ctx context.Context, id string) (*entity.Tena
 		return nil, err
 	}
 
-	// Convert Ent model to dbmodel and then to domain model
-	dbModel := &dbmodel.Tenant{
+	// Direct conversion from Ent model to domain entity
+	return &entity.Tenant{
 		ID:        tenantDB.ID,
 		Code:      tenantDB.Code,
 		CreatedAt: tenantDB.CreatedAt,
 		UpdatedAt: tenantDB.UpdatedAt,
-	}
-	return dbModel.ToDomain(), nil
+	}, nil
 }
 
 // GetByIDWithCars retrieves a tenant by its ID along with its associated cars
@@ -60,8 +58,8 @@ func (r *tenantRepository) GetByIDWithCars(ctx context.Context, id string) (*ent
 		return nil, err
 	}
 
-	// Convert Ent model to dbmodel
-	dbModel := &dbmodel.Tenant{
+	// Direct conversion from Ent model to domain entity
+	domainTenant := &entity.Tenant{
 		ID:        tenantDB.ID,
 		Code:      tenantDB.Code,
 		CreatedAt: tenantDB.CreatedAt,
@@ -70,9 +68,9 @@ func (r *tenantRepository) GetByIDWithCars(ctx context.Context, id string) (*ent
 
 	// Load the cars information if available
 	if tenantDB.Edges.Cars != nil {
-		dbModel.Cars = make([]dbmodel.Car, len(tenantDB.Edges.Cars))
+		cars := make(entity.Cars, len(tenantDB.Edges.Cars))
 		for i, car := range tenantDB.Edges.Cars {
-			dbModel.Cars[i] = dbmodel.Car{
+			cars[i] = &entity.Car{
 				ID:        car.ID,
 				TenantID:  car.TenantID,
 				Model:     car.Model,
@@ -80,10 +78,13 @@ func (r *tenantRepository) GetByIDWithCars(ctx context.Context, id string) (*ent
 				UpdatedAt: car.UpdatedAt,
 			}
 		}
-		return dbModel.ToDomain(dbmodel.TenantLoadOptions{WithCars: true}), nil
+		domainTenant.Refs = &entity.TenantRefs{
+			Cars: cars,
+		}
+		return domainTenant, nil
 	}
 
-	return dbModel.ToDomain(), nil
+	return domainTenant, nil
 }
 
 // Update updates an existing tenant

@@ -38,6 +38,7 @@ Find specific documentation in the [docs/](docs/) folder:
 - [Database Schema Updates](docs/database_schema_updates.md)
 - [Ent ORM Setup](docs/ent.md)
 - [Outbox Pattern Implementation](docs/outbox_pattern.md)
+- [API (gRPC with gRPC-Gateway) Documentation](docs/api-gprc-http.md)
 
 ## Disclaimer
 

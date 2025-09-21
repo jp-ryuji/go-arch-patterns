@@ -71,7 +71,7 @@ Note: Git hooks are local to your repository and are not shared through the repo
 This project uses two categories of development tools:
 
 **Linting tools (golangci-lint):**
-We use golangci-lint as our primary linter. The golangci-lint project strongly recommends binary installation over installing from sources for performance and compatibility reasons. Follow [their binary installation instructions](https://golangci-lint.run/docs/welcome/install/#binaries) for your platform.
+We use `golangci-lint` as our primary linter. The golangci-lint project strongly recommends binary installation over installing from sources for performance and compatibility reasons. Follow [their binary installation instructions](https://golangci-lint.run/docs/welcome/install/#binaries) for your platform.
 
 **Other development tools:**
 Additional tools like `goimports` and `gofumpt` are managed using [Go 1.24's tool dependency management feature](https://tip.golang.org/doc/go1.24#tools). These tools are already declared in the `go.mod`.
