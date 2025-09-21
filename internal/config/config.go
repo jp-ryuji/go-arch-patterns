@@ -89,28 +89,28 @@ func setDefaults() {
 // bindEnv binds environment variables to Viper keys
 func bindEnv() {
 	// Database
-	viper.BindEnv("DB_HOST")
-	viper.BindEnv("DB_PORT")
-	viper.BindEnv("DB_PORT_EXTERNAL")
-	viper.BindEnv("DB_USER")
-	viper.BindEnv("DB_PASSWORD")
-	viper.BindEnv("DB_NAME")
-	viper.BindEnv("DB_SSLMODE")
-	viper.BindEnv("DB_MAX_OPEN_CONNS")
-	viper.BindEnv("DB_MAX_IDLE_CONNS")
-	viper.BindEnv("DB_CONN_MAX_LIFETIME")
+	_ = viper.BindEnv("DB_HOST")
+	_ = viper.BindEnv("DB_PORT")
+	_ = viper.BindEnv("DB_PORT_EXTERNAL")
+	_ = viper.BindEnv("DB_USER")
+	_ = viper.BindEnv("DB_PASSWORD")
+	_ = viper.BindEnv("DB_NAME")
+	_ = viper.BindEnv("DB_SSLMODE")
+	_ = viper.BindEnv("DB_MAX_OPEN_CONNS")
+	_ = viper.BindEnv("DB_MAX_IDLE_CONNS")
+	_ = viper.BindEnv("DB_CONN_MAX_LIFETIME")
 
 	// Redis
-	viper.BindEnv("REDIS_HOST")
-	viper.BindEnv("REDIS_PORT")
-	viper.BindEnv("REDIS_URL")
+	_ = viper.BindEnv("REDIS_HOST")
+	_ = viper.BindEnv("REDIS_PORT")
+	_ = viper.BindEnv("REDIS_URL")
 
 	// Server
-	viper.BindEnv("GRPC_PORT")
-	viper.BindEnv("HTTP_PORT")
+	_ = viper.BindEnv("GRPC_PORT")
+	_ = viper.BindEnv("HTTP_PORT")
 
 	// OpenSearch
-	viper.BindEnv("OPENSEARCH_PORT_EXTERNAL")
+	_ = viper.BindEnv("OPENSEARCH_PORT_EXTERNAL")
 }
 
 // DatabaseURL returns the database connection string
