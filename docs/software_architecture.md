@@ -124,14 +124,12 @@ HTTP/REST JSON Response
     │   ├── service              # Domain services (business logic)
     │   └── repository           # Repository interfaces (ports)
     ├── application              # Application Layer
-    │   ├── input                # Data transfer objects (input)
-    │   └── output               # Data transfer objects (output)
-    │   └── service              # Application services (orchestration)
+    │   ├── service              # Application services (orchestration)
+    │   └── dto                  # Data transfer objects
     ├── infrastructure           # Infrastructure Layer (outermost)
     │   ├── postgres             # PostgreSQL adapter
-    │   │   ├── ent
-    │   │   │   └── schema       # Ent schema design
-    │   │   ├── entgen           # Generated type-safe query code using Ent
+    │   │   ├── ent              # Ent schema design
+    │   │   ├── entgen           # (Generated type-safe query code using Ent)
     │   │   ├── repository       # Repository implementations
     │   │   └── migration
     │   ├── redis                # Redis adapter

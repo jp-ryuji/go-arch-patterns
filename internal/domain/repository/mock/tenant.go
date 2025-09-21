@@ -69,6 +69,21 @@ func (mr *MockTenantRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockTenantRepository)(nil).Delete), ctx, id)
 }
 
+// GetByCode mocks base method.
+func (m *MockTenantRepository) GetByCode(ctx context.Context, code string) (*entity.Tenant, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByCode", ctx, code)
+	ret0, _ := ret[0].(*entity.Tenant)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByCode indicates an expected call of GetByCode.
+func (mr *MockTenantRepositoryMockRecorder) GetByCode(ctx, code any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByCode", reflect.TypeOf((*MockTenantRepository)(nil).GetByCode), ctx, code)
+}
+
 // GetByID mocks base method.
 func (m *MockTenantRepository) GetByID(ctx context.Context, id string) (*entity.Tenant, error) {
 	m.ctrl.T.Helper()

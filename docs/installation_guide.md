@@ -92,6 +92,13 @@ To stop the services, run:
 docker compose down
 ```
 
+The application uses Viper for configuration management, supporting all configuration options via environment variables. See `.envrc.example` for available options.
+
+If you encounter port conflicts when starting the application, you can use the following Makefile commands:
+
+- `make dev.check` - Check if ports 50051 (gRPC) or 8081 (HTTP) are already in use
+- `make dev.kill` - Kill processes listening on these ports
+
 ## Access the PostgreSQL database
 
 You can access the PostgreSQL database using the following command:

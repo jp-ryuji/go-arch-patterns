@@ -39,37 +39,54 @@ func (s *Server) Start() error {
 	s.grpcServer = grpc.NewServer()
 
 	// Register gRPC services
-	carv1.RegisterCarServiceServer(s.grpcServer, car.NewCarServiceServer(s.carService))
+	carServiceServer := car.NewCarServiceServer(s.carService)
+	carv1.RegisterCarServiceServer(s.grpcServer, carServiceServer)
+	fmt.Printf("Registered CarServiceServer with gRPC server\n")
 
 	// Create context for Listen calls
 	ctx := context.Background()
 
 	// Start gRPC server in a goroutine
 	listenConfig := &net.ListenConfig{}
-	grpcListener, err := listenConfig.Listen(ctx, "tcp", fmt.Sprintf(":%d", s.grpcPort))
+	grpcAddr := fmt.Sprintf(":%d", s.grpcPort)
+	grpcListener, err := listenConfig.Listen(ctx, "tcp", grpcAddr)
 	if err != nil {
 		return fmt.Errorf("failed to listen on port %d for gRPC: %w", s.grpcPort, err)
 	}
+	fmt.Printf("gRPC server listening on %s\n", grpcAddr)
 
 	go func() {
+		fmt.Printf("Starting gRPC server\n")
 		if err := s.grpcServer.Serve(grpcListener); err != nil {
 			fmt.Printf("gRPC server error: %v\n", err)
+		} else {
+			fmt.Printf("gRPC server stopped\n")
 		}
 	}()
+	fmt.Printf("gRPC server goroutine started\n")
+
+	// Give the gRPC server a moment to start
+	time.Sleep(100 * time.Millisecond)
+	fmt.Printf("Waited for gRPC server to start\n")
 
 	// Create HTTP server with gRPC-Gateway
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
+	// Create a new context for the gateway (don't cancel the previous one)
+	gwCtx := context.Background()
 
 	// Create gRPC-Gateway mux
 	gwmux := runtime.NewServeMux()
+	fmt.Printf("Created gRPC-Gateway mux\n")
 
 	// Set up connection to gRPC server
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	err = carv1.RegisterCarServiceHandlerFromEndpoint(ctx, gwmux, fmt.Sprintf("localhost:%d", s.grpcPort), opts)
+	grpcEndpoint := fmt.Sprintf("localhost:%d", s.grpcPort)
+	fmt.Printf("Connecting to gRPC server at %s\n", grpcEndpoint)
+	err = carv1.RegisterCarServiceHandlerFromEndpoint(gwCtx, gwmux, grpcEndpoint, opts)
 	if err != nil {
+		fmt.Printf("Failed to register car service handler: %v\n", err)
 		return fmt.Errorf("failed to register car service handler: %w", err)
 	}
+	fmt.Printf("Registered car service handler with gRPC-Gateway\n")
 
 	// Create HTTP server with timeout configuration
 	s.httpServer = &http.Server{
@@ -77,16 +94,22 @@ func (s *Server) Start() error {
 		Handler:           gwmux,
 		ReadHeaderTimeout: 5 * time.Second, // Add timeout to prevent Slowloris attacks
 	}
+	fmt.Printf("Created HTTP server on port %d\n", s.httpPort)
 
 	// Start HTTP server
-	httpListener, err := listenConfig.Listen(ctx, "tcp", fmt.Sprintf(":%d", s.httpPort))
+	httpAddr := fmt.Sprintf(":%d", s.httpPort)
+	httpListener, err := listenConfig.Listen(ctx, "tcp", httpAddr)
 	if err != nil {
 		return fmt.Errorf("failed to listen on port %d for HTTP: %w", s.httpPort, err)
 	}
+	fmt.Printf("HTTP server listening on %s\n", httpAddr)
 
 	go func() {
+		fmt.Printf("Starting HTTP server\n")
 		if err := s.httpServer.Serve(httpListener); err != nil && err != http.ErrServerClosed {
 			fmt.Printf("HTTP server error: %v\n", err)
+		} else {
+			fmt.Printf("HTTP server stopped\n")
 		}
 	}()
 

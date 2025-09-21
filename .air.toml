@@ -1,0 +1,82 @@
+# Air Configuration for Local Development
+# Live-reload utility for Go applications
+# Config file for [Air](https://github.com/air-verse/air) in TOML format
+
+# Root directory - all paths are relative to this
+root = "."
+
+# Temporary directory for build artifacts and logs
+tmp_dir = "tmp"
+
+[build]
+# Build command executed on file changes
+cmd = "make build"
+
+# Path to compiled binary (output of cmd above)
+bin = "./.bin/app"
+
+# Full command to run the application with arguments
+full_bin = "./.bin/app http-server run"
+
+# File extensions that trigger rebuilds
+# Add "yaml", "json" if using config files
+include_ext = ["go"]
+
+# Directories to ignore during watching
+exclude_dir = [
+    "api", "doc", "docker", "proto", "tmp",
+    ".git", "vendor", ".vscode", ".idea",
+    "coverage", "dist", "build"
+]
+
+# Specific directories to watch (empty = watch all)
+include_dir = []
+
+# Specific files to exclude
+exclude_file = []
+
+# Regex patterns to exclude
+exclude_regex = ["_test\\.go"]
+
+# Only rebuild if content changed, not just timestamp
+exclude_unchanged = true
+
+# Follow symbolic links when watching
+follow_symlink = true
+
+# Air's log file location
+log = "air.log"
+
+# Minimum delay between rebuilds (prevents rapid rebuilds)
+delay = 1000 # ms
+
+# Stop binary when build fails
+stop_on_error = true
+
+# Restart binary if it exits unexpectedly
+rerun = true
+
+# Delay before resta
+rerun_delay = 500 # ms
+
+# Send SIGINT before killing (graceful shutdown)
+# Note: Not supported on Windows
+send_interrupt = false
+
+# Time to wait after SIGINT before force kill
+kill_delay = 500 # ms
+
+[log]
+# Include timestamps (useful for debugging performance)
+time = true
+
+[color]
+# Customize output colors for better readability
+main = "magenta"    # General messages
+watcher = "cyan"    # File watching notifications
+build = "yellow"    # Build output
+runner = "green"    # Runtime messages
+
+[misc]
+# Clean tmp directory on exit
+clean_on_exit = true

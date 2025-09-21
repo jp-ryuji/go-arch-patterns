@@ -47,6 +47,25 @@ func (r *tenantRepository) GetByID(ctx context.Context, id string) (*entity.Tena
 	}, nil
 }
 
+// GetByCode retrieves a tenant by its code
+func (r *tenantRepository) GetByCode(ctx context.Context, code string) (*entity.Tenant, error) {
+	tenantDB, err := r.client.Tenant.
+		Query().
+		Where(tenant.Code(code)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Direct conversion from Ent model to domain entity
+	return &entity.Tenant{
+		ID:        tenantDB.ID,
+		Code:      tenantDB.Code,
+		CreatedAt: tenantDB.CreatedAt,
+		UpdatedAt: tenantDB.UpdatedAt,
+	}, nil
+}
+
 // GetByIDWithCars retrieves a tenant by its ID along with its associated cars
 func (r *tenantRepository) GetByIDWithCars(ctx context.Context, id string) (*entity.Tenant, error) {
 	tenantDB, err := r.client.Tenant.

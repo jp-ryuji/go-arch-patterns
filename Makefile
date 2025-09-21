@@ -2,6 +2,44 @@
 build:
 	go build -v ./...
 
+.PHONY: dev.check
+dev.check:
+	@echo "Checking for processes on gRPC port (50051) and HTTP port (8081)..."
+	@if lsof -ti:50051 >/dev/null 2>&1; then \
+		echo "Warning: Port 50051 (gRPC) is already in use. Run 'make dev.kill' to kill the processes."; \
+	fi
+	@if lsof -ti:8081 >/dev/null 2>&1; then \
+		echo "Warning: Port 8081 (HTTP) is already in use. Run 'make dev.kill' to kill the processes."; \
+	fi
+
+.PHONY: dev
+dev: dev.check
+	@docker compose up -d
+	@go run cmd/app/main.go
+
+.PHONY: dev.down
+dev.down:
+	@docker compose down
+
+.PHONY: dev.kill
+dev.kill:
+	@echo "Killing processes listening on gRPC port (50051) and HTTP port (8081)..."
+	@lsof -ti:50051 | xargs kill -9 2>/dev/null || true
+	@lsof -ti:8081 | xargs kill -9 2>/dev/null || true
+	@echo "Processes killed."
+
+.PHONY: seed
+seed:
+	@docker compose exec -T postgres psql -U ${DB_USER} -d ${DB_NAME} -f /seed/data.sql
+
+.PHONY: logs
+logs:
+	docker compose logs -f
+
+.PHONY: clean
+clean:
+	docker compose down -v
+
 .PHONY: lint.go
 lint.go:
 	@golangci-lint run
@@ -51,7 +89,7 @@ format:
 
 define format
 	@go fmt ./...
-	@go tool goimports -w ./
+	@go tool goimports -w ./...
 	@go tool gofumpt -l -w .
 	@go mod tidy
 endef
