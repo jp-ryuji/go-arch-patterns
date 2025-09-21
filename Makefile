@@ -32,6 +32,10 @@ dev.kill:
 seed:
 	@docker compose exec -T postgres psql -U ${DB_USER} -d ${DB_NAME} -f /seed/data.sql
 
+.PHONY: psql
+psql:
+	@docker compose exec postgres psql -U ${DB_USER} -d ${DB_NAME}
+
 .PHONY: logs
 logs:
 	docker compose logs -f
