@@ -172,8 +172,9 @@ To generate code from Protocol Buffer definitions, follow these steps:
 5. **Generated files**:
    The following files are generated:
    - `api/generated/car/v1/car.pb.go` - Message types
-   - `api/generated/car/v1/car_grpc.pb.go` - gRPC service interface
-   - `api/generated/car/v1/car.pb.gw.go` - gRPC-Gateway handlers
+   - `api/generated/car/v1/car_service_grpc.pb.go` - gRPC service interface
+   - `api/generated/car/v1/car_service.pb.gw.go` - gRPC-Gateway handlers
+   - `api/generated/car/v1/car_service.pb.go` - Service message types
    - `api/generated/common/v1/common.pb.go` - Common message types
 
 ### buf.gen.yaml Configuration
