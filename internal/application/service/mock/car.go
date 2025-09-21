@@ -13,8 +13,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	dto "github.com/jp-ryuji/go-arch-patterns/internal/application/dto"
-	entity "github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
+	input "github.com/jp-ryuji/go-arch-patterns/internal/application/input"
+	output "github.com/jp-ryuji/go-arch-patterns/internal/application/output"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -42,62 +42,62 @@ func (m *MockCarService) EXPECT() *MockCarServiceMockRecorder {
 	return m.recorder
 }
 
-// GetByID mocks base method.
-func (m *MockCarService) GetByID(ctx context.Context, input dto.GetCarByIDInput) (*entity.Car, error) {
+// Create mocks base method.
+func (m *MockCarService) Create(ctx context.Context, arg1 input.CreateCar) (*output.CreateCar, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByID", ctx, input)
-	ret0, _ := ret[0].(*entity.Car)
+	ret := m.ctrl.Call(m, "Create", ctx, arg1)
+	ret0, _ := ret[0].(*output.CreateCar)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockCarServiceMockRecorder) Create(ctx, arg1 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCarService)(nil).Create), ctx, arg1)
+}
+
+// GetByID mocks base method.
+func (m *MockCarService) GetByID(ctx context.Context, arg1 input.GetCarByID) (*output.GetCar, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByID", ctx, arg1)
+	ret0, _ := ret[0].(*output.GetCar)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByID indicates an expected call of GetByID.
-func (mr *MockCarServiceMockRecorder) GetByID(ctx, input any) *gomock.Call {
+func (mr *MockCarServiceMockRecorder) GetByID(ctx, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockCarService)(nil).GetByID), ctx, input)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockCarService)(nil).GetByID), ctx, arg1)
 }
 
 // GetByIDWithTenant mocks base method.
-func (m *MockCarService) GetByIDWithTenant(ctx context.Context, input dto.GetCarByIDInput) (*entity.Car, error) {
+func (m *MockCarService) GetByIDWithTenant(ctx context.Context, arg1 input.GetCarByID) (*output.GetCar, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByIDWithTenant", ctx, input)
-	ret0, _ := ret[0].(*entity.Car)
+	ret := m.ctrl.Call(m, "GetByIDWithTenant", ctx, arg1)
+	ret0, _ := ret[0].(*output.GetCar)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByIDWithTenant indicates an expected call of GetByIDWithTenant.
-func (mr *MockCarServiceMockRecorder) GetByIDWithTenant(ctx, input any) *gomock.Call {
+func (mr *MockCarServiceMockRecorder) GetByIDWithTenant(ctx, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByIDWithTenant", reflect.TypeOf((*MockCarService)(nil).GetByIDWithTenant), ctx, input)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByIDWithTenant", reflect.TypeOf((*MockCarService)(nil).GetByIDWithTenant), ctx, arg1)
 }
 
 // List mocks base method.
-func (m *MockCarService) List(ctx context.Context, input dto.ListCarsInput) (*entity.Cars, error) {
+func (m *MockCarService) List(ctx context.Context, arg1 input.ListCars) (*output.ListCars, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", ctx, input)
-	ret0, _ := ret[0].(*entity.Cars)
+	ret := m.ctrl.Call(m, "List", ctx, arg1)
+	ret0, _ := ret[0].(*output.ListCars)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // List indicates an expected call of List.
-func (mr *MockCarServiceMockRecorder) List(ctx, input any) *gomock.Call {
+func (mr *MockCarServiceMockRecorder) List(ctx, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockCarService)(nil).List), ctx, input)
-}
-
-// Register mocks base method.
-func (m *MockCarService) Register(ctx context.Context, input dto.RegisterCarInput) (*entity.Car, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Register", ctx, input)
-	ret0, _ := ret[0].(*entity.Car)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Register indicates an expected call of Register.
-func (mr *MockCarServiceMockRecorder) Register(ctx, input any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockCarService)(nil).Register), ctx, input)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockCarService)(nil).List), ctx, arg1)
 }

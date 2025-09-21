@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/application/dto"
+	"github.com/jp-ryuji/go-arch-patterns/internal/application/input"
+	"github.com/jp-ryuji/go-arch-patterns/internal/application/output"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
@@ -32,8 +33,8 @@ func NewCarService(
 	}
 }
 
-// Register registers a new car using the outbox pattern with transactional guarantees
-func (s *carService) Register(ctx context.Context, input dto.RegisterCarInput) (*entity.Car, error) {
+// Create creates a new car using the outbox pattern with transactional guarantees
+func (s *carService) Create(ctx context.Context, input input.CreateCar) (*output.CreateCar, error) {
 	// Validate input
 	if err := Validate(input); err != nil {
 		return nil, err
@@ -97,31 +98,42 @@ func (s *carService) Register(ctx context.Context, input dto.RegisterCarInput) (
 		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	return car, nil
+	// Convert entity to DTO before returning
+	return output.CarEntityToCreate(car), nil
 }
 
 // GetByID retrieves a car by its ID
-func (s *carService) GetByID(ctx context.Context, input dto.GetCarByIDInput) (*entity.Car, error) {
+func (s *carService) GetByID(ctx context.Context, input input.GetCarByID) (*output.GetCar, error) {
 	// Validate input
 	if err := Validate(input); err != nil {
 		return nil, err
 	}
 
-	return s.carRepo.GetByID(ctx, input.ID)
+	car, err := s.carRepo.GetByID(ctx, input.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return output.CarEntityToGet(car), nil
 }
 
 // GetByIDWithTenant retrieves a car by its ID along with its tenant information
-func (s *carService) GetByIDWithTenant(ctx context.Context, input dto.GetCarByIDInput) (*entity.Car, error) {
+func (s *carService) GetByIDWithTenant(ctx context.Context, input input.GetCarByID) (*output.GetCar, error) {
 	// Validate input
 	if err := Validate(input); err != nil {
 		return nil, err
 	}
 
-	return s.carRepo.GetByIDWithTenant(ctx, input.ID)
+	car, err := s.carRepo.GetByIDWithTenant(ctx, input.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return output.CarEntityToGet(car), nil
 }
 
 // List retrieves a list of cars for a tenant
-func (s *carService) List(ctx context.Context, input dto.ListCarsInput) (*entity.Cars, error) {
+func (s *carService) List(ctx context.Context, input input.ListCars) (*output.ListCars, error) {
 	// Validate input
 	if err := Validate(input); err != nil {
 		return nil, err
@@ -143,6 +155,12 @@ func (s *carService) List(ctx context.Context, input dto.ListCarsInput) (*entity
 		_ = input.PageToken // To avoid unused variable error
 	}
 
-	// Call repository to get cars
-	return s.carRepo.ListByTenant(ctx, input.TenantID, pageSize, offset)
+	// Call repository to get cars with pagination info
+	cars, nextPageToken, totalCount, err := s.carRepo.ListByTenant(ctx, input.TenantID, pageSize, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert entities to DTO before returning
+	return output.CarEntitiesToList(cars, nextPageToken, totalCount), nil
 }

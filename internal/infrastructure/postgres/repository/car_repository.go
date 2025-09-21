@@ -137,7 +137,7 @@ func (r *carRepository) DeleteInTx(ctx context.Context, tx *entgen.Tx, id string
 }
 
 // ListByTenant retrieves cars by tenant ID with pagination
-func (r *carRepository) ListByTenant(ctx context.Context, tenantID string, limit int, offset int) (*entity.Cars, error) {
+func (r *carRepository) ListByTenant(ctx context.Context, tenantID string, limit int, offset int) ([]*entity.Car, string, int32, error) {
 	dbCars, err := r.client.Car.
 		Query().
 		Where(car.TenantID(tenantID)).
@@ -145,10 +145,10 @@ func (r *carRepository) ListByTenant(ctx context.Context, tenantID string, limit
 		Offset(offset).
 		All(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query cars: %w", err)
+		return nil, "", 0, fmt.Errorf("failed to query cars: %w", err)
 	}
 
-	cars := make(entity.Cars, len(dbCars))
+	cars := make([]*entity.Car, len(dbCars))
 	for i, dbCar := range dbCars {
 		// Direct conversion from Ent model to domain entity
 		cars[i] = &entity.Car{
@@ -160,11 +160,15 @@ func (r *carRepository) ListByTenant(ctx context.Context, tenantID string, limit
 		}
 	}
 
-	return &cars, nil
+	// For now, we'll use empty nextPageToken and totalCount
+	// TODO: Implement proper pagination
+	// Using a simple conversion for now, in a real implementation you would get the count from the database
+	count := int32(len(cars)) // #nosec G115
+	return cars, "", count, nil
 }
 
 // ListByTenantWithOptions retrieves cars by tenant ID with pagination and load options
-func (r *carRepository) ListByTenantWithOptions(ctx context.Context, tenantID string, limit int, offset int, opts ...repository.CarLoadOptions) (*entity.Cars, error) {
+func (r *carRepository) ListByTenantWithOptions(ctx context.Context, tenantID string, limit int, offset int, opts ...repository.CarLoadOptions) ([]*entity.Car, string, int32, error) {
 	query := r.client.Car.
 		Query().
 		Where(car.TenantID(tenantID))
@@ -185,15 +189,19 @@ func (r *carRepository) ListByTenantWithOptions(ctx context.Context, tenantID st
 		Offset(offset).
 		All(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query cars: %w", err)
+		return nil, "", 0, fmt.Errorf("failed to query cars: %w", err)
 	}
 
-	cars := make(entity.Cars, len(dbCars))
+	cars := make([]*entity.Car, len(dbCars))
 	for i, dbCar := range dbCars {
 		cars[i] = r.entToDomain(dbCar, opts...)
 	}
 
-	return &cars, nil
+	// For now, we'll use empty nextPageToken and totalCount
+	// TODO: Implement proper pagination
+	// Using a simple conversion for now, in a real implementation you would get the count from the database
+	count := int32(len(cars)) // #nosec G115
+	return cars, "", count, nil
 }
 
 // entToDomain converts an Ent car model to a domain car entity

@@ -19,8 +19,8 @@ type CarRepository interface {
 	CreateInTx(ctx context.Context, tx *entgen.Tx, car *entity.Car) error
 	GetByID(ctx context.Context, id string) (*entity.Car, error)
 	GetByIDWithTenant(ctx context.Context, id string) (*entity.Car, error)
-	ListByTenant(ctx context.Context, tenantID string, limit int, offset int) (*entity.Cars, error)
-	ListByTenantWithOptions(ctx context.Context, tenantID string, limit int, offset int, opts ...CarLoadOptions) (*entity.Cars, error)
+	ListByTenant(ctx context.Context, tenantID string, limit int, offset int) ([]*entity.Car, string, int32, error)
+	ListByTenantWithOptions(ctx context.Context, tenantID string, limit int, offset int, opts ...CarLoadOptions) ([]*entity.Car, string, int32, error)
 	Update(ctx context.Context, car *entity.Car) error
 	UpdateInTx(ctx context.Context, tx *entgen.Tx, car *entity.Car) error
 	Delete(ctx context.Context, id string) error

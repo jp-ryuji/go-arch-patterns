@@ -130,12 +130,14 @@ func (mr *MockCarRepositoryMockRecorder) GetByIDWithTenant(ctx, id any) *gomock.
 }
 
 // ListByTenant mocks base method.
-func (m *MockCarRepository) ListByTenant(ctx context.Context, tenantID string, limit, offset int) (*entity.Cars, error) {
+func (m *MockCarRepository) ListByTenant(ctx context.Context, tenantID string, limit, offset int) ([]*entity.Car, string, int32, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListByTenant", ctx, tenantID, limit, offset)
-	ret0, _ := ret[0].(*entity.Cars)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].([]*entity.Car)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(int32)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
 }
 
 // ListByTenant indicates an expected call of ListByTenant.
@@ -145,16 +147,18 @@ func (mr *MockCarRepositoryMockRecorder) ListByTenant(ctx, tenantID, limit, offs
 }
 
 // ListByTenantWithOptions mocks base method.
-func (m *MockCarRepository) ListByTenantWithOptions(ctx context.Context, tenantID string, limit, offset int, opts ...repository.CarLoadOptions) (*entity.Cars, error) {
+func (m *MockCarRepository) ListByTenantWithOptions(ctx context.Context, tenantID string, limit, offset int, opts ...repository.CarLoadOptions) ([]*entity.Car, string, int32, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, tenantID, limit, offset}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "ListByTenantWithOptions", varargs...)
-	ret0, _ := ret[0].(*entity.Cars)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].([]*entity.Car)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(int32)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
 }
 
 // ListByTenantWithOptions indicates an expected call of ListByTenantWithOptions.
