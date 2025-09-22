@@ -214,7 +214,7 @@ Before testing the API endpoints, ensure that:
 4. The application server is running:
 
    ```bash
-   go run cmd/app/main.go
+   make dev.run
    ```
 
 ### Testing with curl
