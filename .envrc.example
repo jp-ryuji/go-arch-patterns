@@ -1,10 +1,10 @@
 # External Ports
-export DB_PORT_EXTERNAL=5433
+export DB_PORT_EXTERNAL=5435
 export REDIS_PORT_EXTERNAL=6380
 export OPENSEARCH_PORT_EXTERNAL=9201
 
 # Database Configuration
-export DB_HOST=postgres
+export DB_HOST=localhost
 export DB_PORT=5432
 export DB_USER=user
 export DB_PASSWORD=password
@@ -20,6 +20,10 @@ export DB_CONN_MAX_LIFETIME=300s
 export REDIS_HOST=redis
 export REDIS_PORT=6379
 export REDIS_URL=redis://${REDIS_HOST}:${REDIS_PORT}
+
+# Server Ports
+export GRPC_PORT=50051
+export HTTP_PORT=8081
 
 # Constructed Database URL
 export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"

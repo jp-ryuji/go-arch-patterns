@@ -10,6 +10,7 @@ import (
 type TenantRepository interface {
 	Create(ctx context.Context, tenant *entity.Tenant) error
 	GetByID(ctx context.Context, id string) (*entity.Tenant, error)
+	GetByCode(ctx context.Context, code string) (*entity.Tenant, error)
 	GetByIDWithCars(ctx context.Context, id string) (*entity.Tenant, error)
 	Update(ctx context.Context, tenant *entity.Tenant) error
 	Delete(ctx context.Context, id string) error

@@ -4,7 +4,6 @@ This project follows a Domain-Driven Design (DDD) approach with an Onion Archite
 
 In this architecture:
 
-- The **core domain** (business logic) resides at the center and is independent of external systems
 - **Domain entities** represent the core business objects with identity
 - **Value objects** are immutable objects that describe aspects of the domain
 - **Repository interfaces** define the contracts for data access (ports)
@@ -14,7 +13,7 @@ In this architecture:
   - **Secondary/Driven Adapters**: Implementations of repository interfaces that connect to external systems (databases, message queues, etc.)
   - **Primary/Driving Adapters**: Interface adapters that expose application functionality to external clients (gRPC services, HTTP handlers, etc.)
 
-Structure:
+## Directory Structure
 
 ```plaintext
 ├── cmd
@@ -30,26 +29,28 @@ Structure:
 │   │       └── v1
 │   │           └── common.proto
 │   └── generated                # All generated code
-│       └── car
+│       ├── car
+│       │   └── v1
+│       └── common
 │           └── v1
-│               ├── car.pb.go
-│               ├── car_grpc.pb.go
-│               └── car.pb.gw.go
 ├── docker
 ├── docs
 └── internal
+    ├── config                   # Configuration
+    ├── di                       # Dependency Injection
     ├── domain                   # Core Domain Layer (innermost)
     │   ├── entity               # Domain entities with identity
     │   ├── value                # Value objects (immutable)
     │   ├── service              # Domain services (business logic)
     │   └── repository           # Repository interfaces (ports)
     ├── application              # Application Layer
-    │   ├── service              # Application services (orchestration)
-    │   └── dto                  # Data transfer objects
+    │   ├── input                # Data transfer objects (input)
+    │   ├── output               # Data transfer objects (output)
+    │   └── service              # Application services (orchestration)
     ├── infrastructure           # Infrastructure Layer (outermost)
     │   ├── postgres             # PostgreSQL adapter
-    │   │   ├── dbmodel          # ORM/database models
-    │   │   └── entgen           # (Generated type-safe query code using Ent)
+    │   │   ├── ent              # Ent schema design
+    │   │   ├── entgen           # (Generated type-safe query code using Ent)
     │   │   ├── repository       # Repository implementations
     │   │   └── migration
     │   ├── redis                # Redis adapter

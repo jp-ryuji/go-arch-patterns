@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/application/dto"
+	"github.com/jp-ryuji/go-arch-patterns/internal/application/input"
 	"github.com/jp-ryuji/go-arch-patterns/internal/application/service"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	mock_repository "github.com/jp-ryuji/go-arch-patterns/internal/domain/repository/mock"
@@ -25,8 +25,8 @@ func setupTest(t *testing.T) (*gomock.Controller, *mock_repository.MockCarReposi
 	return ctrl, mockCarRepo, mockOutboxRepo, mockTxManager, carService
 }
 
-// TestCarService_Register_Success tests the successful registration of a car
-func TestCarService_Register_Success(t *testing.T) {
+// TestCarService_Create_Success tests the successful creation of a car
+func TestCarService_Create_Success(t *testing.T) {
 	t.Parallel()
 
 	// Setup
@@ -35,7 +35,7 @@ func TestCarService_Register_Success(t *testing.T) {
 
 	// Test data
 	ctx := context.Background()
-	registerInput := dto.RegisterCarInput{
+	registerInput := input.CreateCar{
 		TenantID: "tenant-123",
 		Model:    "Toyota Prius",
 	}
@@ -47,7 +47,7 @@ func TestCarService_Register_Success(t *testing.T) {
 	mockTxManager.EXPECT().BeginTx(ctx).Return(mockTx, nil)
 	mockTxManager.EXPECT().CommitTx(ctx, mockTx).Return(nil)
 
-	// Set up expectations for registering a car
+	// Set up expectations for creating a car
 	var createdCar *entity.Car
 	mockCarRepo.EXPECT().CreateInTx(ctx, mockTx, gomock.Any()).DoAndReturn(
 		func(ctx context.Context, tx *entgen.Tx, car *entity.Car) error {
@@ -67,24 +67,25 @@ func TestCarService_Register_Success(t *testing.T) {
 	// Set up expectations for outbox message creation
 	mockOutboxRepo.EXPECT().CreateInTx(ctx, mockTx, gomock.Any()).Return(nil)
 
-	// Execute - Register a new car using the service
-	registeredCar, err := carService.Register(ctx, registerInput)
+	// Execute - Create a new car using the service
+	createdCarOutput, err := carService.Create(ctx, registerInput)
 	assert.NoError(t, err)
-	assert.NotNil(t, registeredCar)
+	assert.NotNil(t, createdCarOutput)
 
-	// Verify the returned car
-	assert.Equal(t, registerInput.TenantID, registeredCar.TenantID)
-	assert.Equal(t, registerInput.Model, registeredCar.Model)
-	assert.NotEmpty(t, registeredCar.ID)
-	assert.NotZero(t, registeredCar.CreatedAt)
-	assert.NotZero(t, registeredCar.UpdatedAt)
+	// Verify the returned car DTO
+	assert.Equal(t, registerInput.TenantID, createdCarOutput.TenantID)
+	assert.Equal(t, registerInput.Model, createdCarOutput.Model)
+	assert.NotEmpty(t, createdCarOutput.ID)
+	assert.NotZero(t, createdCarOutput.CreatedAt)
 
-	// Verify that the car sent to the repository matches what was returned
-	assert.Equal(t, registeredCar, createdCar)
+	// Verify that the car sent to the repository matches what was used to create the DTO
+	assert.Equal(t, createdCarOutput.ID, createdCar.ID)
+	assert.Equal(t, createdCarOutput.TenantID, createdCar.TenantID)
+	assert.Equal(t, createdCarOutput.Model, createdCar.Model)
 }
 
-// TestCarService_Register_RepositoryError tests registration when repository returns an error
-func TestCarService_Register_RepositoryError(t *testing.T) {
+// TestCarService_Create_RepositoryError tests creation when repository returns an error
+func TestCarService_Create_RepositoryError(t *testing.T) {
 	t.Parallel()
 
 	// Setup
@@ -93,7 +94,7 @@ func TestCarService_Register_RepositoryError(t *testing.T) {
 
 	// Test data
 	ctx := context.Background()
-	registerInput := dto.RegisterCarInput{
+	registerInput := input.CreateCar{
 		TenantID: "tenant-123",
 		Model:    "Toyota Prius",
 	}
@@ -109,11 +110,11 @@ func TestCarService_Register_RepositoryError(t *testing.T) {
 	expectedError := assert.AnError
 	mockCarRepo.EXPECT().CreateInTx(ctx, mockTx, gomock.Any()).Return(expectedError)
 
-	// Execute - Try to register a car when repository fails
-	registeredCar, err := carService.Register(ctx, registerInput)
+	// Execute - Try to create a car when repository fails
+	createdCar, err := carService.Create(ctx, registerInput)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), expectedError.Error())
-	assert.Nil(t, registeredCar)
+	assert.Nil(t, createdCar)
 }
 
 // TestCarService_GetByID_Success tests successful retrieval of a car by ID
@@ -127,7 +128,7 @@ func TestCarService_GetByID_Success(t *testing.T) {
 	// Test data
 	ctx := context.Background()
 	carID := "car-123"
-	getInput := dto.GetCarByIDInput{
+	getInput := input.GetCarByID{
 		ID: carID,
 	}
 
@@ -143,7 +144,7 @@ func TestCarService_GetByID_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, retrievedCar)
 
-	// Verify the returned car
+	// Verify the returned car DTO
 	assert.Equal(t, expectedCar.ID, retrievedCar.ID)
 	assert.Equal(t, expectedCar.TenantID, retrievedCar.TenantID)
 	assert.Equal(t, expectedCar.Model, retrievedCar.Model)
@@ -160,7 +161,7 @@ func TestCarService_GetByID_NotFound(t *testing.T) {
 	// Test data
 	ctx := context.Background()
 	carID := "non-existent-car"
-	getInput := dto.GetCarByIDInput{
+	getInput := input.GetCarByID{
 		ID: carID,
 	}
 
@@ -186,7 +187,7 @@ func TestCarService_GetByIDWithTenant_Success(t *testing.T) {
 	// Test data
 	ctx := context.Background()
 	carID := "car-123"
-	getInput := dto.GetCarByIDInput{
+	getInput := input.GetCarByID{
 		ID: carID,
 	}
 
@@ -206,14 +207,10 @@ func TestCarService_GetByIDWithTenant_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, retrievedCar)
 
-	// Verify the returned car
+	// Verify the returned car DTO
 	assert.Equal(t, expectedCar.ID, retrievedCar.ID)
 	assert.Equal(t, expectedCar.TenantID, retrievedCar.TenantID)
 	assert.Equal(t, expectedCar.Model, retrievedCar.Model)
-	assert.NotNil(t, retrievedCar.Refs)
-	assert.NotNil(t, retrievedCar.Refs.Tenant)
-	assert.Equal(t, expectedTenant.ID, retrievedCar.Refs.Tenant.ID)
-	assert.Equal(t, expectedTenant.Code, retrievedCar.Refs.Tenant.Code)
 }
 
 // TestCarService_GetByIDWithTenant_NotFound tests retrieval when car with tenant doesn't exist
@@ -227,7 +224,7 @@ func TestCarService_GetByIDWithTenant_NotFound(t *testing.T) {
 	// Test data
 	ctx := context.Background()
 	carID := "non-existent-car"
-	getInput := dto.GetCarByIDInput{
+	getInput := input.GetCarByID{
 		ID: carID,
 	}
 
@@ -242,30 +239,73 @@ func TestCarService_GetByIDWithTenant_NotFound(t *testing.T) {
 	assert.Nil(t, retrievedCar)
 }
 
-// TestCarService_Register_Validation tests validation failures for Register
+// TestCarService_List_Success tests successful listing of cars
+func TestCarService_List_Success(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	ctrl, mockCarRepo, _, _, carService := setupTest(t)
+	defer ctrl.Finish()
+
+	// Test data
+	ctx := context.Background()
+	tenantID := "tenant-123"
+	listInput := input.ListCars{
+		TenantID: tenantID,
+		PageSize: 10,
+	}
+
+	// Create expected cars using the factory method
+	now := time.Now()
+	expectedCars := []*entity.Car{
+		entity.NewCar(tenantID, "Toyota Prius", now),
+		entity.NewCar(tenantID, "Honda Civic", now),
+	}
+	expectedNextPageToken := "next-page-token"
+	expectedTotalCount := int32(2)
+
+	// Set up expectations for listing cars
+	mockCarRepo.EXPECT().ListByTenant(ctx, tenantID, 10, 0).Return(expectedCars, expectedNextPageToken, expectedTotalCount, nil)
+
+	// Execute - List cars using the service
+	listOutput, err := carService.List(ctx, listInput)
+	assert.NoError(t, err)
+	assert.NotNil(t, listOutput)
+
+	// Verify the returned list DTO
+	assert.Equal(t, expectedNextPageToken, listOutput.NextPageToken)
+	assert.Equal(t, expectedTotalCount, listOutput.TotalCount)
+	assert.Len(t, listOutput.Cars, 2)
+	assert.Equal(t, expectedCars[0].ID, listOutput.Cars[0].ID)
+	assert.Equal(t, expectedCars[0].Model, listOutput.Cars[0].Model)
+	assert.Equal(t, expectedCars[1].ID, listOutput.Cars[1].ID)
+	assert.Equal(t, expectedCars[1].Model, listOutput.Cars[1].Model)
+}
+
+// TestCarService_Create_Validation tests validation failures for Create
 func TestCarService_Register_Validation(t *testing.T) {
 	t.Parallel()
 
 	tests := map[string]struct {
-		input   dto.RegisterCarInput
+		input   input.CreateCar
 		wantErr string
 	}{
 		"empty tenant ID": {
-			input: dto.RegisterCarInput{
+			input: input.CreateCar{
 				TenantID: "", // Missing required field
 				Model:    "Toyota Prius",
 			},
 			wantErr: "validation failed",
 		},
 		"empty model": {
-			input: dto.RegisterCarInput{
+			input: input.CreateCar{
 				TenantID: "tenant-123",
 				Model:    "", // Missing required field
 			},
 			wantErr: "validation failed",
 		},
 		"both fields empty": {
-			input: dto.RegisterCarInput{
+			input: input.CreateCar{
 				TenantID: "", // Missing required field
 				Model:    "", // Missing required field
 			},
@@ -284,13 +324,13 @@ func TestCarService_Register_Validation(t *testing.T) {
 			// Test data
 			ctx := context.Background()
 
-			// Execute - Try to register a car with invalid input
-			registeredCar, err := carService.Register(ctx, tt.input)
+			// Execute - Try to create a car with invalid input
+			createdCar, err := carService.Create(ctx, tt.input)
 
 			// Assert
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), tt.wantErr)
-			assert.Nil(t, registeredCar)
+			assert.Nil(t, createdCar)
 		})
 	}
 }
@@ -300,11 +340,11 @@ func TestCarService_GetByID_Validation(t *testing.T) {
 	t.Parallel()
 
 	tests := map[string]struct {
-		input   dto.GetCarByIDInput
+		input   input.GetCarByID
 		wantErr string
 	}{
 		"empty ID": {
-			input: dto.GetCarByIDInput{
+			input: input.GetCarByID{
 				ID: "", // Missing required field
 			},
 			wantErr: "validation failed",

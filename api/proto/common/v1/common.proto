@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package common.v1;
+
+option go_package = "github.com/jp-ryuji/go-arch-patterns/api/generated/common/v1;commonv1";
+
+// Error represents a common error response
+message Error {
+  string code = 1;
+  string message = 2;
+}

@@ -2,12 +2,12 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
-	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/dbmodel"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	car "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/car"
 )
@@ -55,15 +55,14 @@ func (r *carRepository) GetByID(ctx context.Context, id string) (*entity.Car, er
 		return nil, err
 	}
 
-	// Convert Ent model to dbmodel and then to domain model
-	dbModel := &dbmodel.Car{
+	// Direct conversion from Ent model to domain entity
+	return &entity.Car{
 		ID:        carDB.ID,
 		TenantID:  carDB.TenantID,
 		Model:     carDB.Model,
 		CreatedAt: carDB.CreatedAt,
 		UpdatedAt: carDB.UpdatedAt,
-	}
-	return dbModel.ToDomain(), nil
+	}, nil
 }
 
 // GetByIDWithTenant retrieves a car by its ID along with its tenant information
@@ -77,27 +76,9 @@ func (r *carRepository) GetByIDWithTenant(ctx context.Context, id string) (*enti
 		return nil, err
 	}
 
-	// Convert Ent model to dbmodel
-	dbModel := &dbmodel.Car{
-		ID:        carDB.ID,
-		TenantID:  carDB.TenantID,
-		Model:     carDB.Model,
-		CreatedAt: carDB.CreatedAt,
-		UpdatedAt: carDB.UpdatedAt,
-	}
-
-	// Load the tenant information if available
-	if carDB.Edges.Tenant != nil {
-		dbModel.Tenant = dbmodel.Tenant{
-			ID:        carDB.Edges.Tenant.ID,
-			Code:      carDB.Edges.Tenant.Code,
-			CreatedAt: carDB.Edges.Tenant.CreatedAt,
-			UpdatedAt: carDB.Edges.Tenant.UpdatedAt,
-		}
-		return dbModel.ToDomain(dbmodel.CarLoadOptions{WithTenant: true}), nil
-	}
-
-	return dbModel.ToDomain(), nil
+	// Convert Ent model to domain entity with tenant information
+	opts := repository.CarLoadOptions{WithTenant: true}
+	return r.entToDomain(carDB, opts), nil
 }
 
 // Update updates an existing car
@@ -150,22 +131,141 @@ func (r *carRepository) Delete(ctx context.Context, id string) error {
 
 // DeleteInTx removes a car by its ID within a transaction
 func (r *carRepository) DeleteInTx(ctx context.Context, tx *entgen.Tx, id string) error {
-	err := tx.Car.
+	return tx.Car.
 		DeleteOneID(id).
 		Exec(ctx)
-		// Make the delete operation idempotent by ignoring "not found" errors
-		// If the record doesn't exist, DeleteOneID.Exec() will return an error
-		// We want Delete to be idempotent, so we ignore "not found" errors
+}
+
+// ListByTenant retrieves cars by tenant ID with pagination
+func (r *carRepository) ListByTenant(ctx context.Context, tenantID string, limit int, offset int) ([]*entity.Car, string, int32, error) {
+	dbCars, err := r.client.Car.
+		Query().
+		Where(car.TenantID(tenantID)).
+		Limit(limit).
+		Offset(offset).
+		All(ctx)
 	if err != nil {
-		// Check if it's a "not found" error by checking the error message
-		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "no rows in result set") {
-			// Ignore "not found" errors to make the operation idempotent
-			return nil
-		}
-		return err
+		return nil, "", 0, fmt.Errorf("failed to query cars: %w", err)
 	}
 
-	return nil
+	cars := make([]*entity.Car, len(dbCars))
+	for i, dbCar := range dbCars {
+		// Direct conversion from Ent model to domain entity
+		cars[i] = &entity.Car{
+			ID:        dbCar.ID,
+			TenantID:  dbCar.TenantID,
+			Model:     dbCar.Model,
+			CreatedAt: dbCar.CreatedAt,
+			UpdatedAt: dbCar.UpdatedAt,
+		}
+	}
+
+	// For now, we'll use empty nextPageToken and totalCount
+	// TODO: Implement proper pagination
+	// Using a simple conversion for now, in a real implementation you would get the count from the database
+	count := int32(len(cars)) // #nosec G115
+	return cars, "", count, nil
+}
+
+// ListByTenantWithOptions retrieves cars by tenant ID with pagination and load options
+func (r *carRepository) ListByTenantWithOptions(ctx context.Context, tenantID string, limit int, offset int, opts ...repository.CarLoadOptions) ([]*entity.Car, string, int32, error) {
+	query := r.client.Car.
+		Query().
+		Where(car.TenantID(tenantID))
+
+	// Handle eager loading based on options
+	if len(opts) > 0 {
+		opt := opts[0]
+		if opt.WithTenant {
+			query = query.WithTenant()
+		}
+		if opt.WithRentals {
+			query = query.WithRentals()
+		}
+	}
+
+	dbCars, err := query.
+		Limit(limit).
+		Offset(offset).
+		All(ctx)
+	if err != nil {
+		return nil, "", 0, fmt.Errorf("failed to query cars: %w", err)
+	}
+
+	cars := make([]*entity.Car, len(dbCars))
+	for i, dbCar := range dbCars {
+		cars[i] = r.entToDomain(dbCar, opts...)
+	}
+
+	// For now, we'll use empty nextPageToken and totalCount
+	// TODO: Implement proper pagination
+	// Using a simple conversion for now, in a real implementation you would get the count from the database
+	count := int32(len(cars)) // #nosec G115
+	return cars, "", count, nil
+}
+
+// entToDomain converts an Ent car model to a domain car entity
+func (r *carRepository) entToDomain(entCar *entgen.Car, opts ...repository.CarLoadOptions) *entity.Car {
+	domainCar := &entity.Car{
+		ID:        entCar.ID,
+		TenantID:  entCar.TenantID,
+		Model:     entCar.Model,
+		CreatedAt: entCar.CreatedAt,
+		UpdatedAt: entCar.UpdatedAt,
+	}
+
+	// Handle relationships if options are provided
+	if len(opts) == 0 {
+		return domainCar
+	}
+
+	opt := opts[0]
+	hasTenant := opt.WithTenant && entCar.Edges.Tenant != nil
+	hasRentals := opt.WithRentals && len(entCar.Edges.Rentals) > 0
+
+	if !hasTenant && !hasRentals {
+		return domainCar
+	}
+
+	domainCar.Refs = &entity.CarRefs{}
+
+	if hasTenant {
+		domainCar.Refs.Tenant = r.entTenantToDomain(entCar.Edges.Tenant)
+	}
+
+	if hasRentals {
+		rentals := make(entity.Rentals, len(entCar.Edges.Rentals))
+		for i, rental := range entCar.Edges.Rentals {
+			rentals[i] = r.entRentalToDomain(rental)
+		}
+		domainCar.Refs.Rentals = rentals
+	}
+
+	return domainCar
+}
+
+// entTenantToDomain converts an Ent tenant model to a domain tenant entity
+func (r *carRepository) entTenantToDomain(entTenant *entgen.Tenant) *entity.Tenant {
+	return &entity.Tenant{
+		ID:        entTenant.ID,
+		Code:      entTenant.Code,
+		CreatedAt: entTenant.CreatedAt,
+		UpdatedAt: entTenant.UpdatedAt,
+	}
+}
+
+// entRentalToDomain converts an Ent rental model to a domain rental entity
+func (r *carRepository) entRentalToDomain(entRental *entgen.Rental) *entity.Rental {
+	return &entity.Rental{
+		ID:        entRental.ID,
+		TenantID:  entRental.TenantID,
+		CarID:     entRental.CarID,
+		RenterID:  entRental.RenterID,
+		StartsAt:  entRental.StartsAt,
+		EndsAt:    entRental.EndsAt,
+		CreatedAt: entRental.CreatedAt,
+		UpdatedAt: entRental.UpdatedAt,
+	}
 }
 
 // Tx returns the underlying Ent client's transaction capabilities

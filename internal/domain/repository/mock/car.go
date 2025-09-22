@@ -14,6 +14,7 @@ import (
 	reflect "reflect"
 
 	entity "github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
+	repository "github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	entgen "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -126,6 +127,45 @@ func (m *MockCarRepository) GetByIDWithTenant(ctx context.Context, id string) (*
 func (mr *MockCarRepositoryMockRecorder) GetByIDWithTenant(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByIDWithTenant", reflect.TypeOf((*MockCarRepository)(nil).GetByIDWithTenant), ctx, id)
+}
+
+// ListByTenant mocks base method.
+func (m *MockCarRepository) ListByTenant(ctx context.Context, tenantID string, limit, offset int) ([]*entity.Car, string, int32, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListByTenant", ctx, tenantID, limit, offset)
+	ret0, _ := ret[0].([]*entity.Car)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(int32)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
+}
+
+// ListByTenant indicates an expected call of ListByTenant.
+func (mr *MockCarRepositoryMockRecorder) ListByTenant(ctx, tenantID, limit, offset any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByTenant", reflect.TypeOf((*MockCarRepository)(nil).ListByTenant), ctx, tenantID, limit, offset)
+}
+
+// ListByTenantWithOptions mocks base method.
+func (m *MockCarRepository) ListByTenantWithOptions(ctx context.Context, tenantID string, limit, offset int, opts ...repository.CarLoadOptions) ([]*entity.Car, string, int32, error) {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx, tenantID, limit, offset}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ListByTenantWithOptions", varargs...)
+	ret0, _ := ret[0].([]*entity.Car)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(int32)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
+}
+
+// ListByTenantWithOptions indicates an expected call of ListByTenantWithOptions.
+func (mr *MockCarRepositoryMockRecorder) ListByTenantWithOptions(ctx, tenantID, limit, offset any, opts ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx, tenantID, limit, offset}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByTenantWithOptions", reflect.TypeOf((*MockCarRepository)(nil).ListByTenantWithOptions), varargs...)
 }
 
 // Update mocks base method.
