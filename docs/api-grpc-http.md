@@ -121,8 +121,8 @@ This will update `buf.lock` with the latest versions of dependencies while respe
 
 The API is implemented in the following directories:
 
-- `internal/interface/grpc/car/v1/service.go` - gRPC service implementation
-- `internal/interface/http/server.go` - HTTP server with gRPC-Gateway
+- `internal/presentation/grpc/car/v1/service.go` - gRPC service implementation
+- `internal/presentation/http/server.go` - HTTP server with gRPC-Gateway
 
 ### Dependency Injection
 

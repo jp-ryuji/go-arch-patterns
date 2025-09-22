@@ -56,7 +56,7 @@ In this architecture:
     │   ├── redis                # Redis adapter
     │   ├── messaging            # Message queue adapters (if needed)
     │   └── config               # Configuration
-    ├── interface                # Interface Adapters
+    ├── presentation             # Presentation Layer (outermost)
     │   ├── grpc                 # gRPC service implementations
     │   │   ├── car
     │   │   │   └── v1

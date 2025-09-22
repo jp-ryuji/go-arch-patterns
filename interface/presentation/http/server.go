@@ -9,8 +9,8 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	carv1 "github.com/jp-ryuji/go-arch-patterns/api/generated/car/v1"
+	"github.com/jp-ryuji/go-arch-patterns/interface/presentation/grpc/car/v1"
 	"github.com/jp-ryuji/go-arch-patterns/internal/application/service"
-	"github.com/jp-ryuji/go-arch-patterns/internal/interface/grpc/car/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

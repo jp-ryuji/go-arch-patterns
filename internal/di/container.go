@@ -1,10 +1,10 @@
 package di
 
 import (
+	"github.com/jp-ryuji/go-arch-patterns/interface/presentation/http"
 	"github.com/jp-ryuji/go-arch-patterns/internal/application/service"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/repository"
-	"github.com/jp-ryuji/go-arch-patterns/internal/interface/http"
 )
 
 // Container holds all the dependencies
