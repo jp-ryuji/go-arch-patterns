@@ -2,11 +2,19 @@
 
 ## Architecture
 
-The API is built using gRPC with a gRPC-Gateway that translates HTTP/JSON requests into gRPC calls. This architecture provides:
+The API is built using gRPC with gRPC-Connect that translates HTTP/JSON requests into gRPC calls. This architecture provides:
 
 - Automatic API documentation generation from protobuf definitions
 - Easy integration between HTTP/JSON and gRPC
 - Type-safe API definitions
+- Direct HTTP/JSON and HTTP/2 gRPC support without a proxy layer
+
+Unlike gRPC-Gateway which uses a reverse proxy to translate RESTful HTTP/JSON calls to gRPC, gRPC-Connect provides native HTTP support with:
+
+- No proxy layer needed
+- Simpler implementation
+- Better performance
+- RPC-style endpoints rather than RESTful URLs
 
 ## Configuration Files
 
@@ -22,7 +30,7 @@ This project uses [buf](https://buf.build) to manage Protocol Buffer files and g
 
 Creates a new car entity.
 
-- **URL**: `/v1/cars`
+- **URL**: `/car.v1.CarService/CreateCar`
 - **Method**: `POST`
 - **Request Body**:
 
@@ -51,8 +59,16 @@ Creates a new car entity.
 
 Retrieves a car by its ID.
 
-- **URL**: `/v1/cars/{id}`
-- **Method**: `GET`
+- **URL**: `/car.v1.CarService/GetCar`
+- **Method**: `POST`
+- **Request Body**:
+
+  ```json
+  {
+    "id": "string"
+  }
+  ```
+
 - **Response**:
 
   ```json
@@ -71,12 +87,17 @@ Retrieves a car by its ID.
 
 Retrieves a list of cars for a tenant with pagination support.
 
-- **URL**: `/v1/cars`
-- **Method**: `GET`
-- **Query Parameters**:
-  - `tenant_id` (required): The tenant ID to filter cars
-  - `page_size` (optional): Number of cars to return per page (default: 10)
-  - `page_token` (optional): Token for pagination
+- **URL**: `/car.v1.CarService/ListCars`
+- **Method**: `POST`
+- **Request Body**:
+
+  ```json
+  {
+    "tenant_id": "string",
+    "page_size": 10,
+    "page_token": "string"
+  }
+  ```
 
 - **Response**:
 
@@ -121,8 +142,8 @@ This will update `buf.lock` with the latest versions of dependencies while respe
 
 The API is implemented in the following directories:
 
-- `internal/presentation/grpc/car/v1/service.go` - gRPC service implementation
-- `internal/presentation/http/server.go` - HTTP server with gRPC-Gateway
+- `internal/presentation/connect/car/v1/service.go` - gRPC-Connect service implementation
+- `internal/presentation/http/server.go` - HTTP server with gRPC-Connect
 
 ### Dependency Injection
 
@@ -130,7 +151,7 @@ The project uses a dependency injection container located at `internal/di/contai
 
 1. Create new repositories for the service
 2. Create new application services
-3. Register the gRPC service implementations
+3. Register the gRPC-Connect service implementations
 4. Update the HTTP server configuration if needed
 
 The container provides a centralized place to manage dependencies and ensures that services are properly wired together. It accepts an existing database client and port configurations, making it flexible and testable.
@@ -173,7 +194,7 @@ To generate code from Protocol Buffer definitions, follow these steps:
    The following files are generated:
    - `api/generated/car/v1/car.pb.go` - Message types
    - `api/generated/car/v1/car_service_grpc.pb.go` - gRPC service interface
-   - `api/generated/car/v1/car_service.pb.gw.go` - gRPC-Gateway handlers
+   - `api/generated/car/v1/car_service.connect.go` - gRPC-Connect handlers
    - `api/generated/car/v1/car_service.pb.go` - Service message types
    - `api/generated/common/v1/common.pb.go` - Common message types
 
@@ -183,7 +204,7 @@ The `buf.gen.yaml` file configures how Protocol Buffer files are processed to ge
 
 - **go plugin** - Generates Go message types (`*.pb.go`)
 - **go-grpc plugin** - Generates gRPC service interfaces (`*_grpc.pb.go`)
-- **grpc-gateway plugin** - Generates HTTP/JSON to gRPC gateway code (`*.pb.gw.go`)
+- **connect plugin** - Generates HTTP/JSON to gRPC-Connect code (`*.connect.go`)
 
 All generated code is placed in the `api/generated` directory with paths relative to the source files.
 
@@ -224,7 +245,9 @@ Before testing the API endpoints, ensure that:
 Retrieve a list of cars for a specific tenant:
 
 ```bash
-curl -X GET "http://localhost:8081/v1/cars?tenant_id=TENANT_ID"
+curl -X POST "http://localhost:8081/car.v1.CarService/ListCars" \
+  -H "Content-Type: application/json" \
+  -d '{"tenant_id": "TENANT_ID"}'
 ```
 
 Replace `TENANT_ID` with an actual tenant ID from your database.
@@ -234,7 +257,9 @@ Replace `TENANT_ID` with an actual tenant ID from your database.
 Retrieve a specific car by its ID:
 
 ```bash
-curl -X GET "http://localhost:8081/v1/cars/CAR_ID"
+curl -X POST "http://localhost:8081/car.v1.CarService/GetCar" \
+  -H "Content-Type: application/json" \
+  -d '{"id": "CAR_ID"}'
 ```
 
 Replace `CAR_ID` with an actual car ID from your database.
@@ -244,7 +269,7 @@ Replace `CAR_ID` with an actual car ID from your database.
 Create a new car:
 
 ```bash
-curl -X POST "http://localhost:8081/v1/cars" \
+curl -X POST "http://localhost:8081/car.v1.CarService/CreateCar" \
   -H "Content-Type: application/json" \
   -d '{"tenant_id": "TENANT_ID", "model": "New Car Model"}'
 ```

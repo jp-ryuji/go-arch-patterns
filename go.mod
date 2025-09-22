@@ -3,10 +3,12 @@ module github.com/jp-ryuji/go-arch-patterns
 go 1.25.0
 
 require (
+	connectrpc.com/connect v1.18.1
+	connectrpc.com/grpchealth v1.4.0
+	connectrpc.com/grpcreflect v1.3.0
 	entgo.io/ent v0.14.5
 	github.com/aarondl/null/v9 v9.0.1
 	github.com/go-playground/validator/v10 v10.27.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/lucsky/cuid v1.2.1
 	github.com/oklog/ulid/v2 v2.1.0
@@ -14,6 +16,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/mock v0.6.0
+	golang.org/x/net v0.44.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250908214217-97024824d090
 	google.golang.org/grpc v1.75.1
 	google.golang.org/protobuf v1.36.9
@@ -34,7 +37,6 @@ require (
 	buf.build/go/spdx v0.2.0 // indirect
 	buf.build/go/standard v0.1.0 // indirect
 	cel.dev/expr v0.24.0 // indirect
-	connectrpc.com/connect v1.18.1 // indirect
 	connectrpc.com/otelconnect v0.8.0 // indirect
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
@@ -84,6 +86,7 @@ require (
 	github.com/google/go-containerregistry v0.20.6 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2 // indirect
 	github.com/hashicorp/hcl/v2 v2.18.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -147,7 +150,6 @@ require (
 	golang.org/x/crypto v0.42.0 // indirect
 	golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b // indirect
 	golang.org/x/mod v0.28.0 // indirect
-	golang.org/x/net v0.44.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/telemetry v0.0.0-20250908211612-aef8a434d053 // indirect
@@ -161,6 +163,7 @@ require (
 )
 
 tool (
+	connectrpc.com/connect/cmd/protoc-gen-connect-go
 	github.com/air-verse/air
 	github.com/bufbuild/buf/cmd/buf
 	golang.org/x/tools/cmd/goimports
