@@ -28,11 +28,16 @@ In this architecture:
 │   │   └── common
 │   │       └── v1
 │   │           └── common.proto
-│   └── generated                # All generated code
-│       ├── car
-│       │   └── v1
-│       └── common
-│           └── v1
+│   ├── generated                # Protocol Buffers generated code
+│   └── graphql                  # GraphQL schema and generated code
+│       ├── schema
+│       │   ├── schema.graphqls  # Main GraphQL schema
+│       │   ├── car.graphqls     # Car type definitions
+│       │   └── common.graphqls  # Common type definitions
+│       ├── generated            # gqlgen generated code
+│       │   ├── generated.go     # Generated resolvers interface
+│       │   └── models_gen.go    # Generated GraphQL models
+│       └── gqlgen.yml           # gqlgen configuration
 ├── docker
 ├── docs
 └── internal
