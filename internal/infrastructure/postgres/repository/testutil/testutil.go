@@ -87,6 +87,17 @@ func SetupTestEnvironment() error {
 
 		DBClient = postgres.NewClient(databaseUrl)
 
+		// Run database migrations using Ent
+		log.Printf("Running database migrations...")
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err := DBClient.Schema.Create(ctx); err != nil {
+			log.Printf("Failed to run database migrations: %v", err)
+			return err
+		}
+
+		log.Printf("Successfully connected to database and ran migrations")
 		return nil
 	}); err != nil {
 		log.Printf("Failed to connect to database: %v", err)
