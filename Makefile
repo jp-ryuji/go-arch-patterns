@@ -1,6 +1,6 @@
 .PHONY: build
 build:
-	go build -v ./...
+	go build -o ./.bin/app ./cmd/app
 
 .PHONY: dev.check
 dev.check:
@@ -12,10 +12,10 @@ dev.check:
 		echo "Warning: Port 8081 (HTTP) is already in use. Run 'make dev.kill' to kill the processes."; \
 	fi
 
-.PHONY: dev
-dev: dev.check
+.PHONY: dev.up
+dev.up: dev.check
 	@docker compose up -d
-	@go run cmd/app/main.go
+	@go tool air -c .air.toml
 
 .PHONY: dev.down
 dev.down:

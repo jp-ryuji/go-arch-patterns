@@ -80,16 +80,16 @@ For more information about tool management, see [Go Development Guide](golang.md
 
 ## Start and stop services with Docker Compose
 
-This project uses Docker Compose to manage its services (PostgreSQL and Redis). To start the services, run:
+This project uses Docker Compose to manage its services (PostgreSQL and Redis) and `air` to start the main go app. To start the services, run:
 
 ```bash
-docker compose up -d
+make dev.up
 ```
 
 To stop the services, run:
 
 ```bash
-docker compose down
+make dev.down
 ```
 
 The application uses Viper for configuration management, supporting all configuration options via environment variables. See `.envrc.example` for available options.
@@ -104,7 +104,5 @@ If you encounter port conflicts when starting the application, you can use the f
 You can access the PostgreSQL database using the following command:
 
 ```bash
-PGPASSWORD=$POSTGRES_PASSWORD docker exec -it go-arch-patterns-postgres-1 psql -U $POSTGRES_USERNAME -d $POSTGRES_DBNAME
+make psql
 ```
-
-This command uses the environment variables loaded by direnv to connect to the database.
