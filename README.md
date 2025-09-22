@@ -37,6 +37,7 @@ Find specific documentation in the [docs/](docs/) folder:
 - [Go Development Guide](docs/golang.md)
 - [Database Schema Updates](docs/database_schema_updates.md)
 - [Ent ORM Setup](docs/ent.md)
+  - [Go ORM/Query Builder Selection Summary](docs/orm-selection-summary.md)
 - [Outbox Pattern Implementation](docs/outbox_pattern.md)
 - [API (gRPC with gRPC-Gateway) Documentation](docs/api-grpc-http.md)
 - [Adding New Services](docs/adding_new_services.md)
