@@ -146,7 +146,7 @@ Create the application service in `internal/application/service/rental_service.g
 
 ### 7. Implement gRPC Service
 
-Create the gRPC service implementation in `internal/interface/grpc/rental/v1/service.go`.
+Create the gRPC service implementation in `internal/presentation/grpc/rental/v1/service.go`.
 
 ### 8. Update Dependency Injection Container
 
@@ -169,7 +169,7 @@ rentalv1.RegisterRentalServiceServer(s.grpcServer, rentalServiceServer)
 
 ### 9. Update HTTP Server (if needed)
 
-If your service needs custom HTTP handling, update `internal/interface/http/server.go`.
+If your service needs custom HTTP handling, update `internal/presentation/http/server.go`.
 
 ### 10. Generate Mocks
 
