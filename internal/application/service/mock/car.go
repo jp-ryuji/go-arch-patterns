@@ -15,6 +15,7 @@ import (
 
 	input "github.com/jp-ryuji/go-arch-patterns/internal/application/input"
 	output "github.com/jp-ryuji/go-arch-patterns/internal/application/output"
+	entity "github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -43,10 +44,10 @@ func (m *MockCarService) EXPECT() *MockCarServiceMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockCarService) Create(ctx context.Context, arg1 input.CreateCar) (*output.CreateCar, error) {
+func (m *MockCarService) Create(ctx context.Context, arg1 input.CreateCar) (*entity.Car, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, arg1)
-	ret0, _ := ret[0].(*output.CreateCar)
+	ret0, _ := ret[0].(*entity.Car)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -58,10 +59,10 @@ func (mr *MockCarServiceMockRecorder) Create(ctx, arg1 any) *gomock.Call {
 }
 
 // GetByID mocks base method.
-func (m *MockCarService) GetByID(ctx context.Context, arg1 input.GetCarByID) (*output.GetCar, error) {
+func (m *MockCarService) GetByID(ctx context.Context, arg1 input.GetCarByID) (*entity.Car, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByID", ctx, arg1)
-	ret0, _ := ret[0].(*output.GetCar)
+	ret0, _ := ret[0].(*entity.Car)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -73,10 +74,10 @@ func (mr *MockCarServiceMockRecorder) GetByID(ctx, arg1 any) *gomock.Call {
 }
 
 // GetByIDWithTenant mocks base method.
-func (m *MockCarService) GetByIDWithTenant(ctx context.Context, arg1 input.GetCarByID) (*output.GetCar, error) {
+func (m *MockCarService) GetByIDWithTenant(ctx context.Context, arg1 input.GetCarByID) (*entity.Car, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByIDWithTenant", ctx, arg1)
-	ret0, _ := ret[0].(*output.GetCar)
+	ret0, _ := ret[0].(*entity.Car)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

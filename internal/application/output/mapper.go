@@ -4,27 +4,6 @@ import (
 	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
 )
 
-// CarEntityToGet converts a domain Car entity to GetCar output DTO
-func CarEntityToGet(car *entity.Car) *GetCar {
-	return &GetCar{
-		ID:        car.ID,
-		TenantID:  car.TenantID,
-		Model:     car.Model,
-		CreatedAt: car.CreatedAt,
-		UpdatedAt: car.UpdatedAt,
-	}
-}
-
-// CarEntityToCreate converts a domain Car entity to CreateCar output DTO
-func CarEntityToCreate(car *entity.Car) *CreateCar {
-	return &CreateCar{
-		ID:        car.ID,
-		TenantID:  car.TenantID,
-		Model:     car.Model,
-		CreatedAt: car.CreatedAt,
-	}
-}
-
 // CarEntityToSummary converts a domain Car entity to CarSummary DTO
 func CarEntityToSummary(car *entity.Car) CarSummary {
 	return CarSummary{

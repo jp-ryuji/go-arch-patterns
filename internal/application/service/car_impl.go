@@ -34,7 +34,7 @@ func NewCarService(
 }
 
 // Create creates a new car using the outbox pattern with transactional guarantees
-func (s *carService) Create(ctx context.Context, input input.CreateCar) (*output.CreateCar, error) {
+func (s *carService) Create(ctx context.Context, input input.CreateCar) (*entity.Car, error) {
 	// Validate input
 	if err := Validate(input); err != nil {
 		return nil, err
@@ -98,12 +98,12 @@ func (s *carService) Create(ctx context.Context, input input.CreateCar) (*output
 		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	// Convert entity to DTO before returning
-	return output.CarEntityToCreate(car), nil
+	// Return the entity directly
+	return car, nil
 }
 
 // GetByID retrieves a car by its ID
-func (s *carService) GetByID(ctx context.Context, input input.GetCarByID) (*output.GetCar, error) {
+func (s *carService) GetByID(ctx context.Context, input input.GetCarByID) (*entity.Car, error) {
 	// Validate input
 	if err := Validate(input); err != nil {
 		return nil, err
@@ -114,11 +114,11 @@ func (s *carService) GetByID(ctx context.Context, input input.GetCarByID) (*outp
 		return nil, err
 	}
 
-	return output.CarEntityToGet(car), nil
+	return car, nil
 }
 
 // GetByIDWithTenant retrieves a car by its ID along with its tenant information
-func (s *carService) GetByIDWithTenant(ctx context.Context, input input.GetCarByID) (*output.GetCar, error) {
+func (s *carService) GetByIDWithTenant(ctx context.Context, input input.GetCarByID) (*entity.Car, error) {
 	// Validate input
 	if err := Validate(input); err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ func (s *carService) GetByIDWithTenant(ctx context.Context, input input.GetCarBy
 		return nil, err
 	}
 
-	return output.CarEntityToGet(car), nil
+	return car, nil
 }
 
 // List retrieves a list of cars for a tenant
