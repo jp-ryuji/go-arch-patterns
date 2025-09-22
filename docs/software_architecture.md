@@ -83,3 +83,4 @@ Note: For most web applications, especially those with clear architectural bound
 - [Ent](https://entgo.io/) for ORM and database operations
 - [Dockertest](https://github.com/ory/dockertest) for booting up ephermal docker images for integration tests using Postgres or such
 - [gomock](https://github.com/uber-go/mock) for mocking dependencies in tests
+- [Viper](https://github.com/spf13/viper) for configuration management

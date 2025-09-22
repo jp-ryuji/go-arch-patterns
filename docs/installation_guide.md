@@ -80,10 +80,21 @@ For more information about tool management, see [Go Development Guide](golang.md
 
 ## Start and stop services with Docker Compose
 
-This project uses Docker Compose to manage its services (PostgreSQL and Redis) and `air` to start the main go app. To start the services, run:
+This project uses Docker Compose to manage its services (PostgreSQL and Redis) and `air` to start the main go app. The development environment has been separated into two components:
+
+1. Infrastructure services (PostgreSQL and Redis)
+2. The application itself with hot reload capabilities
+
+To start the infrastructure services, run:
 
 ```bash
 make dev.up
+```
+
+This command starts the Docker Compose services in the background. After the services are running, start the application with:
+
+```bash
+make dev.run
 ```
 
 To stop the services, run:
@@ -98,6 +109,14 @@ If you encounter port conflicts when starting the application, you can use the f
 
 - `make dev.check` - Check if ports 50051 (gRPC) or 8081 (HTTP) are already in use
 - `make dev.kill` - Kill processes listening on these ports
+
+### Development Workflow
+
+For an efficient development workflow, you can use these commands in sequence:
+
+1. `make dev.up` - Start infrastructure services (do this once)
+2. `make dev.run` - Start the application with hot reload
+3. When you need to restart just the application (keeping services running): `make dev.restart`
 
 ## Access the PostgreSQL database
 
