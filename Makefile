@@ -13,7 +13,7 @@ HTTP_PORT := 8081
 
 .PHONY: build
 build: ## Build the application
-	go build -o ./.bin/app ./cmd/app
+	go build -o ./bin/app ./cmd/app
 
 #==============================================================================
 # DEVELOPMENT

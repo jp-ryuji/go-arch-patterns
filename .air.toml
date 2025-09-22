@@ -13,7 +13,7 @@ tmp_dir = "tmp"
 cmd = "make build"
 
 # Path to compiled binary (output of cmd above)
-bin = "./.bin/app"
+bin = "./bin/app"
 
 # Full command to run the application with arguments
 full_bin = "./.bin/app http-server run"
