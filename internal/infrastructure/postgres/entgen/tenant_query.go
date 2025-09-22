@@ -9,7 +9,6 @@ import (
 	"math"
 
 	"entgo.io/ent"
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -27,18 +26,26 @@ import (
 // TenantQuery is the builder for querying Tenant entities.
 type TenantQuery struct {
 	config
-	ctx               *QueryContext
-	order             []tenant.OrderOption
-	inters            []Interceptor
-	predicates        []predicate.Tenant
-	withCars          *CarQuery
-	withCompanies     *CompanyQuery
-	withIndividuals   *IndividualQuery
-	withOptions       *CarOptionQuery
-	withRentalOptions *RentalOptionQuery
-	withRentals       *RentalQuery
-	withRenters       *RenterQuery
-	modifiers         []func(*sql.Selector)
+	ctx                    *QueryContext
+	order                  []tenant.OrderOption
+	inters                 []Interceptor
+	predicates             []predicate.Tenant
+	withCars               *CarQuery
+	withCompanies          *CompanyQuery
+	withIndividuals        *IndividualQuery
+	withOptions            *CarOptionQuery
+	withRentalOptions      *RentalOptionQuery
+	withRentals            *RentalQuery
+	withRenters            *RenterQuery
+	modifiers              []func(*sql.Selector)
+	loadTotal              []func(context.Context, []*Tenant) error
+	withNamedCars          map[string]*CarQuery
+	withNamedCompanies     map[string]*CompanyQuery
+	withNamedIndividuals   map[string]*IndividualQuery
+	withNamedOptions       map[string]*CarOptionQuery
+	withNamedRentalOptions map[string]*RentalOptionQuery
+	withNamedRentals       map[string]*RentalQuery
+	withNamedRenters       map[string]*RenterQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -669,6 +676,60 @@ func (_q *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 			return nil, err
 		}
 	}
+	for name, query := range _q.withNamedCars {
+		if err := _q.loadCars(ctx, query, nodes,
+			func(n *Tenant) { n.appendNamedCars(name) },
+			func(n *Tenant, e *Car) { n.appendNamedCars(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range _q.withNamedCompanies {
+		if err := _q.loadCompanies(ctx, query, nodes,
+			func(n *Tenant) { n.appendNamedCompanies(name) },
+			func(n *Tenant, e *Company) { n.appendNamedCompanies(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range _q.withNamedIndividuals {
+		if err := _q.loadIndividuals(ctx, query, nodes,
+			func(n *Tenant) { n.appendNamedIndividuals(name) },
+			func(n *Tenant, e *Individual) { n.appendNamedIndividuals(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range _q.withNamedOptions {
+		if err := _q.loadOptions(ctx, query, nodes,
+			func(n *Tenant) { n.appendNamedOptions(name) },
+			func(n *Tenant, e *CarOption) { n.appendNamedOptions(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range _q.withNamedRentalOptions {
+		if err := _q.loadRentalOptions(ctx, query, nodes,
+			func(n *Tenant) { n.appendNamedRentalOptions(name) },
+			func(n *Tenant, e *RentalOption) { n.appendNamedRentalOptions(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range _q.withNamedRentals {
+		if err := _q.loadRentals(ctx, query, nodes,
+			func(n *Tenant) { n.appendNamedRentals(name) },
+			func(n *Tenant, e *Rental) { n.appendNamedRentals(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range _q.withNamedRenters {
+		if err := _q.loadRenters(ctx, query, nodes,
+			func(n *Tenant) { n.appendNamedRenters(name) },
+			func(n *Tenant, e *Renter) { n.appendNamedRenters(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _q.loadTotal {
+		if err := _q.loadTotal[i](ctx, nodes); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -951,9 +1012,6 @@ func (_q *TenantQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, m := range _q.modifiers {
-		m(selector)
-	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -971,29 +1029,101 @@ func (_q *TenantQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
-// updated, deleted or "selected ... for update" by other sessions, until the transaction is
-// either committed or rolled-back.
-func (_q *TenantQuery) ForUpdate(opts ...sql.LockOption) *TenantQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
-		_q.Unique(false)
+// WithNamedCars tells the query-builder to eager-load the nodes that are connected to the "cars"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithNamedCars(name string, opts ...func(*CarQuery)) *TenantQuery {
+	query := (&CarClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
 	}
-	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
-		s.ForUpdate(opts...)
-	})
+	if _q.withNamedCars == nil {
+		_q.withNamedCars = make(map[string]*CarQuery)
+	}
+	_q.withNamedCars[name] = query
 	return _q
 }
 
-// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
-// on any rows that are read. Other sessions can read the rows, but cannot modify them
-// until your transaction commits.
-func (_q *TenantQuery) ForShare(opts ...sql.LockOption) *TenantQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
-		_q.Unique(false)
+// WithNamedCompanies tells the query-builder to eager-load the nodes that are connected to the "companies"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithNamedCompanies(name string, opts ...func(*CompanyQuery)) *TenantQuery {
+	query := (&CompanyClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
 	}
-	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
-		s.ForShare(opts...)
-	})
+	if _q.withNamedCompanies == nil {
+		_q.withNamedCompanies = make(map[string]*CompanyQuery)
+	}
+	_q.withNamedCompanies[name] = query
+	return _q
+}
+
+// WithNamedIndividuals tells the query-builder to eager-load the nodes that are connected to the "individuals"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithNamedIndividuals(name string, opts ...func(*IndividualQuery)) *TenantQuery {
+	query := (&IndividualClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if _q.withNamedIndividuals == nil {
+		_q.withNamedIndividuals = make(map[string]*IndividualQuery)
+	}
+	_q.withNamedIndividuals[name] = query
+	return _q
+}
+
+// WithNamedOptions tells the query-builder to eager-load the nodes that are connected to the "options"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithNamedOptions(name string, opts ...func(*CarOptionQuery)) *TenantQuery {
+	query := (&CarOptionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if _q.withNamedOptions == nil {
+		_q.withNamedOptions = make(map[string]*CarOptionQuery)
+	}
+	_q.withNamedOptions[name] = query
+	return _q
+}
+
+// WithNamedRentalOptions tells the query-builder to eager-load the nodes that are connected to the "rental_options"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithNamedRentalOptions(name string, opts ...func(*RentalOptionQuery)) *TenantQuery {
+	query := (&RentalOptionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if _q.withNamedRentalOptions == nil {
+		_q.withNamedRentalOptions = make(map[string]*RentalOptionQuery)
+	}
+	_q.withNamedRentalOptions[name] = query
+	return _q
+}
+
+// WithNamedRentals tells the query-builder to eager-load the nodes that are connected to the "rentals"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithNamedRentals(name string, opts ...func(*RentalQuery)) *TenantQuery {
+	query := (&RentalClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if _q.withNamedRentals == nil {
+		_q.withNamedRentals = make(map[string]*RentalQuery)
+	}
+	_q.withNamedRentals[name] = query
+	return _q
+}
+
+// WithNamedRenters tells the query-builder to eager-load the nodes that are connected to the "renters"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithNamedRenters(name string, opts ...func(*RenterQuery)) *TenantQuery {
+	query := (&RenterClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if _q.withNamedRenters == nil {
+		_q.withNamedRenters = make(map[string]*RenterQuery)
+	}
+	_q.withNamedRenters[name] = query
 	return _q
 }
 

@@ -1,0 +1,37 @@
+# Where are all the schema files located? globs are supported eg  src/**/*.graphqls
+schema:
+  - "schema/*.graphqls"
+
+# Where should the generated server code go?
+exec:
+  filename: generated/generated.go
+  package: generated
+
+# Where should any generated models go?
+model:
+  filename: generated/models_gen.go
+  package: generated
+
+# Where should the resolver implementations go?
+resolver:
+  layout: follow-schema
+  dir: .
+  package: graphql
+
+# gqlgen will search for any type names in the schema in these go packages
+# if they match it will use them, otherwise it will generate them.
+autobind:
+  - "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
+
+# This section declares type mapping between the GraphQL and go type systems
+models:
+  # Point to your Ent generated types
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  Node:
+    model:
+      - github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen.Noder

@@ -29,7 +29,7 @@ func NewContainer(client *entgen.Client, grpcPort, httpPort int) (*Container, er
 	carService := service.NewCarService(carRepo, outboxRepo, txManager)
 
 	// Create HTTP server with gRPC Connect
-	server := http.NewServer(grpcPort, httpPort, carService)
+	server := http.NewServer(grpcPort, httpPort, carService, client)
 
 	return &Container{
 		Client:     client,
@@ -38,11 +38,4 @@ func NewContainer(client *entgen.Client, grpcPort, httpPort int) (*Container, er
 		grpcPort:   grpcPort,
 		httpPort:   httpPort,
 	}, nil
-}
-
-// Close closes all resources in the container
-func (c *Container) Close() {
-	if c.Client != nil {
-		c.Client.Close()
-	}
 }

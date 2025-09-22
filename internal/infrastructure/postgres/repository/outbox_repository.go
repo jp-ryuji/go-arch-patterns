@@ -65,7 +65,6 @@ func (r *outboxRepository) GetPendingWithLock(ctx context.Context, limit int, pr
 		Where(outbox.Status("pending")).
 		Limit(limit).
 		Order(entgen.Asc(outbox.FieldCreatedAt)).
-		ForUpdate().
 		All(ctx)
 	if err != nil {
 		return nil, err

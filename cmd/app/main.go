@@ -26,7 +26,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create container: %v", err)
 	}
-	defer container.Close()
 
 	// Start the server
 	log.Println("Starting server...")

@@ -11,7 +11,9 @@ import (
 	"connectrpc.com/grpcreflect"
 	"github.com/jp-ryuji/go-arch-patterns/api/generated/car/v1/carv1connect"
 	"github.com/jp-ryuji/go-arch-patterns/internal/application/service"
+	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	connectcar "github.com/jp-ryuji/go-arch-patterns/internal/presentation/connect/car/v1"
+	graphqlHandler "github.com/jp-ryuji/go-arch-patterns/internal/presentation/graphql"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
@@ -22,14 +24,16 @@ type Server struct {
 	grpcPort   int
 	httpPort   int
 	carService service.CarService
+	entClient  *entgen.Client
 }
 
 // NewServer creates a new HTTP server with gRPC Connect
-func NewServer(grpcPort, httpPort int, carService service.CarService) *Server {
+func NewServer(grpcPort, httpPort int, carService service.CarService, entClient *entgen.Client) *Server {
 	return &Server{
 		grpcPort:   grpcPort,
 		httpPort:   httpPort,
 		carService: carService,
+		entClient:  entClient,
 	}
 }
 
@@ -52,7 +56,12 @@ func (s *Server) Start() error {
 	mux.Handle(grpcreflect.NewHandlerV1(grpcreflect.NewStaticReflector(carv1connect.CarServiceName)))
 	mux.Handle(grpcreflect.NewHandlerV1Alpha(grpcreflect.NewStaticReflector(carv1connect.CarServiceName)))
 
+	// GraphQL endpoints
+	mux.Handle("/graphql", graphqlHandler.NewHandler(s.entClient))
+	mux.Handle("/playground", graphqlHandler.NewPlaygroundHandler())
+
 	fmt.Printf("Registered car service handler with gRPC Connect\n")
+	fmt.Printf("Registered GraphQL handlers\n")
 
 	// Create HTTP server with timeout configuration
 	s.httpServer = &http.Server{

@@ -43,6 +43,10 @@ type CarOptionEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
+	// totalCount holds the count of the edges above.
+	totalCount [2]map[string]int
+
+	namedRentalOptions map[string][]*RentalOption
 }
 
 // TenantOrErr returns the Tenant value or an error if the edge
@@ -190,6 +194,30 @@ func (_m *CarOption) String() string {
 	}
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedRentalOptions returns the RentalOptions named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (_m *CarOption) NamedRentalOptions(name string) ([]*RentalOption, error) {
+	if _m.Edges.namedRentalOptions == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := _m.Edges.namedRentalOptions[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (_m *CarOption) appendNamedRentalOptions(name string, edges ...*RentalOption) {
+	if _m.Edges.namedRentalOptions == nil {
+		_m.Edges.namedRentalOptions = make(map[string][]*RentalOption)
+	}
+	if len(edges) == 0 {
+		_m.Edges.namedRentalOptions[name] = []*RentalOption{}
+	} else {
+		_m.Edges.namedRentalOptions[name] = append(_m.Edges.namedRentalOptions[name], edges...)
+	}
 }
 
 // CarOptions is a parsable slice of CarOption.

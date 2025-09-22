@@ -9,7 +9,6 @@ import (
 	"math"
 
 	"entgo.io/ent"
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -24,15 +23,17 @@ import (
 // RentalQuery is the builder for querying Rental entities.
 type RentalQuery struct {
 	config
-	ctx               *QueryContext
-	order             []rental.OrderOption
-	inters            []Interceptor
-	predicates        []predicate.Rental
-	withTenant        *TenantQuery
-	withCar           *CarQuery
-	withRenter        *RenterQuery
-	withRentalOptions *RentalOptionQuery
-	modifiers         []func(*sql.Selector)
+	ctx                    *QueryContext
+	order                  []rental.OrderOption
+	inters                 []Interceptor
+	predicates             []predicate.Rental
+	withTenant             *TenantQuery
+	withCar                *CarQuery
+	withRenter             *RenterQuery
+	withRentalOptions      *RentalOptionQuery
+	modifiers              []func(*sql.Selector)
+	loadTotal              []func(context.Context, []*Rental) error
+	withNamedRentalOptions map[string]*RentalOptionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -534,6 +535,18 @@ func (_q *RentalQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Renta
 			return nil, err
 		}
 	}
+	for name, query := range _q.withNamedRentalOptions {
+		if err := _q.loadRentalOptions(ctx, query, nodes,
+			func(n *Rental) { n.appendNamedRentalOptions(name) },
+			func(n *Rental, e *RentalOption) { n.appendNamedRentalOptions(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _q.loadTotal {
+		if err := _q.loadTotal[i](ctx, nodes); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -731,9 +744,6 @@ func (_q *RentalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, m := range _q.modifiers {
-		m(selector)
-	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -751,29 +761,17 @@ func (_q *RentalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
-// updated, deleted or "selected ... for update" by other sessions, until the transaction is
-// either committed or rolled-back.
-func (_q *RentalQuery) ForUpdate(opts ...sql.LockOption) *RentalQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
-		_q.Unique(false)
+// WithNamedRentalOptions tells the query-builder to eager-load the nodes that are connected to the "rental_options"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *RentalQuery) WithNamedRentalOptions(name string, opts ...func(*RentalOptionQuery)) *RentalQuery {
+	query := (&RentalOptionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
 	}
-	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
-		s.ForUpdate(opts...)
-	})
-	return _q
-}
-
-// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
-// on any rows that are read. Other sessions can read the rows, but cannot modify them
-// until your transaction commits.
-func (_q *RentalQuery) ForShare(opts ...sql.LockOption) *RentalQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
-		_q.Unique(false)
+	if _q.withNamedRentalOptions == nil {
+		_q.withNamedRentalOptions = make(map[string]*RentalOptionQuery)
 	}
-	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
-		s.ForShare(opts...)
-	})
+	_q.withNamedRentalOptions[name] = query
 	return _q
 }
 
