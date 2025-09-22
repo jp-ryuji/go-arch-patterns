@@ -32,4 +32,8 @@ go.work.sum
 # .idea/
 # .vscode/
 
+# Logs
 *.log
+
+# Binaries
+/bin/
