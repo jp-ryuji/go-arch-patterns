@@ -101,7 +101,7 @@ gen.buf: ## Generate protobuf code
 	@go tool buf generate
 	@mv api/generated/api/proto/* api/generated/ 2>/dev/null || true
 	@rm -rf api/generated/api
-	@find api/generated -type f ! -name '*.pb.go' ! -name '*.pb.gw.go' -delete 2>/dev/null || true
+	@find api/generated -type f ! -name '*.pb.go' ! -name '*.connect.go' -delete 2>/dev/null || true
 	@find api/generated -type d -empty -delete 2>/dev/null || true
 	$(call format)
 

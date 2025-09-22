@@ -1,10 +1,19 @@
 # Adding New Services
 
-This document explains how to add new services to the car rental platform.
+This document explains how to add new services to the car rental platform. The platform already includes a `Car` service as an example of the complete implementation. This guide will show you how to add additional services following the same patterns, using the existing `Car` service implementation as a reference.
 
 ## Overview
 
-When adding new services to the platform, you need to follow several steps to ensure proper integration with the existing architecture. The process involves creating new Protocol Buffer definitions, implementing gRPC services, and updating the dependency injection container.
+When adding new services to the platform, you need to follow several steps to ensure proper integration with the existing architecture. The process involves creating new Protocol Buffer definitions, implementing gRPC-Connect services, and updating the dependency injection container.
+
+This guide references the existing `Car` service implementation as an example. You can follow the same patterns to implement new services. The `Car` service is fully implemented and can be found at:
+
+- Protocol Buffers: `api/proto/car/v1/`
+- Generated code: `api/generated/car/v1/`
+- Domain layer: `internal/domain/entity/car.go`, `internal/domain/repository/car.go`
+- Infrastructure layer: `internal/infrastructure/postgres/ent/schema/car.go`, `internal/infrastructure/postgres/repository/car_repository.go`
+- Application layer: `internal/application/service/car_service.go`
+- Presentation layer: `internal/presentation/connect/car/v1/service.go`
 
 ## Steps to Add a New Service
 
@@ -12,94 +21,74 @@ When adding new services to the platform, you need to follow several steps to en
 
 Create new Protocol Buffer files in the `api/proto` directory:
 
-1. Create a new directory for your service under `api/proto`, e.g., `api/proto/rental/v1/`
-2. Define your message types in a file like `rental.proto`
-3. Define your service methods in a file like `rental_service.proto`
+1. Create a new directory for your service under `api/proto`, e.g., `api/proto/car/v1/`
+2. Define your message types in a file like `car.proto`
+3. Define your service methods in a file like `car_service.proto`
 
-Example `api/proto/rental/v1/rental.proto`:
+For reference, see the existing `Car` service definitions:
+
+Example `api/proto/car/v1/car.proto`:
 
 ```protobuf
 syntax = "proto3";
 
-package rental.v1;
+package car.v1;
 
-option go_package = "github.com/jp-ryuji/go-arch-patterns/api/generated/rental/v1;rentalv1";
+option go_package = "github.com/jp-ryuji/go-arch-patterns/api/generated/car/v1;carv1";
 
 import "google/protobuf/timestamp.proto";
 
-message Rental {
+message Car {
   string id = 1;
   string tenant_id = 2;
-  string car_id = 3;
-  string renter_id = 4;
-  google.protobuf.Timestamp start_date = 5;
-  google.protobuf.Timestamp end_date = 6;
-  google.protobuf.Timestamp created_at = 7;
-  google.protobuf.Timestamp updated_at = 8;
+  string model = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
 }
 ```
 
-Example `api/proto/rental/v1/rental_service.proto`:
+Example `api/proto/car/v1/car_service.proto`:
 
 ```protobuf
 syntax = "proto3";
 
-package rental.v1;
+package car.v1;
 
-import "api/proto/rental/v1/rental.proto";
-import "google/api/annotations.proto";
+import "api/proto/car/v1/car.proto";
 
-option go_package = "github.com/jp-ryuji/go-arch-patterns/api/generated/rental/v1;rentalv1";
+option go_package = "github.com/jp-ryuji/go-arch-patterns/api/generated/car/v1;carv1";
 
-service RentalService {
-  rpc CreateRental(CreateRentalRequest) returns (CreateRentalResponse) {
-    option (google.api.http) = {
-      post: "/v1/rentals"
-      body: "*"
-    };
-  }
-
-  rpc GetRental(GetRentalRequest) returns (GetRentalResponse) {
-    option (google.api.http) = {
-      get: "/v1/rentals/{id}"
-    };
-  }
-
-  rpc ListRentals(ListRentalsRequest) returns (ListRentalsResponse) {
-    option (google.api.http) = {
-      get: "/v1/rentals"
-    };
-  }
+service CarService {
+  rpc CreateCar(CreateCarRequest) returns (CreateCarResponse);
+  rpc GetCar(GetCarRequest) returns (GetCarResponse);
+  rpc ListCars(ListCarsRequest) returns (ListCarsResponse);
 }
 
-message CreateRentalRequest {
+message CreateCarRequest {
   string tenant_id = 1;
-  string car_id = 2;
-  string renter_id = 3;
-  int64 start_date = 4; // Unix timestamp
-  int64 end_date = 5;   // Unix timestamp
+  string model = 2;
 }
 
-message CreateRentalResponse {
-  Rental rental = 1;
+message CreateCarResponse {
+  Car car = 1;
 }
 
-message GetRentalRequest {
+message GetCarRequest {
   string id = 1;
 }
 
-message GetRentalResponse {
-  Rental rental = 1;
+message GetCarResponse {
+  Car car = 1;
 }
 
-message ListRentalsRequest {
+message ListCarsRequest {
   string tenant_id = 1;
   int32 page_size = 2;
   string page_token = 3;
 }
 
-message ListRentalsResponse {
-  repeated Rental rentals = 1;
+message ListCarsResponse {
+  repeated Car cars = 1;
   string next_page_token = 2;
 }
 ```
@@ -122,31 +111,81 @@ After defining your service, generate the Go code:
 make gen.buf
 ```
 
-This will generate the necessary Go files in `api/generated/rental/v1/`.
+This will generate the necessary Go files in `api/generated/car/v1/`.
 
 ### 4. Implement Domain Layer
 
 Create the domain entities, repositories, and services:
 
-1. Create entity in `internal/domain/entity/rental.go`
-2. Create repository interface in `internal/domain/repository/rental.go`
+1. Create entity in `internal/domain/entity/car.go`
+2. Create repository interface in `internal/domain/repository/car.go`
 3. Create any necessary value objects in `internal/domain/value/`
 
 ### 5. Implement Infrastructure Layer
 
 Create the infrastructure implementations:
 
-1. Create Ent schema in `internal/infrastructure/postgres/ent/schema/rental.go`
+1. Create Ent schema in `internal/infrastructure/postgres/ent/schema/car.go`
 2. Generate Ent code: `make gen.ent`
-3. Create repository implementation in `internal/infrastructure/postgres/repository/rental_repository.go`
+3. Create repository implementation in `internal/infrastructure/postgres/repository/car_repository.go`
 
 ### 6. Implement Application Layer
 
-Create the application service in `internal/application/service/rental_service.go`.
+Create the application service in `internal/application/service/car_service.go`.
 
-### 7. Implement gRPC Service
+### 7. Implement Connect Service Handler
 
-Create the gRPC service implementation in `internal/presentation/grpc/rental/v1/service.go`.
+Create the Connect service implementation in `internal/presentation/connect/car/v1/service.go`.
+
+The Connect service handler should implement the interface generated by the Connect plugin. For each RPC method in your service, you'll need to implement a corresponding method in your handler that:
+
+1. Converts the Connect request to your application DTO
+2. Calls your application service
+3. Converts the application response to a Connect response
+
+Example implementation:
+
+```go
+// CarServiceHandler implements the Connect service for car operations
+type CarServiceHandler struct {
+    carService service.CarService
+}
+
+// NewCarServiceHandler creates a new CarServiceHandler
+func NewCarServiceHandler(carService service.CarService) *CarServiceHandler {
+    return &CarServiceHandler{
+        carService: carService,
+    }
+}
+
+// CreateCar creates a new car
+func (h *CarServiceHandler) CreateCar(ctx context.Context, req *connect.Request[carv1.CreateCarRequest]) (*connect.Response[carv1.CreateCarResponse], error) {
+    // Convert Connect request to application DTO
+    input := input.CreateCar{
+        TenantID: req.Msg.GetTenantId(),
+        Model:    req.Msg.GetModel(),
+    }
+
+    // Call application service
+    carOutput, err := h.carService.Create(ctx, input)
+    if err != nil {
+        return nil, err
+    }
+
+    // Convert DTO to Connect response
+    response := &carv1.CreateCarResponse{
+        Car: &carv1.Car{
+            Id:        carOutput.ID,
+            TenantId:  carOutput.TenantID,
+            Model:     carOutput.Model,
+            CreatedAt: timestamppb.New(carOutput.CreatedAt),
+        },
+    }
+
+    return connect.NewResponse(response), nil
+}
+// ... other methods
+```
 
 ### 8. Update Dependency Injection Container
 
@@ -154,22 +193,28 @@ Update `internal/di/container.go` to include your new service:
 
 ```go
 // Add new repository
-rentalRepo := repository.NewRentalRepository(client)
+carRepo := repository.NewCarRepository(client)
 
 // Add to transaction manager if needed
 // Update transaction manager constructor if needed
 
 // Create application service
-rentalService := service.NewRentalService(rentalRepo, /* other dependencies */)
+carService := service.NewCarService(carRepo, /* other dependencies */)
 
-// Register gRPC service
-rentalServiceServer := rental.NewRentalServiceServer(rentalService)
-rentalv1.RegisterRentalServiceServer(s.grpcServer, rentalServiceServer)
+// Register Connect service handler
+carServiceHandler := connectcar.NewCarServiceHandler(carService)
+// The HTTP server will automatically register this handler
 ```
 
 ### 9. Update HTTP Server (if needed)
 
 If your service needs custom HTTP handling, update `internal/presentation/http/server.go`.
+
+The HTTP server automatically registers Connect handlers for your services. The Connect handler will be available at the RPC-style endpoint:
+
+- `/car.v1.CarService/CreateCar` for the CreateCar RPC
+- `/car.v1.CarService/GetCar` for the GetCar RPC
+- `/car.v1.CarService/ListCars` for the ListCars RPC
 
 ### 10. Generate Mocks
 
@@ -207,7 +252,7 @@ When adding a new service, ensure you've completed these tasks:
 - [ ] Ent code generated
 - [ ] Repository implementation created
 - [ ] Application service created
-- [ ] gRPC service implementation created
+- [ ] Connect service handler implemented
 - [ ] Dependency injection container updated
 - [ ] HTTP server updated (if needed)
 - [ ] Mocks generated

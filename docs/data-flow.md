@@ -27,7 +27,7 @@ Database
 ```plaintext
 HTTP/REST JSON Request
     ↓
-grpc-gateway (HTTP → gRPC conversion)
+grpc-connect (HTTP → gRPC conversion)
     ↓ converts JSON → protobuf
 gRPC Server Handler
     ↓ converts protobuf → DTO
@@ -70,7 +70,7 @@ Application Service
     ↓ converts Entity → DTO
 gRPC Server Handler
     ↓ returns protobuf Response
-grpc-gateway (gRPC → HTTP conversion)
+grpc-connect (gRPC → HTTP conversion)
     ↓ converts protobuf → JSON
 HTTP/REST JSON Response
 ```

@@ -10,10 +10,8 @@ plugins:
     opt:
       - paths=source_relative
       - require_unimplemented_servers=false
-  - name: grpc-gateway
-    path: protoc-gen-grpc-gateway
+  - name: connect-go
+    path: protoc-gen-connect-go
     out: api/generated
     opt:
-      - generate_unbound_methods=true
-      - logtostderr=true
       - paths=source_relative

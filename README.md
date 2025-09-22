@@ -39,7 +39,7 @@ Find specific documentation in the [docs/](docs/) folder:
 - [Ent ORM Setup](docs/ent.md)
   - [Go ORM/Query Builder Selection Summary](docs/orm-selection-summary.md)
 - [Outbox Pattern Implementation](docs/outbox_pattern.md)
-- [API (gRPC with gRPC-Gateway) Documentation](docs/api-grpc-http.md)
+- [API (gRPC with gRPC Connect) Documentation](docs/api-grpc-http.md)
 - [Adding New Services](docs/adding_new_services.md)
 
 ## Disclaimer

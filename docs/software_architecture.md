@@ -11,7 +11,7 @@ In this architecture:
 - **DTOs** (Data Transfer Objects) carry data between processes
 - **Adapters** come in two types:
   - **Secondary/Driven Adapters**: Implementations of repository interfaces that connect to external systems (databases, message queues, etc.)
-  - **Primary/Driving Adapters**: Interface adapters that expose application functionality to external clients (gRPC services, HTTP handlers, etc.)
+  - **Primary/Driving Adapters**: Presentation layer that exposes application functionality to external clients (gRPC-Connect services, HTTP handlers, etc.)
 
 ## Directory Structure
 
@@ -54,17 +54,15 @@ In this architecture:
     │   │   ├── repository       # Repository implementations
     │   │   └── migration
     │   ├── redis                # Redis adapter
-    │   ├── messaging            # Message queue adapters (if needed)
-    │   └── config               # Configuration
+    │   └── messaging            # Message queue adapters (if needed)
     ├── presentation             # Presentation Layer (outermost)
-    │   ├── grpc                 # gRPC service implementations
+    │   ├── connect              # gRPC-Connect service implementations
     │   │   ├── car
     │   │   │   └── v1
-    │   │   │       └── service.go    # carServiceServer implementation
-    │   │   ├── server.go             # gRPC server setup
-    │   │   └── interceptor           # gRPC interceptors
+    │   │   │       └── service.go    # CarServiceHandler implementation
+    │   │   └── interceptor           # gRPC-Connect interceptors
     │   └── http                      # HTTP Gateway setup
-    │       ├── server.go             # HTTP server + gRPC-Gateway
+    │       ├── server.go             # HTTP server + gRPC Connect
     │       ├── middleware.go         # HTTP middleware
     │       └── handler.go            # Custom HTTP handlers (if any)
     └── pkg                      # Shared utilities/libraries
@@ -84,3 +82,4 @@ Note: For most web applications, especially those with clear architectural bound
 - [Dockertest](https://github.com/ory/dockertest) for booting up ephermal docker images for integration tests using Postgres or such
 - [gomock](https://github.com/uber-go/mock) for mocking dependencies in tests
 - [Viper](https://github.com/spf13/viper) for configuration management
+- [gRPC-Connect](https://connectrpc.com/) for exposing gRPC services over HTTP

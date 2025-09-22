@@ -16,7 +16,7 @@ cmd = "make build"
 bin = "./bin/app"
 
 # Full command to run the application with arguments
-full_bin = "./.bin/app http-server run"
+full_bin = "./bin/app"
 
 # File extensions that trigger rebuilds
 # Add "yaml", "json" if using config files
