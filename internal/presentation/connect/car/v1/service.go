@@ -5,18 +5,18 @@ import (
 
 	"connectrpc.com/connect"
 	carv1 "github.com/jp-ryuji/go-arch-patterns/api/generated/car/v1"
-	"github.com/jp-ryuji/go-arch-patterns/internal/application/input"
-	"github.com/jp-ryuji/go-arch-patterns/internal/application/service"
+	rentalinput "github.com/jp-ryuji/go-arch-patterns/internal/rental/application/input"
+	rentalservice "github.com/jp-ryuji/go-arch-patterns/internal/rental/application/service"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // CarServiceHandler implements the Connect service for car operations
 type CarServiceHandler struct {
-	carService service.CarService
+	carService rentalservice.CarService
 }
 
 // NewCarServiceHandler creates a new CarServiceHandler
-func NewCarServiceHandler(carService service.CarService) *CarServiceHandler {
+func NewCarServiceHandler(carService rentalservice.CarService) *CarServiceHandler {
 	return &CarServiceHandler{
 		carService: carService,
 	}
@@ -25,7 +25,7 @@ func NewCarServiceHandler(carService service.CarService) *CarServiceHandler {
 // CreateCar creates a new car
 func (h *CarServiceHandler) CreateCar(ctx context.Context, req *connect.Request[carv1.CreateCarRequest]) (*connect.Response[carv1.CreateCarResponse], error) {
 	// Convert Connect request to application DTO
-	input := input.CreateCar{
+	input := rentalinput.CreateCar{
 		TenantID: req.Msg.GetTenantId(),
 		Model:    req.Msg.GetModel(),
 	}
@@ -52,7 +52,7 @@ func (h *CarServiceHandler) CreateCar(ctx context.Context, req *connect.Request[
 // GetCar retrieves a car by ID
 func (h *CarServiceHandler) GetCar(ctx context.Context, req *connect.Request[carv1.GetCarRequest]) (*connect.Response[carv1.GetCarResponse], error) {
 	// Convert Connect request to application DTO
-	input := input.GetCarByID{
+	input := rentalinput.GetCarByID{
 		ID: req.Msg.GetId(),
 	}
 
@@ -79,7 +79,7 @@ func (h *CarServiceHandler) GetCar(ctx context.Context, req *connect.Request[car
 // ListCars retrieves a list of cars
 func (h *CarServiceHandler) ListCars(ctx context.Context, req *connect.Request[carv1.ListCarsRequest]) (*connect.Response[carv1.ListCarsResponse], error) {
 	// Convert Connect request to application DTO
-	input := input.ListCars{
+	input := rentalinput.ListCars{
 		TenantID:  req.Msg.GetTenantId(),
 		PageSize:  req.Msg.GetPageSize(),
 		PageToken: req.Msg.GetPageToken(),
