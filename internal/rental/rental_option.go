@@ -1,4 +1,4 @@
-package entity
+package rental
 
 import (
 	"time"
@@ -6,10 +6,8 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
-// RentalOptions is a slice of RentalOption
 type RentalOptions []*RentalOption
 
-// RentalOption represents a rental option entity
 type RentalOption struct {
 	ID        string
 	TenantID  string
@@ -18,18 +16,8 @@ type RentalOption struct {
 	Count     int
 	CreatedAt time.Time
 	UpdatedAt time.Time
-
-	// References to related entities
-	Refs *RentalOptionRefs
 }
 
-// RentalOptionRefs holds references to related entities
-type RentalOptionRefs struct {
-	Rental *Rental
-	Option *Option
-}
-
-// NewRentalOption creates a new RentalOption
 func NewRentalOption(tenantID, rentalID, optionID string, count int) *RentalOption {
 	now := time.Now()
 	return &RentalOption{
@@ -43,7 +31,6 @@ func NewRentalOption(tenantID, rentalID, optionID string, count int) *RentalOpti
 	}
 }
 
-// WithID creates a RentalOption with a specific ID (for testing)
 func (ro *RentalOption) WithID(id string) *RentalOption {
 	ro.ID = id
 	return ro

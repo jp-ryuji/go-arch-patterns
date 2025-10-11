@@ -1,4 +1,4 @@
-package input
+package rentalinput
 
 // GetCarByID represents the input data for retrieving a car by ID
 type GetCarByID struct {

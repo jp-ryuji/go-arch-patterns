@@ -1,4 +1,4 @@
-package service
+package rentalservice
 
 import (
 	"fmt"

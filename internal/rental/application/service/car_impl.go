@@ -1,30 +1,29 @@
-package service
+package rentalservice
 
 import (
 	"context"
 	"fmt"
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/application/input"
-	"github.com/jp-ryuji/go-arch-patterns/internal/application/output"
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
-	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
+	sharedrepository "github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	"github.com/jp-ryuji/go-arch-patterns/internal/pkg/id"
+	rental "github.com/jp-ryuji/go-arch-patterns/internal/rental"
+	rentalinput "github.com/jp-ryuji/go-arch-patterns/internal/rental/application/input"
+	rentaloutput "github.com/jp-ryuji/go-arch-patterns/internal/rental/application/output"
 )
 
 // carService implements CarService interface
 type carService struct {
-	carRepo    repository.CarRepository
-	outboxRepo repository.OutboxRepository
-	txManager  repository.TransactionManager
+	carRepo    rental.CarRepository
+	outboxRepo sharedrepository.OutboxRepository
+	txManager  sharedrepository.TransactionManager
 }
 
 // NewCarService creates a new car service
 func NewCarService(
-	carRepo repository.CarRepository,
-	outboxRepo repository.OutboxRepository,
-	txManager repository.TransactionManager,
+	carRepo rental.CarRepository,
+	outboxRepo sharedrepository.OutboxRepository,
+	txManager sharedrepository.TransactionManager,
 ) CarService {
 	return &carService{
 		carRepo:    carRepo,
@@ -34,14 +33,14 @@ func NewCarService(
 }
 
 // Create creates a new car using the outbox pattern with transactional guarantees
-func (s *carService) Create(ctx context.Context, input input.CreateCar) (*entity.Car, error) {
+func (s *carService) Create(ctx context.Context, input rentalinput.CreateCar) (*rental.Car, error) {
 	// Validate input
 	if err := Validate(input); err != nil {
 		return nil, err
 	}
 
 	now := time.Now()
-	car := entity.NewCar(input.TenantID, input.Model, now)
+	car := rental.NewCar(input.TenantID, input.Model, now)
 
 	// Start a transaction
 	tx, err := s.txManager.BeginTx(ctx)
@@ -70,12 +69,12 @@ func (s *carService) Create(ctx context.Context, input input.CreateCar) (*entity
 	}
 
 	// Step 2: Create outbox message for external systems within transaction
-	outbox := &entgen.Outbox{
+	outbox := &sharedrepository.OutboxMessage{
 		ID:            id.New(),
 		AggregateType: "car",
 		AggregateID:   car.ID,
 		EventType:     "car_created",
-		Payload: map[string]interface{}{
+		Payload: map[string]any{
 			"id":         car.ID,
 			"tenant_id":  car.TenantID,
 			"model":      car.Model,
@@ -83,7 +82,8 @@ func (s *carService) Create(ctx context.Context, input input.CreateCar) (*entity
 			"updated_at": car.UpdatedAt,
 		},
 		CreatedAt: now,
-		Status:    "pending",
+		Status:    sharedrepository.OutboxStatusPending,
+		Version:   1,
 	}
 
 	if err := s.outboxRepo.CreateInTx(ctx, tx, outbox); err != nil {
@@ -103,7 +103,7 @@ func (s *carService) Create(ctx context.Context, input input.CreateCar) (*entity
 }
 
 // GetByID retrieves a car by its ID
-func (s *carService) GetByID(ctx context.Context, input input.GetCarByID) (*entity.Car, error) {
+func (s *carService) GetByID(ctx context.Context, input rentalinput.GetCarByID) (*rental.Car, error) {
 	// Validate input
 	if err := Validate(input); err != nil {
 		return nil, err
@@ -118,7 +118,7 @@ func (s *carService) GetByID(ctx context.Context, input input.GetCarByID) (*enti
 }
 
 // GetByIDWithTenant retrieves a car by its ID along with its tenant information
-func (s *carService) GetByIDWithTenant(ctx context.Context, input input.GetCarByID) (*entity.Car, error) {
+func (s *carService) GetByIDWithTenant(ctx context.Context, input rentalinput.GetCarByID) (*rental.Car, error) {
 	// Validate input
 	if err := Validate(input); err != nil {
 		return nil, err
@@ -133,7 +133,7 @@ func (s *carService) GetByIDWithTenant(ctx context.Context, input input.GetCarBy
 }
 
 // List retrieves a list of cars for a tenant
-func (s *carService) List(ctx context.Context, input input.ListCars) (*output.ListCars, error) {
+func (s *carService) List(ctx context.Context, input rentalinput.ListCars) (*rentaloutput.ListCars, error) {
 	// Validate input
 	if err := Validate(input); err != nil {
 		return nil, err
@@ -162,5 +162,5 @@ func (s *carService) List(ctx context.Context, input input.ListCars) (*output.Li
 	}
 
 	// Convert entities to DTO before returning
-	return output.CarEntitiesToList(cars, nextPageToken, totalCount), nil
+	return rentaloutput.CarEntitiesToList(cars, nextPageToken, totalCount), nil
 }

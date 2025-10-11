@@ -1,4 +1,4 @@
-package output
+package rentaloutput
 
 // ListCars represents the response data for listing cars
 type ListCars struct {
