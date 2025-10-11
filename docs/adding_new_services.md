@@ -10,9 +10,9 @@ This guide references the existing `Car` service implementation as an example. Y
 
 - Protocol Buffers: `api/proto/car/v1/`
 - Generated code: `api/generated/car/v1/`
-- Domain layer: `internal/domain/entity/car.go`, `internal/domain/repository/car.go`
+- Domain layer: `internal/rental/car.go`, `internal/rental/repository.go`
 - Infrastructure layer: `internal/infrastructure/postgres/ent/schema/car.go`, `internal/infrastructure/postgres/repository/car_repository.go`
-- Application layer: `internal/application/service/car_service.go`
+- Application layer: `internal/rental/application/service/car.go`
 - Presentation layer: `internal/presentation/connect/car/v1/service.go`
 
 ## Steps to Add a New Service
@@ -117,9 +117,9 @@ This will generate the necessary Go files in `api/generated/car/v1/`.
 
 Create the domain entities, repositories, and services:
 
-1. Create entity in `internal/domain/entity/car.go`
-2. Create repository interface in `internal/domain/repository/car.go`
-3. Create any necessary value objects in `internal/domain/value/`
+1. Create entity in `internal/rental/car.go`
+2. Create repository interface in `internal/rental/repository.go`
+3. Create any necessary value objects under the appropriate bounded context (e.g., `internal/renter/email.go`)
 
 ### 5. Implement Infrastructure Layer
 
@@ -131,7 +131,7 @@ Create the infrastructure implementations:
 
 ### 6. Implement Application Layer
 
-Create the application service in `internal/application/service/car_service.go`.
+Create the application service in `internal/rental/application/service/car.go`.
 
 ### 7. Implement Connect Service Handler
 
@@ -148,11 +148,11 @@ Example implementation:
 ```go
 // CarServiceHandler implements the Connect service for car operations
 type CarServiceHandler struct {
-    carService service.CarService
+    carService rentalservice.CarService
 }
 
 // NewCarServiceHandler creates a new CarServiceHandler
-func NewCarServiceHandler(carService service.CarService) *CarServiceHandler {
+func NewCarServiceHandler(carService rentalservice.CarService) *CarServiceHandler {
     return &CarServiceHandler{
         carService: carService,
     }
@@ -199,7 +199,7 @@ carRepo := repository.NewCarRepository(client)
 // Update transaction manager constructor if needed
 
 // Create application service
-carService := service.NewCarService(carRepo, /* other dependencies */)
+carService := rentalservice.NewCarService(carRepo, /* other dependencies */)
 
 // Register Connect service handler
 carServiceHandler := connectcar.NewCarServiceHandler(carService)

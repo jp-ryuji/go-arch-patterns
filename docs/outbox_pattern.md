@@ -25,11 +25,11 @@ In our implementation, we coordinate between:
    - `internal/infrastructure/postgres/repository/transaction_manager.go` - Transaction manager implementation
 
 3. **Application Layer**:
-   - `internal/application/service/car_impl.go` - Car service implementation with outbox pattern
-   - `internal/application/service/car.go` - Car service interface
+   - `internal/rental/application/service/car_impl.go` - Car service implementation with outbox pattern
+   - `internal/rental/application/service/car.go` - Car service interface
 
 4. **Tests**:
-   - `internal/application/service/test/car_impl_test.go` - Unit tests for car service with transactional outbox
+   - `internal/rental/application/service/car_impl_test.go` - Unit tests for car service with transactional outbox
 
 ### Outbox Flow
 

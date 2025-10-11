@@ -21,52 +21,52 @@ In this architecture:
 │       └── main.go
 ├── api                          # Protocol Buffers definitions
 │   ├── proto
-│   │   ├── car
-│   │   │   └── v1
-│   │   │       ├── car.proto
-│   │   │       └── car_service.proto
-│   │   └── common
-│   │       └── v1
-│   │           └── common.proto
-│   └── generated                # All generated code
-│       ├── car
-│       │   └── v1
-│       └── common
-│           └── v1
-├── docker
-├── docs
+│   │   ├── car/v1               # gRPC service definitions
+│   │   └── common/v1            # Shared protobuf types
+│   └── generated                # Generated gRPC/Connect/Go code
+├── docker                       # Local development tooling
+├── docs                         # Architecture and operational docs
 └── internal
-    ├── config                   # Configuration
-    ├── di                       # Dependency Injection
-    ├── domain                   # Core Domain Layer (innermost)
-    │   ├── entity               # Domain entities with identity
-    │   ├── value                # Value objects (immutable)
-    │   ├── service              # Domain services (business logic)
-    │   └── repository           # Repository interfaces (ports)
-    ├── application              # Application Layer
-    │   ├── input                # Data transfer objects (input)
-    │   ├── output               # Data transfer objects (output)
-    │   └── service              # Application services (orchestration)
-    ├── infrastructure           # Infrastructure Layer (outermost)
-    │   ├── postgres             # PostgreSQL adapter
-    │   │   ├── ent              # Ent schema design
-    │   │   ├── entgen           # (Generated type-safe query code using Ent)
-    │   │   ├── repository       # Repository implementations
-    │   │   └── migration
-    │   ├── redis                # Redis adapter
-    │   └── messaging            # Message queue adapters (if needed)
-    ├── presentation             # Presentation Layer (outermost)
-    │   ├── connect              # gRPC-Connect service implementations
-    │   │   ├── car
-    │   │   │   └── v1
-    │   │   │       └── service.go    # CarServiceHandler implementation
-    │   │   └── interceptor           # gRPC-Connect interceptors
-    │   └── http                      # HTTP Gateway setup
-    │       ├── server.go             # HTTP server + gRPC Connect
-    │       ├── middleware.go         # HTTP middleware
-    │       └── handler.go            # Custom HTTP handlers (if any)
-    └── pkg                      # Shared utilities/libraries
+    ├── config                   # Configuration loading
+    ├── di                       # Dependency injection container
+    ├── domain
+    │   └── repository           # Shared interfaces (outbox, transactions)
+    ├── infrastructure           # Outer adapters (DB, messaging, etc.)
+    │   └── postgres
+    │       ├── ent              # Ent schema definitions
+    │       ├── entgen           # Generated ent client code
+    │       └── repository       # Persistence adapters per aggregate
+    ├── presentation             # Driving adapters (HTTP / Connect)
+    │   ├── connect/car/v1       # gRPC-Connect handlers
+    │   └── http                 # HTTP gateway and middleware
+    ├── rental                   # Rental bounded context
+    │   ├── application
+    │   │   ├── input            # Use-case input DTOs
+    │   │   ├── output           # Use-case output DTOs
+    │   │   └── service          # Application services + tests/mocks
+    │   ├── car.go               # Car aggregate
+    │   ├── rental.go            # Rental aggregate
+    │   ├── rental_option.go     # Rental option entity
+    │   ├── option.go            # Configurable rental option
+    │   ├── repository.go        # Port definitions (CarRepository, etc.)
+    │   └── mocks                # Generated mocks for repository interfaces
+    ├── renter                   # Renter bounded context
+    │   ├── entity_renter.go     # Base renter identity
+    │   ├── entity_individual.go # Individual profile
+    │   ├── entity_company.go    # Company profile + sizes
+    │   ├── email.go             # Email value object
+    │   ├── factory.go           # Fixture builders for tests
+    │   ├── repository.go        # Renter/Company repository ports
+    │   └── mocks                # Generated mocks for renter repositories
+    ├── tenant                   # Tenant bounded context
+    │   ├── tenant.go            # Tenant aggregate
+    │   ├── factory.go           # Fixture builders
+    │   ├── repository.go        # Tenant repository port
+    │   └── mocks                # Generated mocks for tenant repository
+    └── pkg                      # Shared utilities (IDs, nullable helpers)
 ```
+
+Each bounded context keeps its own onion layers (domain → application → adapters) so business rules evolve independently. Shared cross-cutting abstractions such as the outbox and transaction manager interfaces remain under `internal/domain/repository`, while infrastructure and presentation layers wire the contexts together through dependency injection.
 
 ## Go `internal` Directory
 
