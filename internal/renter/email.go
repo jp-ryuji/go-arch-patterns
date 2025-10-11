@@ -1,4 +1,4 @@
-package value
+package renter
 
 import (
 	"errors"
@@ -7,17 +7,12 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// Email represents a validated email address value object
+const MaxEmailLength = 50
+
 type Email struct {
 	value string
 }
 
-const (
-	// MaxEmailLength is the maximum allowed length for an email address
-	MaxEmailLength = 50
-)
-
-// NewEmail creates a new Email value object after validating the email format
 func NewEmail(email string) (*Email, error) {
 	if err := validateEmail(email); err != nil {
 		return nil, err
@@ -26,7 +21,6 @@ func NewEmail(email string) (*Email, error) {
 	return &Email{value: strings.ToLower(email)}, nil
 }
 
-// validateEmail checks if the email meets the required format and constraints
 func validateEmail(email string) error {
 	if email == "" {
 		return errors.New("email cannot be empty")
@@ -44,12 +38,10 @@ func validateEmail(email string) error {
 	return nil
 }
 
-// String returns the string representation of the email
 func (e *Email) String() string {
 	return e.value
 }
 
-// Equals checks if two Email objects are equal
 func (e *Email) Equals(other *Email) bool {
 	if other == nil {
 		return false

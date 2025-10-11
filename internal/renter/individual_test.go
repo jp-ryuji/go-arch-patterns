@@ -1,16 +1,14 @@
-package entity
+package renter
 
 import (
 	"testing"
 	"time"
 
 	"github.com/aarondl/null/v9"
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/value"
 	"github.com/stretchr/testify/require"
 )
 
-// okCaseValues holds the test values for the valid individual case
-type okCaseValues struct {
+type individualCase struct {
 	email     string
 	tenantID  string
 	firstName null.String
@@ -21,8 +19,7 @@ type okCaseValues struct {
 func TestNewIndividual(t *testing.T) {
 	t.Parallel()
 
-	// Define test values for the ok case
-	okValues := okCaseValues{
+	okValues := individualCase{
 		email:     "test@example.com",
 		tenantID:  "tenant-123",
 		firstName: null.StringFrom("First"),
@@ -31,7 +28,7 @@ func TestNewIndividual(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		values  okCaseValues
+		values  individualCase
 		wantErr bool
 	}{
 		"ok": {
@@ -39,7 +36,7 @@ func TestNewIndividual(t *testing.T) {
 			wantErr: false,
 		},
 		"ng (invalid email)": {
-			values: okCaseValues{
+			values: individualCase{
 				tenantID:  okValues.tenantID,
 				email:     "invalid-email",
 				firstName: okValues.firstName,
@@ -54,13 +51,12 @@ func TestNewIndividual(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Create an email VO
-			emailVO, err := value.NewEmail(tt.values.email)
+			emailVO, err := NewEmail(tt.values.email)
 			if err != nil {
 				if tt.wantErr {
-					return // Expected error
+					return
 				}
-				t.Fatalf("Failed to create email VO: %v", err)
+				t.Fatalf("failed to create email VO: %v", err)
 			}
 
 			individual := NewIndividual(
@@ -73,17 +69,15 @@ func TestNewIndividual(t *testing.T) {
 			)
 
 			if tt.wantErr {
-				t.Fatal("Expected error but got none")
+				t.Fatal("expected error but got none")
 			}
 
 			require.NotNil(t, individual)
 			require.NotEmpty(t, individual.RenterID)
 
-			// Create an email VO to compare with the individual's email
-			expectedEmail, err := value.NewEmail(tt.values.email)
+			expectedEmail, err := NewEmail(tt.values.email)
 			require.NoError(t, err)
 			require.True(t, individual.Email.Equals(expectedEmail))
-
 			require.Equal(t, tt.values.tenantID, individual.TenantID)
 			require.Equal(t, tt.values.firstName, individual.FirstName)
 			require.Equal(t, tt.values.lastName, individual.LastName)

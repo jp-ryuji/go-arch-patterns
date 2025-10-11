@@ -1,4 +1,4 @@
-package value
+package renter
 
 import (
 	"testing"
