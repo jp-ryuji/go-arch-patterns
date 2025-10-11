@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
+	sharedrepository "github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	car "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/car"
+	rental "github.com/jp-ryuji/go-arch-patterns/internal/rental"
 )
 
 type carRepository struct {
@@ -17,14 +17,14 @@ type carRepository struct {
 }
 
 // NewCarRepository creates a new car repository
-func NewCarRepository(client *entgen.Client) repository.CarRepository {
+func NewCarRepository(client *entgen.Client) rental.CarRepository {
 	return &carRepository{
 		client: client,
 	}
 }
 
 // Create inserts a new car into the database
-func (r *carRepository) Create(ctx context.Context, car *entity.Car) error {
+func (r *carRepository) Create(ctx context.Context, car *rental.Car) error {
 	_, err := r.client.Car.
 		Create().
 		SetID(car.ID).
@@ -35,8 +35,13 @@ func (r *carRepository) Create(ctx context.Context, car *entity.Car) error {
 }
 
 // CreateInTx inserts a new car into the database within a transaction
-func (r *carRepository) CreateInTx(ctx context.Context, tx *entgen.Tx, car *entity.Car) error {
-	_, err := tx.Car.
+func (r *carRepository) CreateInTx(ctx context.Context, tx sharedrepository.Transaction, car *rental.Car) error {
+	entTx, err := asEntTx(tx)
+	if err != nil {
+		return err
+	}
+
+	_, err = entTx.Car.
 		Create().
 		SetID(car.ID).
 		SetTenantID(car.TenantID).
@@ -46,7 +51,7 @@ func (r *carRepository) CreateInTx(ctx context.Context, tx *entgen.Tx, car *enti
 }
 
 // GetByID retrieves a car by its ID
-func (r *carRepository) GetByID(ctx context.Context, id string) (*entity.Car, error) {
+func (r *carRepository) GetByID(ctx context.Context, id string) (*rental.Car, error) {
 	carDB, err := r.client.Car.
 		Query().
 		Where(car.ID(id)).
@@ -56,7 +61,7 @@ func (r *carRepository) GetByID(ctx context.Context, id string) (*entity.Car, er
 	}
 
 	// Direct conversion from Ent model to domain entity
-	return &entity.Car{
+	return &rental.Car{
 		ID:        carDB.ID,
 		TenantID:  carDB.TenantID,
 		Model:     carDB.Model,
@@ -66,7 +71,7 @@ func (r *carRepository) GetByID(ctx context.Context, id string) (*entity.Car, er
 }
 
 // GetByIDWithTenant retrieves a car by its ID along with its tenant information
-func (r *carRepository) GetByIDWithTenant(ctx context.Context, id string) (*entity.Car, error) {
+func (r *carRepository) GetByIDWithTenant(ctx context.Context, id string) (*rental.Car, error) {
 	carDB, err := r.client.Car.
 		Query().
 		Where(car.ID(id)).
@@ -77,12 +82,12 @@ func (r *carRepository) GetByIDWithTenant(ctx context.Context, id string) (*enti
 	}
 
 	// Convert Ent model to domain entity with tenant information
-	opts := repository.CarLoadOptions{WithTenant: true}
+	opts := rental.CarLoadOptions{WithTenant: true}
 	return r.entToDomain(carDB, opts), nil
 }
 
 // Update updates an existing car
-func (r *carRepository) Update(ctx context.Context, car *entity.Car) error {
+func (r *carRepository) Update(ctx context.Context, car *rental.Car) error {
 	// Update the UpdatedAt field to the current time
 	car.UpdatedAt = time.Now()
 
@@ -96,11 +101,15 @@ func (r *carRepository) Update(ctx context.Context, car *entity.Car) error {
 }
 
 // UpdateInTx updates an existing car within a transaction
-func (r *carRepository) UpdateInTx(ctx context.Context, tx *entgen.Tx, car *entity.Car) error {
-	// Update the UpdatedAt field to the current time
+func (r *carRepository) UpdateInTx(ctx context.Context, tx sharedrepository.Transaction, car *rental.Car) error {
 	car.UpdatedAt = time.Now()
 
-	_, err := tx.Car.
+	entTx, err := asEntTx(tx)
+	if err != nil {
+		return err
+	}
+
+	_, err = entTx.Car.
 		UpdateOneID(car.ID).
 		SetTenantID(car.TenantID).
 		SetModel(car.Model).
@@ -130,14 +139,19 @@ func (r *carRepository) Delete(ctx context.Context, id string) error {
 }
 
 // DeleteInTx removes a car by its ID within a transaction
-func (r *carRepository) DeleteInTx(ctx context.Context, tx *entgen.Tx, id string) error {
-	return tx.Car.
+func (r *carRepository) DeleteInTx(ctx context.Context, tx sharedrepository.Transaction, id string) error {
+	entTx, err := asEntTx(tx)
+	if err != nil {
+		return err
+	}
+
+	return entTx.Car.
 		DeleteOneID(id).
 		Exec(ctx)
 }
 
 // ListByTenant retrieves cars by tenant ID with pagination
-func (r *carRepository) ListByTenant(ctx context.Context, tenantID string, limit int, offset int) ([]*entity.Car, string, int32, error) {
+func (r *carRepository) ListByTenant(ctx context.Context, tenantID string, limit int, offset int) ([]*rental.Car, string, int32, error) {
 	dbCars, err := r.client.Car.
 		Query().
 		Where(car.TenantID(tenantID)).
@@ -148,10 +162,10 @@ func (r *carRepository) ListByTenant(ctx context.Context, tenantID string, limit
 		return nil, "", 0, fmt.Errorf("failed to query cars: %w", err)
 	}
 
-	cars := make([]*entity.Car, len(dbCars))
+	cars := make([]*rental.Car, len(dbCars))
 	for i, dbCar := range dbCars {
 		// Direct conversion from Ent model to domain entity
-		cars[i] = &entity.Car{
+		cars[i] = &rental.Car{
 			ID:        dbCar.ID,
 			TenantID:  dbCar.TenantID,
 			Model:     dbCar.Model,
@@ -168,7 +182,7 @@ func (r *carRepository) ListByTenant(ctx context.Context, tenantID string, limit
 }
 
 // ListByTenantWithOptions retrieves cars by tenant ID with pagination and load options
-func (r *carRepository) ListByTenantWithOptions(ctx context.Context, tenantID string, limit int, offset int, opts ...repository.CarLoadOptions) ([]*entity.Car, string, int32, error) {
+func (r *carRepository) ListByTenantWithOptions(ctx context.Context, tenantID string, limit int, offset int, opts ...rental.CarLoadOptions) ([]*rental.Car, string, int32, error) {
 	query := r.client.Car.
 		Query().
 		Where(car.TenantID(tenantID))
@@ -192,7 +206,7 @@ func (r *carRepository) ListByTenantWithOptions(ctx context.Context, tenantID st
 		return nil, "", 0, fmt.Errorf("failed to query cars: %w", err)
 	}
 
-	cars := make([]*entity.Car, len(dbCars))
+	cars := make([]*rental.Car, len(dbCars))
 	for i, dbCar := range dbCars {
 		cars[i] = r.entToDomain(dbCar, opts...)
 	}
@@ -205,8 +219,8 @@ func (r *carRepository) ListByTenantWithOptions(ctx context.Context, tenantID st
 }
 
 // entToDomain converts an Ent car model to a domain car entity
-func (r *carRepository) entToDomain(entCar *entgen.Car, opts ...repository.CarLoadOptions) *entity.Car {
-	domainCar := &entity.Car{
+func (r *carRepository) entToDomain(entCar *entgen.Car, _ ...rental.CarLoadOptions) *rental.Car {
+	domainCar := &rental.Car{
 		ID:        entCar.ID,
 		TenantID:  entCar.TenantID,
 		Model:     entCar.Model,
@@ -214,58 +228,7 @@ func (r *carRepository) entToDomain(entCar *entgen.Car, opts ...repository.CarLo
 		UpdatedAt: entCar.UpdatedAt,
 	}
 
-	// Handle relationships if options are provided
-	if len(opts) == 0 {
-		return domainCar
-	}
-
-	opt := opts[0]
-	hasTenant := opt.WithTenant && entCar.Edges.Tenant != nil
-	hasRentals := opt.WithRentals && len(entCar.Edges.Rentals) > 0
-
-	if !hasTenant && !hasRentals {
-		return domainCar
-	}
-
-	domainCar.Refs = &entity.CarRefs{}
-
-	if hasTenant {
-		domainCar.Refs.Tenant = r.entTenantToDomain(entCar.Edges.Tenant)
-	}
-
-	if hasRentals {
-		rentals := make(entity.Rentals, len(entCar.Edges.Rentals))
-		for i, rental := range entCar.Edges.Rentals {
-			rentals[i] = r.entRentalToDomain(rental)
-		}
-		domainCar.Refs.Rentals = rentals
-	}
-
 	return domainCar
-}
-
-// entTenantToDomain converts an Ent tenant model to a domain tenant entity
-func (r *carRepository) entTenantToDomain(entTenant *entgen.Tenant) *entity.Tenant {
-	return &entity.Tenant{
-		ID:        entTenant.ID,
-		Code:      entTenant.Code,
-		CreatedAt: entTenant.CreatedAt,
-		UpdatedAt: entTenant.UpdatedAt,
-	}
-}
-
-// entRentalToDomain converts an Ent rental model to a domain rental entity
-func (r *carRepository) entRentalToDomain(entRental *entgen.Rental) *entity.Rental {
-	return &entity.Rental{
-		ID:        entRental.ID,
-		TenantID:  entRental.TenantID,
-		CarID:     entRental.CarID,
-		RenterID:  entRental.RenterID,
-		StartsAt:  entRental.StartsAt,
-		EndsAt:    entRental.EndsAt,
-		CreatedAt: entRental.CreatedAt,
-		UpdatedAt: entRental.UpdatedAt,
-	}
 }
 
 // Tx returns the underlying Ent client's transaction capabilities

@@ -5,10 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/entity"
-	"github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	company "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen/company"
+	renter "github.com/jp-ryuji/go-arch-patterns/internal/renter"
 )
 
 type companyRepository struct {
@@ -16,14 +15,14 @@ type companyRepository struct {
 }
 
 // NewCompanyRepository creates a new company repository
-func NewCompanyRepository(client *entgen.Client) repository.CompanyRepository {
+func NewCompanyRepository(client *entgen.Client) renter.CompanyRepository {
 	return &companyRepository{
 		client: client,
 	}
 }
 
 // Create inserts a new company into the database
-func (r *companyRepository) Create(ctx context.Context, company *entity.Company) error {
+func (r *companyRepository) Create(ctx context.Context, company *renter.Company) error {
 	_, err := r.client.Company.
 		Create().
 		SetID(company.ID).
@@ -36,7 +35,7 @@ func (r *companyRepository) Create(ctx context.Context, company *entity.Company)
 }
 
 // GetByID retrieves a company by its ID
-func (r *companyRepository) GetByID(ctx context.Context, id string) (*entity.Company, error) {
+func (r *companyRepository) GetByID(ctx context.Context, id string) (*renter.Company, error) {
 	companyDB, err := r.client.Company.
 		Query().
 		Where(company.RenterIDEQ(id)).
@@ -46,9 +45,9 @@ func (r *companyRepository) GetByID(ctx context.Context, id string) (*entity.Com
 	}
 
 	// Direct conversion from Ent model to domain entity
-	companySize := entity.NewCompanySize(companyDB.CompanySize)
+	companySize := renter.NewCompanySize(companyDB.CompanySize)
 
-	return &entity.Company{
+	return &renter.Company{
 		ID:          companyDB.ID,
 		RenterID:    companyDB.RenterID,
 		TenantID:    companyDB.TenantID,
@@ -60,7 +59,7 @@ func (r *companyRepository) GetByID(ctx context.Context, id string) (*entity.Com
 }
 
 // Update updates an existing company
-func (r *companyRepository) Update(ctx context.Context, comp *entity.Company) error {
+func (r *companyRepository) Update(ctx context.Context, comp *renter.Company) error {
 	// Update the UpdatedAt field to the current time
 	comp.UpdatedAt = time.Now()
 
