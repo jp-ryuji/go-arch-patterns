@@ -1,16 +1,16 @@
 package di
 
 import (
-	"github.com/jp-ryuji/go-arch-patterns/internal/application/service"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
 	"github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/repository"
 	"github.com/jp-ryuji/go-arch-patterns/internal/presentation/http"
+	rentalservice "github.com/jp-ryuji/go-arch-patterns/internal/rental/application/service"
 )
 
 // Container holds all the dependencies
 type Container struct {
 	Client     *entgen.Client
-	CarService service.CarService
+	CarService rentalservice.CarService
 	HTTPServer *http.Server
 	grpcPort   int
 	httpPort   int
@@ -26,7 +26,7 @@ func NewContainer(client *entgen.Client, grpcPort, httpPort int) (*Container, er
 	txManager := repository.NewTransactionManager(client)
 
 	// Create application services
-	carService := service.NewCarService(carRepo, outboxRepo, txManager)
+	carService := rentalservice.NewCarService(carRepo, outboxRepo, txManager)
 
 	// Create HTTP server with gRPC Connect
 	server := http.NewServer(grpcPort, httpPort, carService)
