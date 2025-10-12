@@ -14,7 +14,7 @@ import (
 	reflect "reflect"
 	time "time"
 
-	entgen "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
+	repository "github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -58,7 +58,7 @@ func (mr *MockOutboxRepositoryMockRecorder) CleanupProcessedMessages(ctx, olderT
 }
 
 // Create mocks base method.
-func (m *MockOutboxRepository) Create(ctx context.Context, outbox *entgen.Outbox) error {
+func (m *MockOutboxRepository) Create(ctx context.Context, outbox *repository.OutboxMessage) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, outbox)
 	ret0, _ := ret[0].(error)
@@ -72,7 +72,7 @@ func (mr *MockOutboxRepositoryMockRecorder) Create(ctx, outbox any) *gomock.Call
 }
 
 // CreateInTx mocks base method.
-func (m *MockOutboxRepository) CreateInTx(ctx context.Context, tx *entgen.Tx, outbox *entgen.Outbox) error {
+func (m *MockOutboxRepository) CreateInTx(ctx context.Context, tx repository.Transaction, outbox *repository.OutboxMessage) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateInTx", ctx, tx, outbox)
 	ret0, _ := ret[0].(error)
@@ -86,10 +86,10 @@ func (mr *MockOutboxRepositoryMockRecorder) CreateInTx(ctx, tx, outbox any) *gom
 }
 
 // GetFailed mocks base method.
-func (m *MockOutboxRepository) GetFailed(ctx context.Context, limit int) ([]*entgen.Outbox, error) {
+func (m *MockOutboxRepository) GetFailed(ctx context.Context, limit int) ([]*repository.OutboxMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFailed", ctx, limit)
-	ret0, _ := ret[0].([]*entgen.Outbox)
+	ret0, _ := ret[0].([]*repository.OutboxMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -101,10 +101,10 @@ func (mr *MockOutboxRepositoryMockRecorder) GetFailed(ctx, limit any) *gomock.Ca
 }
 
 // GetPending mocks base method.
-func (m *MockOutboxRepository) GetPending(ctx context.Context, limit int) ([]*entgen.Outbox, error) {
+func (m *MockOutboxRepository) GetPending(ctx context.Context, limit int) ([]*repository.OutboxMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPending", ctx, limit)
-	ret0, _ := ret[0].([]*entgen.Outbox)
+	ret0, _ := ret[0].([]*repository.OutboxMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -116,10 +116,10 @@ func (mr *MockOutboxRepositoryMockRecorder) GetPending(ctx, limit any) *gomock.C
 }
 
 // GetPendingWithLock mocks base method.
-func (m *MockOutboxRepository) GetPendingWithLock(ctx context.Context, limit int, processorID string) ([]*entgen.Outbox, error) {
+func (m *MockOutboxRepository) GetPendingWithLock(ctx context.Context, limit int, processorID string) ([]*repository.OutboxMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPendingWithLock", ctx, limit, processorID)
-	ret0, _ := ret[0].([]*entgen.Outbox)
+	ret0, _ := ret[0].([]*repository.OutboxMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -145,7 +145,7 @@ func (mr *MockOutboxRepositoryMockRecorder) MarkAsFailed(ctx, id, errorMessage a
 }
 
 // MarkAsFailedInTx mocks base method.
-func (m *MockOutboxRepository) MarkAsFailedInTx(ctx context.Context, tx *entgen.Tx, id, errorMessage string) error {
+func (m *MockOutboxRepository) MarkAsFailedInTx(ctx context.Context, tx repository.Transaction, id, errorMessage string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MarkAsFailedInTx", ctx, tx, id, errorMessage)
 	ret0, _ := ret[0].(error)
@@ -173,7 +173,7 @@ func (mr *MockOutboxRepositoryMockRecorder) MarkAsProcessed(ctx, id, processedAt
 }
 
 // MarkAsProcessedInTx mocks base method.
-func (m *MockOutboxRepository) MarkAsProcessedInTx(ctx context.Context, tx *entgen.Tx, id string, processedAt time.Time) error {
+func (m *MockOutboxRepository) MarkAsProcessedInTx(ctx context.Context, tx repository.Transaction, id string, processedAt time.Time) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MarkAsProcessedInTx", ctx, tx, id, processedAt)
 	ret0, _ := ret[0].(error)

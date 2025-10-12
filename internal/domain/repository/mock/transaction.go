@@ -13,9 +13,47 @@ import (
 	context "context"
 	reflect "reflect"
 
-	entgen "github.com/jp-ryuji/go-arch-patterns/internal/infrastructure/postgres/entgen"
+	repository "github.com/jp-ryuji/go-arch-patterns/internal/domain/repository"
 	gomock "go.uber.org/mock/gomock"
 )
+
+// MockTransaction is a mock of Transaction interface.
+type MockTransaction struct {
+	ctrl     *gomock.Controller
+	recorder *MockTransactionMockRecorder
+	isgomock struct{}
+}
+
+// MockTransactionMockRecorder is the mock recorder for MockTransaction.
+type MockTransactionMockRecorder struct {
+	mock *MockTransaction
+}
+
+// NewMockTransaction creates a new mock instance.
+func NewMockTransaction(ctrl *gomock.Controller) *MockTransaction {
+	mock := &MockTransaction{ctrl: ctrl}
+	mock.recorder = &MockTransactionMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTransaction) EXPECT() *MockTransactionMockRecorder {
+	return m.recorder
+}
+
+// Raw mocks base method.
+func (m *MockTransaction) Raw() any {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Raw")
+	ret0, _ := ret[0].(any)
+	return ret0
+}
+
+// Raw indicates an expected call of Raw.
+func (mr *MockTransactionMockRecorder) Raw() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Raw", reflect.TypeOf((*MockTransaction)(nil).Raw))
+}
 
 // MockTransactionManager is a mock of TransactionManager interface.
 type MockTransactionManager struct {
@@ -42,10 +80,10 @@ func (m *MockTransactionManager) EXPECT() *MockTransactionManagerMockRecorder {
 }
 
 // BeginTx mocks base method.
-func (m *MockTransactionManager) BeginTx(ctx context.Context) (*entgen.Tx, error) {
+func (m *MockTransactionManager) BeginTx(ctx context.Context) (repository.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BeginTx", ctx)
-	ret0, _ := ret[0].(*entgen.Tx)
+	ret0, _ := ret[0].(repository.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -57,7 +95,7 @@ func (mr *MockTransactionManagerMockRecorder) BeginTx(ctx any) *gomock.Call {
 }
 
 // CommitTx mocks base method.
-func (m *MockTransactionManager) CommitTx(ctx context.Context, tx *entgen.Tx) error {
+func (m *MockTransactionManager) CommitTx(ctx context.Context, tx repository.Transaction) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CommitTx", ctx, tx)
 	ret0, _ := ret[0].(error)
@@ -71,7 +109,7 @@ func (mr *MockTransactionManagerMockRecorder) CommitTx(ctx, tx any) *gomock.Call
 }
 
 // RollbackTx mocks base method.
-func (m *MockTransactionManager) RollbackTx(ctx context.Context, tx *entgen.Tx) error {
+func (m *MockTransactionManager) RollbackTx(ctx context.Context, tx repository.Transaction) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RollbackTx", ctx, tx)
 	ret0, _ := ret[0].(error)

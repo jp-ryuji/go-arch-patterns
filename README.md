@@ -12,16 +12,16 @@ This repository demonstrates the following software engineering concepts:
 ### Domain-Driven Design & Architecture
 
 - **Value Object**:
-  - *Definition*: See [Email value object](internal/domain/value/email.go) with [tests](internal/domain/value/email_test.go)
-  - *Usage*: See [Individual entity](internal/domain/entity/individual.go) using the Email value object
+  - *Definition*: See [Email value object](internal/renter/email.go) with [tests](internal/renter/email_test.go)
+  - *Usage*: See [Individual entity](internal/renter/individual.go) using the Email value object
 
 ### Database Design Patterns
 
-- **Class Table Inheritance**: See [Renter entity](internal/domain/entity/renter.go) as the base class with [Company](internal/domain/entity/company.go) and [Individual](internal/domain/entity/individual.go) as specialized subclasses
+- **Class Table Inheritance**: See [Renter entity](internal/renter/renter.go) as the base class with [Company](internal/renter/company.go) and [Individual](internal/renter/individual.go) as specialized subclasses
 
 ### Microservices Patterns
 
-- **Outbox Pattern**: Reliable event publishing for distributed systems. See [documentation](docs/outbox_pattern.md) and [implementation](internal/application/service/car_impl.go)
+- **Outbox Pattern**: Reliable event publishing for distributed systems. See [documentation](docs/outbox_pattern.md) and [implementation](internal/rental/application/service/car_impl.go)
 
 ### SaaS Patterns
 

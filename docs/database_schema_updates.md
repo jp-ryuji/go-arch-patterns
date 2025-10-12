@@ -13,7 +13,7 @@ For a complete view of the current database schema, see:
 
 ## Process for Updating Database Schema
 
-1. **Update Domain Entities**: Modify the structs in `internal/domain/entity/` to reflect your changes.
+1. **Update Domain Entities**: Modify the structs under the relevant bounded context (e.g., `internal/tenant/`, `internal/renter/`, `internal/rental/`) to reflect your changes.
 
 2. **Update Ent Schema Definitions**: Update the corresponding schema definitions in `internal/infrastructure/postgres/ent/schema/` to match your domain model changes. Ensure you:
    - Maintain the Ent schema definitions for table structure

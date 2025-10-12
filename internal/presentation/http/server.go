@@ -10,8 +10,8 @@ import (
 	"connectrpc.com/grpchealth"
 	"connectrpc.com/grpcreflect"
 	"github.com/jp-ryuji/go-arch-patterns/api/generated/car/v1/carv1connect"
-	"github.com/jp-ryuji/go-arch-patterns/internal/application/service"
 	connectcar "github.com/jp-ryuji/go-arch-patterns/internal/presentation/connect/car/v1"
+	rentalservice "github.com/jp-ryuji/go-arch-patterns/internal/rental/application/service"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
@@ -21,11 +21,11 @@ type Server struct {
 	httpServer *http.Server
 	grpcPort   int
 	httpPort   int
-	carService service.CarService
+	carService rentalservice.CarService
 }
 
 // NewServer creates a new HTTP server with gRPC Connect
-func NewServer(grpcPort, httpPort int, carService service.CarService) *Server {
+func NewServer(grpcPort, httpPort int, carService rentalservice.CarService) *Server {
 	return &Server{
 		grpcPort:   grpcPort,
 		httpPort:   httpPort,
