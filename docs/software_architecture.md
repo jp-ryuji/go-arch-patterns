@@ -51,9 +51,9 @@ In this architecture:
     │   ├── repository.go        # Port definitions (CarRepository, etc.)
     │   └── mocks                # Generated mocks for repository interfaces
     ├── renter                   # Renter bounded context
-    │   ├── entity_renter.go     # Base renter identity
-    │   ├── entity_individual.go # Individual profile
-    │   ├── entity_company.go    # Company profile + sizes
+    │   ├── renter.go            # Base renter identity
+    │   ├── individual.go        # Individual profile
+    │   ├── company.go           # Company profile + sizes
     │   ├── email.go             # Email value object
     │   ├── factory.go           # Fixture builders for tests
     │   ├── repository.go        # Renter/Company repository ports

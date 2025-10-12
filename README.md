@@ -13,11 +13,11 @@ This repository demonstrates the following software engineering concepts:
 
 - **Value Object**:
   - *Definition*: See [Email value object](internal/renter/email.go) with [tests](internal/renter/email_test.go)
-  - *Usage*: See [Individual entity](internal/renter/entity_individual.go) using the Email value object
+  - *Usage*: See [Individual entity](internal/renter/individual.go) using the Email value object
 
 ### Database Design Patterns
 
-- **Class Table Inheritance**: See [Renter entity](internal/renter/entity_renter.go) as the base class with [Company](internal/renter/entity_company.go) and [Individual](internal/renter/entity_individual.go) as specialized subclasses
+- **Class Table Inheritance**: See [Renter entity](internal/renter/renter.go) as the base class with [Company](internal/renter/company.go) and [Individual](internal/renter/individual.go) as specialized subclasses
 
 ### Microservices Patterns
 
