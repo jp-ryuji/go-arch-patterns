@@ -12,12 +12,12 @@ Key characteristics of this system:
 
 ```mermaid
 erDiagram
-    companies ||--o{ renters : "can be"
-    individuals ||--o{ renters : "can be"
-    cars ||--o{ rentals : has
-    renters ||--o{ rentals : has
-    options ||--o{ rental_options : has
-    rentals ||--o{ rental_options : has
+    renters ||--o| companies : "is a (Company)"
+    renters ||--o| individuals : "is a (Individual)"
+    cars ||--o{ rentals : "booked in"
+    renters ||--o{ rentals : "makes"
+    rentals ||--o{ rental_options : "includes"
+    options ||--o{ rental_options : "applied to"
 
     tenants {
         string code
@@ -70,8 +70,8 @@ erDiagram
     tenants ||--o{ options : owns
     tenants ||--o{ rental_options : owns
 
-    renters ||--o{ companies : "class table inheritance"
-    renters ||--o{ individuals : "class table inheritance"
+    renters ||--o| companies : "class table inheritance"
+    renters ||--o| individuals : "class table inheritance"
 
     cars ||--o{ rentals : has
     renters ||--o{ rentals : places
